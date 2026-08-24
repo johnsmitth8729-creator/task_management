@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Edit Profile" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">{% trans "Dashboard" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'profile' %}">{% trans "My Profile" %}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{% trans "Edit" %}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="content-panel">
+                <h1 class="h4 fw-bold text-dark mb-4">{% trans "Edit Profile Information" %}</h1>
+
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger py-2 small" role="alert">
+                            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label fw-semibold">{{ form.first_name.label }}</label>
+                            {{ form.first_name }}
+                            {% for error in form.first_name.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label fw-semibold">{{ form.last_name.label }}</label>
+                            {{ form.last_name }}
+                            {% for error in form.last_name.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.phone.id_for_label }}" class="form-label fw-semibold">{{ form.phone.label }}</label>
+                        {{ form.phone }}
+                        {% for error in form.phone.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.photo.id_for_label }}" class="form-label fw-semibold">{{ form.photo.label }}</label>
+                        {{ form.photo }}
+                        {% for error in form.photo.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="{{ form.preferred_language.id_for_label }}" class="form-label fw-semibold">{{ form.preferred_language.label }}</label>
+                        {{ form.preferred_language }}
+                        {% for error in form.preferred_language.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{% url 'profile' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+                        <button type="submit" class="btn btn-primary">{% trans "Save Profile" %}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

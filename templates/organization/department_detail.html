@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ department.name }} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">{% trans "Dashboard" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'department_list' %}">{% trans "Departments" %}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ department.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h1 class="h3 fw-bold text-dark mb-0">{{ department.name }}</h1>
+                <span class="badge bg-light text-secondary fs-6">{{ department.code }}</span>
+                {% if department.is_active %}
+                    <span class="badge bg-success-subtle text-success">{% trans "Active" %}</span>
+                {% else %}
+                    <span class="badge bg-danger-subtle text-danger">{% trans "Inactive" %}</span>
+                {% endif %}
+            </div>
+            <p class="text-muted mb-0">{{ department.description|default:_("No description provided.") }}</p>
+        </div>
+        {% if user.is_rector %}
+            <div class="d-flex gap-2">
+                <a href="{% url 'department_edit' pk=department.pk %}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-pencil me-1"></i>{% trans "Edit Department" %}
+                </a>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#assignHeadModal">
+                    <i class="bi bi-person-badge me-1"></i>{% trans "Assign Head" %}
+                </button>
+                <form action="{% url 'department_toggle_active' pk=department.pk %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                        {% if department.is_active %}
+                            <i class="bi bi-pause-circle me-1"></i>{% trans "Deactivate" %}
+                        {% else %}
+                            <i class="bi bi-play-circle me-1"></i>{% trans "Activate" %}
+                        {% endif %}
+                    </button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Leadership cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6">
+            <div class="card h-100 border shadow-none">
+                <div class="card-body">
+                    <h2 class="h6 fw-bold text-muted text-uppercase mb-3">{% trans "Department Head" %}</h2>
+                    {% if department.head %}
+                        <div class="d-flex align-items-center gap-3">
+                            {% if department.head.photo %}
+                                <img src="{{ department.head.photo.url }}" class="avatar-circle">
+                            {% else %}
+                                <div class="avatar-circle bg-primary text-white">{{ department.head.initials }}</div>
+                            {% endif %}
+                            <div>
+                                <a href="{% url 'user_detail' pk=department.head.pk %}" class="fw-bold text-dark text-decoration-none">
+                                    {{ department.head.display_name }}
+                                </a>
+                                <div class="small text-muted">{{ department.head.email }} &bull; {{ department.head.phone|default:"-" }}</div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0 small">{% trans "No department head currently assigned." %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+            <div class="card h-100 border shadow-none">
+                <div class="card-body">
+                    <h2 class="h6 fw-bold text-muted text-uppercase mb-3">{% trans "Supervising Vice Rector(s)" %}</h2>
+                    <ul class="list-group list-group-flush">
+                        {% for resp in active_responsibilities %}
+                            <li class="list-group-item px-0 py-1 d-flex align-items-center gap-2">
+                                <i class="bi bi-shield-check text-info"></i>
+                                <a href="{% url 'user_detail' pk=resp.vice_rector.pk %}" class="fw-semibold text-dark text-decoration-none">
+                                    {{ resp.vice_rector.display_name }}
+                                </a>
+                                <span class="text-muted small">({% trans "since" %} {{ resp.start_date|date:"Y-m-d" }})</span>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item px-0 py-1 text-muted small">{% trans "No Vice Rector assigned to this department." %}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employees & Positions Tabs -->
+    <div class="content-panel mb-4">
+        <ul class="nav nav-tabs mb-3" id="deptTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-semibold" id="employees-tab" data-bs-toggle="tab" data-bs-target="#employees" type="button" role="tab">
+                    <i class="bi bi-people me-1"></i>{% trans "Employees" %} ({{ employees.count }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-semibold" id="positions-tab" data-bs-toggle="tab" data-bs-target="#positions" type="button" role="tab">
+                    <i class="bi bi-briefcase me-1"></i>{% trans "Department Positions" %} ({{ positions.count }})
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="deptTabContent">
+            <!-- Employees Tab -->
+            <div class="tab-pane fade show active" id="employees" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Employee" %}</th>
+                                <th>{% trans "Position" %}</th>
+                                <th>{% trans "Role" %}</th>
+                                <th>{% trans "Email" %}</th>
+                                <th>{% trans "Status" %}</th>
+                                <th class="text-end">{% trans "Actions" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for emp in employees %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if emp.photo %}
+                                                <img src="{{ emp.photo.url }}" class="avatar-circle avatar-circle-sm">
+                                            {% else %}
+                                                <span class="avatar-circle avatar-circle-sm bg-secondary text-white">{{ emp.initials }}</span>
+                                            {% endif %}
+                                            <a href="{% url 'user_detail' pk=emp.pk %}" class="fw-semibold text-dark text-decoration-none">
+                                                {{ emp.display_name }}
+                                            </a>
+                                        </div>
+                                    </td>
+                                    <td>{{ emp.position.name|default:_("Unassigned") }}</td>
+                                    <td>
+                                        {% for r in emp.roles.all %}
+                                            <span class="badge bg-light text-secondary">{{ r.name }}</span>
+                                        {% empty %}
+                                            <span class="text-muted small">-</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td>{{ emp.email }}</td>
+                                    <td>
+                                        {% if emp.is_active %}
+                                            <span class="badge bg-success-subtle text-success">{% trans "Active" %}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger-subtle text-danger">{% trans "Inactive" %}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{% url 'user_detail' pk=emp.pk %}" class="btn btn-outline-secondary btn-sm">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">{% trans "No employees currently assigned to this department." %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Positions Tab -->
+            <div class="tab-pane fade" id="positions" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Position Title" %}</th>
+                                <th>{% trans "Code" %}</th>
+                                <th>{% trans "Status" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pos in positions %}
+                                <tr>
+                                    <td class="fw-semibold">{{ pos.name }}</td>
+                                    <td><span class="badge bg-light text-secondary">{{ pos.code }}</span></td>
+                                    <td>
+                                        {% if pos.is_active %}
+                                            <span class="badge bg-success-subtle text-success">{% trans "Active" %}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger-subtle text-danger">{% trans "Inactive" %}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-4 text-muted">{% trans "No department-specific positions defined." %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user.is_rector and head_form %}
+    <!-- Modal for Assigning Department Head -->
+    <div class="modal fade" id="assignHeadModal" tabindex="-1" aria-labelledby="assignHeadModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{% url 'department_assign_head' pk=department.pk %}" method="post">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="assignHeadModalLabel">{% trans "Assign Department Head" %}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">{{ head_form.head.label }}</label>
+                            {{ head_form.head }}
+                        </div>
+                        <p class="small text-muted mb-0">
+                            {% trans "The selected user will be set as the official Department Head and granted the DEPARTMENT_HEAD role." %}
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                        <button type="submit" class="btn btn-primary">{% trans "Save Assignment" %}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

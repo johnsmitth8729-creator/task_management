@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Users Directory" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">{% trans "Employee & User Directory" %}</h1>
+            <p class="text-muted mb-0">{% trans "Manage university personnel, role assignments, and organizational placement" %}</p>
+        </div>
+        {% if user.is_rector %}
+            <div>
+                <a href="{% url 'user_create' %}" class="btn btn-primary">
+                    <i class="bi bi-person-plus me-1"></i>{% trans "Create User" %}
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Filters & Search -->
+    <div class="content-panel mb-4">
+        <form method="get" class="row g-3 align-items-center">
+            <div class="col-12 col-md-4 col-lg-3">
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="{% trans 'Search by name, email...' %}" value="{{ search_query }}">
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2">
+                <select name="department" class="form-select">
+                    <option value="">{% trans "All Departments" %}</option>
+                    {% for dept in departments %}
+                        <option value="{{ dept.pk }}" {% if selected_department == dept.pk|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2">
+                <select name="position" class="form-select">
+                    <option value="">{% trans "All Positions" %}</option>
+                    {% for pos in positions %}
+                        <option value="{{ pos.pk }}" {% if selected_position == pos.pk|stringformat:"s" %}selected{% endif %}>{{ pos.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2">
+                <select name="role" class="form-select">
+                    <option value="">{% trans "All Roles" %}</option>
+                    {% for r in roles %}
+                        <option value="{{ r.code }}" {% if selected_role == r.code %}selected{% endif %}>{{ r.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-3 col-lg-1">
+                <select name="status" class="form-select">
+                    <option value="">{% trans "All" %}</option>
+                    <option value="active" {% if selected_status == 'active' %}selected{% endif %}>{% trans "Active" %}</option>
+                    <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>{% trans "Inactive" %}</option>
+                </select>
+            </div>
+            <div class="col-12 col-lg-2 d-flex gap-2">
+                <button type="submit" class="btn btn-secondary w-100">{% trans "Filter" %}</button>
+                {% if search_query or selected_department or selected_position or selected_role or selected_status %}
+                    <a href="{% url 'user_list' %}" class="btn btn-outline-secondary">{% trans "Reset" %}</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Table of Users -->
+    <div class="content-panel">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>{% trans "User" %}</th>
+                        <th>{% trans "Role" %}</th>
+                        <th>{% trans "Department" %}</th>
+                        <th>{% trans "Position" %}</th>
+                        <th>{% trans "Contact" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th class="text-end">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in user_list %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    {% if item.photo %}
+                                        <img src="{{ item.photo.url }}" alt="{{ item.display_name }}" class="avatar-circle">
+                                    {% else %}
+                                        <div class="avatar-circle bg-secondary text-white">{{ item.initials }}</div>
+                                    {% endif %}
+                                    <div>
+                                        <a href="{% url 'user_detail' pk=item.pk %}" class="fw-bold text-dark text-decoration-none">
+                                            {{ item.display_name }}
+                                        </a>
+                                        <div class="small text-muted">@{{ item.username }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% for r in item.roles.all %}
+                                    <span class="badge bg-primary-subtle text-primary">{{ r.name }}</span>
+                                {% empty %}
+                                    <span class="text-muted small">-</span>
+                                {% endfor %}
+                            </td>
+                            <td>{{ item.department.name|default:_("None") }}</td>
+                            <td>{{ item.position.name|default:_("None") }}</td>
+                            <td>
+                                <div class="small text-dark">{{ item.email }}</div>
+                                <div class="small text-muted">{{ item.phone|default:"-" }}</div>
+                            </td>
+                            <td>
+                                {% if item.is_active %}
+                                    <span class="badge bg-success-subtle text-success">{% trans "Active" %}</span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger">{% trans "Inactive" %}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'user_detail' pk=item.pk %}" class="btn btn-outline-secondary btn-sm" title="{% trans 'View Profile' %}">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                {% if user.is_rector or user.is_vice_rector or user.is_department_head %}
+                                    <a href="{% url 'user_edit' pk=item.pk %}" class="btn btn-outline-primary btn-sm" title="{% trans 'Edit' %}">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                <i class="bi bi-people fs-3 d-block mb-2 text-secondary"></i>
+                                {% trans "No users found matching your criteria." %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                <small class="text-muted">
+                    {% blocktrans with start=page_obj.start_index end=page_obj.end_index total=paginator.count %}
+                        Showing {{ start }} to {{ end }} of {{ total }} users
+                    {% endblocktrans %}
+                </small>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination pagination-sm mb-0">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&department={{ selected_department }}&position={{ selected_position }}&role={{ selected_role }}&status={{ selected_status }}">&laquo;</a></li>
+                        {% endif %}
+                        <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+                        {% if page_obj.has_next %}
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&department={{ selected_department }}&position={{ selected_position }}&role={{ selected_role }}&status={{ selected_status }}">&raquo;</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

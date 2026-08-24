@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ profile_user.display_name }} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">{% trans "Dashboard" %}</a></li>
+            {% if not user.is_employee %}
+                <li class="breadcrumb-item"><a href="{% url 'user_list' %}">{% trans "Users" %}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">{{ profile_user.display_name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4 justify-content-center">
+        <div class="col-12 col-lg-4">
+            <!-- Profile Card -->
+            <div class="content-panel text-center">
+                {% if profile_user.photo %}
+                    <img src="{{ profile_user.photo.url }}" alt="{{ profile_user.display_name }}" class="avatar-circle-lg mb-3">
+                {% else %}
+                    <div class="avatar-circle-lg bg-primary text-white mx-auto mb-3">{{ profile_user.initials }}</div>
+                {% endif %}
+                <h1 class="h5 fw-bold text-dark mb-1">{{ profile_user.display_name }}</h1>
+                <p class="text-muted small mb-2">@{{ profile_user.username }}</p>
+
+                <div class="d-flex justify-content-center flex-wrap gap-1 mb-3">
+                    {% for r in profile_user.roles.all %}
+                        <span class="badge bg-primary-subtle text-primary">{{ r.name }}</span>
+                    {% empty %}
+                        <span class="badge bg-light text-secondary">{% trans "No Role" %}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    {% if profile_user.is_active %}
+                        <span class="badge bg-success-subtle text-success">{% trans "Active Account" %}</span>
+                    {% else %}
+                        <span class="badge bg-danger-subtle text-danger">{% trans "Inactive Account" %}</span>
+                    {% endif %}
+                </div>
+
+                <div class="d-grid gap-2">
+                    {% if can_edit %}
+                        <a href="{% url 'user_edit' pk=profile_user.pk %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-pencil me-1"></i>{% trans "Edit User" %}
+                        </a>
+                    {% endif %}
+
+                    {% if user.is_rector and user.id != profile_user.id %}
+                        <form action="{% url 'user_toggle_active' pk=profile_user.pk %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                {% if profile_user.is_active %}
+                                    <i class="bi bi-pause-circle me-1"></i>{% trans "Deactivate Account" %}
+                                {% else %}
+                                    <i class="bi bi-play-circle me-1"></i>{% trans "Activate Account" %}
+                                {% endif %}
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-8">
+            <!-- Details -->
+            <div class="content-panel">
+                <h2 class="h5 fw-bold text-dark mb-4">{% trans "Account & Organizational Details" %}</h2>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">{% trans "Full Name" %}</dt>
+                    <dd class="col-sm-8 fw-semibold">{{ profile_user.display_name }}</dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Username" %}</dt>
+                    <dd class="col-sm-8">{{ profile_user.username }}</dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Email Address" %}</dt>
+                    <dd class="col-sm-8"><a href="mailto:{{ profile_user.email }}">{{ profile_user.email }}</a></dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Phone" %}</dt>
+                    <dd class="col-sm-8">{{ profile_user.phone|default:"-" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Department" %}</dt>
+                    <dd class="col-sm-8">
+                        {% if profile_user.department %}
+                            <a href="{% url 'department_detail' pk=profile_user.department.pk %}">{{ profile_user.department.name }}</a>
+                            <span class="badge bg-light text-secondary ms-1">{{ profile_user.department.code }}</span>
+                        {% else %}
+                            <span class="text-muted">{% trans "Not assigned" %}</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Position" %}</dt>
+                    <dd class="col-sm-8">{{ profile_user.position.name|default:_("Not assigned") }}</dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Preferred Language" %}</dt>
+                    <dd class="col-sm-8">{{ profile_user.get_preferred_language_display }}</dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Date Joined" %}</dt>
+                    <dd class="col-sm-8">{{ profile_user.date_joined|date:"Y-m-d H:i" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Last Login" %}</dt>
+                    <dd class="col-sm-8">{{ profile_user.last_login|date:"Y-m-d H:i"|default:_("Never") }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

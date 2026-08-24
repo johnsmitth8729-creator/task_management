@@ -1,40 +1,163 @@
 {% load i18n %}
 <aside class="app-sidebar d-none d-lg-flex">
     <nav class="nav flex-column w-100">
-        <a class="nav-link active" href="{% url 'dashboard' %}">
+        <div class="nav-section-title">{% trans "Main" %}</div>
+        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
             <i class="bi bi-speedometer2"></i>
             <span>{% trans "Dashboard" %}</span>
         </a>
-        <a class="nav-link disabled" aria-disabled="true" href="#">
+
+        {% if user.is_rector %}
+            <div class="nav-section-title mt-2">{% trans "Organization" %}</div>
+            <a class="nav-link {% if request.resolver_match.url_name == 'organization_overview' %}active{% endif %}" href="{% url 'organization_overview' %}">
+                <i class="bi bi-diagram-3"></i>
+                <span>{% trans "Structure" %}</span>
+            </a>
+            <a class="nav-link {% if 'department' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'department_list' %}">
+                <i class="bi bi-building"></i>
+                <span>{% trans "Departments" %}</span>
+            </a>
+            <a class="nav-link {% if 'position' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'position_list' %}">
+                <i class="bi bi-briefcase"></i>
+                <span>{% trans "Positions" %}</span>
+            </a>
+            <a class="nav-link {% if 'responsibility' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'responsibility_list' %}">
+                <i class="bi bi-diagram-2"></i>
+                <span>{% trans "Vice Rectors" %}</span>
+            </a>
+
+            <div class="nav-section-title mt-2">{% trans "Administration" %}</div>
+            <a class="nav-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'user_list' %}">
+                <i class="bi bi-people"></i>
+                <span>{% trans "Users" %}</span>
+            </a>
+            <a class="nav-link {% if request.resolver_match.url_name == 'audit_list' %}active{% endif %}" href="{% url 'audit_list' %}">
+                <i class="bi bi-clock-history"></i>
+                <span>{% trans "Audit Logs" %}</span>
+            </a>
+
+        {% elif user.is_vice_rector %}
+            <div class="nav-section-title mt-2">{% trans "Management" %}</div>
+            <a class="nav-link {% if 'department' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'department_list' %}">
+                <i class="bi bi-building"></i>
+                <span>{% trans "My Departments" %}</span>
+            </a>
+            <a class="nav-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'user_list' %}">
+                <i class="bi bi-people"></i>
+                <span>{% trans "Employees" %}</span>
+            </a>
+            <a class="nav-link {% if request.resolver_match.url_name == 'organization_overview' %}active{% endif %}" href="{% url 'organization_overview' %}">
+                <i class="bi bi-diagram-3"></i>
+                <span>{% trans "Organization" %}</span>
+            </a>
+
+        {% elif user.is_department_head %}
+            <div class="nav-section-title mt-2">{% trans "Management" %}</div>
+            {% if user.department %}
+                <a class="nav-link {% if 'department' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'department_detail' pk=user.department.pk %}">
+                    <i class="bi bi-building"></i>
+                    <span>{% trans "My Department" %}</span>
+                </a>
+            {% endif %}
+            <a class="nav-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'user_list' %}">
+                <i class="bi bi-people"></i>
+                <span>{% trans "Employees" %}</span>
+            </a>
+        {% endif %}
+
+        <div class="nav-section-title mt-2">{% trans "Account" %}</div>
+        <a class="nav-link {% if 'profile' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'profile' %}">
             <i class="bi bi-person"></i>
-            <span>{% trans "Profile" %}</span>
+            <span>{% trans "My Profile" %}</span>
         </a>
-        <form action="{% url 'logout' %}" method="post" class="mt-auto">
-            {% csrf_token %}
-            <button class="nav-link text-danger w-100 text-start" type="submit">
-                <i class="bi bi-box-arrow-right"></i>
-                <span>{% trans "Logout" %}</span>
-            </button>
-        </form>
+
+        <div class="mt-auto pt-3 border-top">
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button class="nav-link text-danger w-100 text-start border-0 bg-transparent" type="submit">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>{% trans "Logout" %}</span>
+                </button>
+            </form>
+        </div>
     </nav>
 </aside>
 
+<!-- Mobile Offcanvas Sidebar -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="mobileSidebarLabel">{% trans "Menu" %}</h5>
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title fw-bold" id="mobileSidebarLabel">{% trans "Menu" %}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{% trans 'Close' %}"></button>
     </div>
-    <div class="offcanvas-body">
+    <div class="offcanvas-body p-3">
         <nav class="nav flex-column">
-            <a class="nav-link active" href="{% url 'dashboard' %}">
+            <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
                 <i class="bi bi-speedometer2"></i>
                 <span>{% trans "Dashboard" %}</span>
             </a>
-            <a class="nav-link disabled" aria-disabled="true" href="#">
+
+            {% if user.is_rector %}
+                <div class="nav-section-title mt-2">{% trans "Organization" %}</div>
+                <a class="nav-link" href="{% url 'organization_overview' %}">
+                    <i class="bi bi-diagram-3"></i>
+                    <span>{% trans "Structure" %}</span>
+                </a>
+                <a class="nav-link" href="{% url 'department_list' %}">
+                    <i class="bi bi-building"></i>
+                    <span>{% trans "Departments" %}</span>
+                </a>
+                <a class="nav-link" href="{% url 'position_list' %}">
+                    <i class="bi bi-briefcase"></i>
+                    <span>{% trans "Positions" %}</span>
+                </a>
+                <a class="nav-link" href="{% url 'responsibility_list' %}">
+                    <i class="bi bi-diagram-2"></i>
+                    <span>{% trans "Vice Rectors" %}</span>
+                </a>
+                <div class="nav-section-title mt-2">{% trans "Administration" %}</div>
+                <a class="nav-link" href="{% url 'user_list' %}">
+                    <i class="bi bi-people"></i>
+                    <span>{% trans "Users" %}</span>
+                </a>
+                <a class="nav-link" href="{% url 'audit_list' %}">
+                    <i class="bi bi-clock-history"></i>
+                    <span>{% trans "Audit Logs" %}</span>
+                </a>
+
+            {% elif user.is_vice_rector %}
+                <div class="nav-section-title mt-2">{% trans "Management" %}</div>
+                <a class="nav-link" href="{% url 'department_list' %}">
+                    <i class="bi bi-building"></i>
+                    <span>{% trans "My Departments" %}</span>
+                </a>
+                <a class="nav-link" href="{% url 'user_list' %}">
+                    <i class="bi bi-people"></i>
+                    <span>{% trans "Employees" %}</span>
+                </a>
+                <a class="nav-link" href="{% url 'organization_overview' %}">
+                    <i class="bi bi-diagram-3"></i>
+                    <span>{% trans "Organization" %}</span>
+                </a>
+
+            {% elif user.is_department_head %}
+                <div class="nav-section-title mt-2">{% trans "Management" %}</div>
+                {% if user.department %}
+                    <a class="nav-link" href="{% url 'department_detail' pk=user.department.pk %}">
+                        <i class="bi bi-building"></i>
+                        <span>{% trans "My Department" %}</span>
+                    </a>
+                {% endif %}
+                <a class="nav-link" href="{% url 'user_list' %}">
+                    <i class="bi bi-people"></i>
+                    <span>{% trans "Employees" %}</span>
+                </a>
+            {% endif %}
+
+            <div class="nav-section-title mt-2">{% trans "Account" %}</div>
+            <a class="nav-link" href="{% url 'profile' %}">
                 <i class="bi bi-person"></i>
-                <span>{% trans "Profile" %}</span>
+                <span>{% trans "My Profile" %}</span>
             </a>
         </nav>
     </div>
 </div>
-

@@ -113,3 +113,42 @@ Production should use:
 - First and second approvals are distinct.
 - KPI and payroll historical records remain auditable.
 
+---
+
+## Phase 2 — Implemented Patterns
+
+### IDOR Protection Pattern
+
+All detail and mutation views use authorized querysets instead of unrestricted `.get(pk=...)`:
+
+```python
+# Correct — scope first, then filter by pk
+qs = user.get_scoped_departments()
+department = get_object_or_404(qs, pk=pk)
+
+# Or via mixin
+class DepartmentDetailView(ScopedDepartmentAccessMixin, DetailView):
+    ...  # raises 403 if can_view_department() fails
+```
+
+HTTP 403 `PermissionDenied` is raised when a user attempts to access an object outside their scope. This applies to:
+- Department detail, update, toggle-active, assign-head views
+- User detail, update, toggle-active views
+
+### AuditLog Model (core.models.AuditLog)
+
+Every significant administrative operation creates an `AuditLog` record:
+
+| Action Code | When |
+|---|---|
+| `user_created` | User created via admin or user management |
+| `user_updated` | User profile or role changed |
+| `user_deactivated` | User account disabled |
+| `user_activated` | User account re-enabled |
+| `dept_head_assigned` | Department Head changed |
+| `responsibility_assigned` | Vice Rector given department scope |
+| `responsibility_removed` | Vice Rector department scope removed |
+
+`log_audit(actor, action, target_repr, details, ip_address)` is the canonical helper.
+
+Audit logs are visible to the Rector only via `/audit/` (403 for all other roles).

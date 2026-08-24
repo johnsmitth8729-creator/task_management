@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+    {% if object %}{% trans "Edit User" %} - {{ object.display_name }}{% else %}{% trans "Create User" %}{% endif %} | {% trans "TASK MANAGEMENT" %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">{% trans "Dashboard" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'user_list' %}">{% trans "Users" %}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{% if object %}{% trans "Edit" %}{% else %}{% trans "Create" %}{% endif %}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="content-panel">
+                <h1 class="h4 fw-bold text-dark mb-4">
+                    {% if object %}{% trans "Edit User" %}{% else %}{% trans "Create New User" %}{% endif %}
+                </h1>
+
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger py-2 small" role="alert">
+                            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold">{{ form.username.label }}</label>
+                            {{ form.username }}
+                            {% for error in form.username.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold">{{ form.email.label }}</label>
+                            {{ form.email }}
+                            {% for error in form.email.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label fw-semibold">{{ form.first_name.label }}</label>
+                            {{ form.first_name }}
+                            {% for error in form.first_name.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label fw-semibold">{{ form.last_name.label }}</label>
+                            {{ form.last_name }}
+                            {% for error in form.last_name.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    {% if form.password %}
+                        <div class="mb-3">
+                            <label for="{{ form.password.id_for_label }}" class="form-label fw-semibold">{{ form.password.label }}</label>
+                            {{ form.password }}
+                            {% for error in form.password.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.phone.id_for_label }}" class="form-label fw-semibold">{{ form.phone.label }}</label>
+                            {{ form.phone }}
+                            {% for error in form.phone.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.photo.id_for_label }}" class="form-label fw-semibold">{{ form.photo.label }}</label>
+                            {{ form.photo }}
+                            {% for error in form.photo.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.department.id_for_label }}" class="form-label fw-semibold">{{ form.department.label }}</label>
+                            {{ form.department }}
+                            {% for error in form.department.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.position.id_for_label }}" class="form-label fw-semibold">{{ form.position.label }}</label>
+                            {{ form.position }}
+                            {% for error in form.position.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.preferred_language.id_for_label }}" class="form-label fw-semibold">{{ form.preferred_language.label }}</label>
+                            {{ form.preferred_language }}
+                            {% for error in form.preferred_language.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold d-block">{{ form.roles.label }}</label>
+                        <div class="d-flex flex-wrap gap-3">
+                            {% for choice in form.roles %}
+                                <div class="form-check">
+                                    {{ choice.tag }}
+                                    <label class="form-check-label" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% for error in form.roles.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="form-check mb-4">
+                        {{ form.is_active }}
+                        <label class="form-check-label fw-semibold" for="{{ form.is_active.id_for_label }}">{{ form.is_active.label }}</label>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{% url 'user_list' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+                        <button type="submit" class="btn btn-primary">
+                            {% if object %}{% trans "Save Changes" %}{% else %}{% trans "Create User" %}{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

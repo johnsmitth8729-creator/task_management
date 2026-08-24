@@ -136,3 +136,47 @@ If a user has multiple roles, use additive permissions only after each object sc
 - Whether Vice Rectors can manage users in assigned departments or only tasks and approvals.
 - Whether Rector can bypass first approval or must follow the same two-level process.
 
+---
+
+## Phase 2 — Implemented (accounts.permissions)
+
+### Permission Helpers
+
+```python
+can_view_department(user, department) -> bool
+can_manage_department(user, department) -> bool
+can_view_user(actor, target_user) -> bool
+can_edit_user(actor, target_user) -> bool
+can_manage_roles(user) -> bool
+can_manage_responsibilities(user) -> bool
+```
+
+### Class-Based View Mixins
+
+```python
+RectorRequiredMixin           # 403 if not Rector/superuser
+ScopedDepartmentAccessMixin   # 403 if actor cannot view the department
+ScopedUserAccessMixin         # 403 if actor cannot view the target user
+```
+
+### User Scoping Methods (accounts.models.User)
+
+```python
+user.is_rector             # True if RECTOR role or is_superuser
+user.is_vice_rector        # True if VICE_RECTOR role
+user.is_department_head    # True if DEPARTMENT_HEAD role
+user.is_employee           # True if EMPLOYEE role
+user.primary_role          # First Role object by priority
+user.initials              # First letter of first + last name
+user.get_scoped_departments()  # QuerySet<Department>
+user.get_scoped_users()        # QuerySet<User>
+```
+
+Scoping rules:
+
+| Role | `get_scoped_departments()` | `get_scoped_users()` |
+|---|---|---|
+| Rector | `Department.objects.all()` | `User.objects.all()` |
+| Vice Rector | Departments from active `DepartmentResponsibility` | Users in those departments |
+| Department Head | Own department only | Users in own department |
+| Employee | Own department only | Only self |

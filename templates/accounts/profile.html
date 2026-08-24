@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "My Profile" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="content-panel">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4 pb-3 border-bottom">
+                    <div class="d-flex align-items-center gap-3">
+                        {% if user.photo %}
+                            <img src="{{ user.photo.url }}" alt="{{ user.display_name }}" class="avatar-circle-lg">
+                        {% else %}
+                            <div class="avatar-circle-lg bg-primary text-white">{{ user.initials }}</div>
+                        {% endif %}
+                        <div>
+                            <h1 class="h4 fw-bold text-dark mb-1">{{ user.display_name }}</h1>
+                            <p class="text-muted small mb-1">@{{ user.username }} &bull; {{ user.email }}</p>
+                            {% for r in user.roles.all %}
+                                <span class="badge bg-primary-subtle text-primary">{{ r.name }}</span>
+                            {% empty %}
+                                <span class="badge bg-light text-secondary">{% trans "Employee" %}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div>
+                        <a href="{% url 'profile_edit' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil me-1"></i>{% trans "Edit Profile" %}
+                        </a>
+                    </div>
+                </div>
+
+                <h2 class="h5 fw-bold text-dark mb-3">{% trans "Personal & Organizational Info" %}</h2>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">{% trans "Department" %}</dt>
+                    <dd class="col-sm-8">{{ user.department.name|default:_("Not assigned") }}</dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Position" %}</dt>
+                    <dd class="col-sm-8">{{ user.position.name|default:_("Not assigned") }}</dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Phone" %}</dt>
+                    <dd class="col-sm-8">{{ user.phone|default:"-" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Preferred UI Language" %}</dt>
+                    <dd class="col-sm-8">{{ user.get_preferred_language_display }}</dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Account Created" %}</dt>
+                    <dd class="col-sm-8">{{ user.date_joined|date:"Y-m-d H:i" }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

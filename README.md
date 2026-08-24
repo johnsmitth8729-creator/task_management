@@ -2,7 +2,7 @@
 
 TASK MANAGEMENT is a university-wide internal platform for task management, workflow monitoring, approvals, analytics, KPI, and configurable payroll/bonus calculation.
 
-This repository is currently in **Phase 1: Foundation & Authentication**. The foundation Django application connected to PostgreSQL is implemented, with custom User, Role foundation, Department and Position models, authentication flow (login/logout), multilingual support (UZ, EN, RU), Bootstrap 5 UI shell, Django admin, and automated tests.
+This repository is currently in **Phase 2: Organization, Users & RBAC / Admin**. The organizational hierarchy, department and position management, user management, Vice Rector department responsibilities, Department Head assignments, object-level & department-scoped RBAC, audit logging, role-based navigation, and university-branded UI are fully implemented and verified.
 
 ## Purpose
 
@@ -99,7 +99,7 @@ The roadmap is frozen:
 
 - [x] **Phase 0: Blueprint & Architecture**
 - [x] **Phase 1: Foundation & Authentication**
-- [ ] Phase 2: Organization, Users & RBAC / Admin
+- [x] **Phase 2: Organization, Users & RBAC / Admin**
 - [ ] Phase 3: Complete Task Engine
 - [ ] Phase 4: Employee & Department Workflow
 - [ ] Phase 5: Approval, Rejection & Completion
@@ -169,18 +169,22 @@ python manage.py migrate
 
 ### 5. Seed Development Data
 
-Populate initial test roles, departments, positions, and accounts:
+Populate initial test roles, departments, positions, responsibilities, and accounts:
 
 ```bash
 python manage.py seed_dev
 ```
 
 This creates the following development accounts (Password: `ChangeMe12345!`):
-- **Rector**: `rector` (Superadmin)
-- **Vice Rector**: `vice.rector` (Admin / IT Dept)
-- **Department Head**: `department.head` (Head / IT Dept)
-- **Employee 1**: `employee.one` (Developer / IT Dept)
-- **Employee 2**: `employee.two` (Librarian / Library Dept)
+- **Rector**: `rector` (Superadmin, global authority)
+- **Vice Rector Academic**: `vice.rector` (Supervises IT & Library)
+- **Vice Rector Finance**: `vice.rector.finance` (Supervises Finance & HR)
+- **Department Head IT**: `department.head` (Head of IT Department)
+- **Department Head Library**: `head.library` (Head of University Library)
+- **Department Head Finance**: `head.finance` (Head of Finance & Accounting)
+- **Employee IT**: `employee.one` (Senior Software Engineer / IT)
+- **Employee Library**: `employee.two` (Librarian / Library)
+- **Employee Finance**: `employee.finance` (Senior Accountant / Finance)
 
 ### 6. Run Automated Tests
 

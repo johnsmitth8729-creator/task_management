@@ -2,92 +2,109 @@
 
 ## Hierarchy
 
-University -> Rector -> Vice Rectors -> Departments -> Department Heads -> Positions -> Employees
+University → Rector → Vice Rectors → Departments → Department Heads → Positions → Employees
 
-The database should also support a generalized `OrganizationalUnit` tree for future expansion.
+## Core Models (Phase 2 — Implemented)
 
-## Core Models
-
-### University
-
-Represents the institution and stores global identity settings such as name, logo, timezone, and active status.
-
-### OrganizationalUnit
-
-Generic hierarchical model for future expansion beyond departments.
-
-Examples:
-
-- faculty
-- center
-- office
-- department
-- branch
-
-### Department
+### Department (`organization.Department`)
 
 Operational task unit. Every task must belong to one department.
 
-### Position
+Fields:
+- `id` — UUID primary key
+- `name` — full department name
+- `code` — short code (unique, e.g. `IT`, `FIN`)
+- `description` — optional text description
+- `head` — ForeignKey to `User` (nullable; the assigned Department Head)
+- `is_active` — soft-delete flag
+- `created_at`, `updated_at` — audit timestamps
+
+### Position (`organization.Position`)
 
 Employee job position. A position may be global or department-specific.
 
-### EmployeeProfile
+Fields:
+- `id` — UUID primary key
+- `name` — full position title
+- `code` — short code (unique, e.g. `DEV`, `HR_OFFICER`)
+- `description` — optional text description
+- `department` — ForeignKey to `Department` (nullable; department-specific positions)
+- `is_active` — soft-delete flag
+- `created_at`, `updated_at` — audit timestamps
 
-Connects a user to:
-
-- department
-- position
-- employment status
-- manager relationship if needed
-
-### DepartmentResponsibility
+### DepartmentResponsibility (`organization.DepartmentResponsibility`)
 
 Maps a Vice Rector to one or more departments.
 
 This model is the primary enforcement point for Vice Rector scope.
 
+Fields:
+- `id` — UUID primary key
+- `vice_rector` — ForeignKey to `User`
+- `department` — ForeignKey to `Department`
+- `start_date` — date the responsibility began
+- `end_date` — date the responsibility ended (nullable)
+- `is_active` — current active flag
+- `created_at`, `updated_at` — audit timestamps
+
+Constraints:
+- `UniqueConstraint` on `(vice_rector, department)` where `is_active=True` — prevents duplicate active responsibilities
+
 ## Role Placement
 
-Rector:
+### Rector
+- Global university authority (superuser).
+- `User.is_rector` property checks for `RECTOR` role or Django superuser.
 
-- global university authority
+### Vice Rector
+- User with `VICE_RECTOR` role.
+- One or more active `DepartmentResponsibility` rows.
+- `User.get_scoped_departments()` returns only assigned departments.
+- `User.get_scoped_users()` returns users belonging to those departments.
 
-Vice Rector:
+### Department Head
+- User with `DEPARTMENT_HEAD` role.
+- The `Department.head` FK references this user.
+- `User.get_scoped_departments()` returns `Department.objects.filter(id=self.department_id)`.
+- `User.get_scoped_users()` returns users in the same department.
 
-- user with `VICE_RECTOR` role
-- one or more active `DepartmentResponsibility` rows
+### Employee
+- User with `EMPLOYEE` role.
+- One department, one position.
+- `User.get_scoped_departments()` returns only own department.
+- `User.get_scoped_users()` returns only self.
 
-Department Head:
+## Services (`organization.services`)
 
-- user with `DEPARTMENT_HEAD` role
-- exactly one primary department unless future rules allow multiple
+All organizational mutations are done through service functions to ensure audit logging:
 
-Employee:
-
-- user with `EMPLOYEE` role
-- one department
-- one position
-
-## Expansion Support
-
-The architecture should support:
-
-- multiple organizational unit levels
-- department renaming without losing history
-- inactive departments
-- position changes over time
-- future branch campuses
-- temporary acting department heads
-- Vice Rector responsibility changes over time
+- `assign_department_head(department, user, actor)` — sets `department.head` and logs the action.
+- `assign_vice_rector_responsibility(vice_rector, department, actor)` — creates `DepartmentResponsibility` and logs.
+- `remove_vice_rector_responsibility(responsibility, actor)` — deactivates a responsibility and logs.
 
 ## Historical Responsibility
 
-Responsibility tables should use effective dates:
-
+Responsibility rows use effective dates:
 - `start_date`
-- `end_date`
+- `end_date` (nullable)
 - `is_active`
 
-This preserves historical reporting and auditability.
+This preserves historical reporting and auditability. Old rows are never deleted, only deactivated.
 
+## Expansion Support
+
+The architecture supports:
+- multiple organizational unit levels (future `OrganizationalUnit` tree)
+- department renaming without losing history
+- inactive departments (soft-delete via `is_active`)
+- position changes over time
+- temporary acting department heads (change `Department.head`)
+- Vice Rector responsibility changes over time via `DepartmentResponsibility`
+
+
+
+## Future Expansion
+
+- `OrganizationalUnit` tree for faculties, centers, and branches
+- `University` model for global identity and branding settings
+- `EmployeeProfile` for richer employment history tracking

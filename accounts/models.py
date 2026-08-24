@@ -80,7 +80,71 @@ class User(AbstractUser):
         full_name = self.get_full_name().strip()
         return full_name or self.username
 
+    @property
+    def initials(self) -> str:
+        first = (self.first_name or '').strip()
+        last = (self.last_name or '').strip()
+        if first and last:
+            return f"{first[0]}{last[0]}".upper()
+        if first:
+            return first[0].upper()
+        if self.username:
+            return self.username[:2].upper()
+        return "U"
+
     def has_role(self, code: str) -> bool:
         return self.roles.filter(code=code, is_active=True).exists()
+
+    @property
+    def is_rector(self) -> bool:
+        return self.is_superuser or self.has_role(Role.Codes.RECTOR)
+
+    @property
+    def is_vice_rector(self) -> bool:
+        return self.has_role(Role.Codes.VICE_RECTOR)
+
+    @property
+    def is_department_head(self) -> bool:
+        return self.has_role(Role.Codes.DEPARTMENT_HEAD)
+
+    @property
+    def is_employee(self) -> bool:
+        return self.has_role(Role.Codes.EMPLOYEE)
+
+    @property
+    def primary_role(self):
+        active_roles = list(self.roles.filter(is_active=True).order_by('code'))
+        priority = [
+            Role.Codes.RECTOR,
+            Role.Codes.VICE_RECTOR,
+            Role.Codes.DEPARTMENT_HEAD,
+            Role.Codes.EMPLOYEE,
+        ]
+        for role_code in priority:
+            for role in active_roles:
+                if role.code == role_code:
+                    return role
+        return active_roles[0] if active_roles else None
+
+    def get_scoped_departments(self):
+        from organization.models import Department
+        if self.is_rector:
+            return Department.objects.all()
+        if self.is_vice_rector:
+            dept_ids = self.department_responsibilities.filter(is_active=True).values_list('department_id', flat=True)
+            return Department.objects.filter(id__in=dept_ids)
+        if self.department_id:
+            return Department.objects.filter(id=self.department_id)
+        return Department.objects.none()
+
+    def get_scoped_users(self):
+        if self.is_rector:
+            return User.objects.all()
+        if self.is_vice_rector:
+            scoped_dept_ids = self.get_scoped_departments().values_list('id', flat=True)
+            return User.objects.filter(department_id__in=scoped_dept_ids)
+        if self.is_department_head and self.department_id:
+            return User.objects.filter(department_id=self.department_id)
+        return User.objects.filter(id=self.id)
 
 # Create your models here.

@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Vice Rector Responsibilities" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">{% trans "Vice Rector Department Scopes" %}</h1>
+            <p class="text-muted mb-0">{% trans "Assign executive supervision of departments to Vice Rectors" %}</p>
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#assignRespModal">
+                <i class="bi bi-plus-lg me-1"></i>{% trans "Assign Department" %}
+            </button>
+        </div>
+    </div>
+
+    <!-- Vice Rectors Cards -->
+    <div class="row g-4 mb-4">
+        {% for vr in vice_rectors %}
+            <div class="col-12 col-lg-6">
+                <div class="card h-100 border shadow-none">
+                    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center gap-3">
+                        {% if vr.photo %}
+                            <img src="{{ vr.photo.url }}" class="avatar-circle">
+                        {% else %}
+                            <div class="avatar-circle bg-info text-white">{{ vr.initials }}</div>
+                        {% endif %}
+                        <div>
+                            <h2 class="h6 fw-bold mb-0">
+                                <a href="{% url 'user_detail' pk=vr.pk %}" class="text-dark text-decoration-none">
+                                    {{ vr.display_name }}
+                                </a>
+                            </h2>
+                            <small class="text-muted">{{ vr.email }}</small>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="small fw-bold text-muted text-uppercase mb-3">{% trans "Supervised Departments" %}</h3>
+                        <div class="list-group list-group-flush">
+                            {% for resp in vr.department_responsibilities.all %}
+                                {% if resp.is_active %}
+                                    <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <a href="{% url 'department_detail' pk=resp.department.pk %}" class="fw-semibold text-dark text-decoration-none">
+                                                {{ resp.department.name }}
+                                            </a>
+                                            <span class="badge bg-light text-secondary ms-1">{{ resp.department.code }}</span>
+                                            <div class="small text-muted">{% trans "Since" %} {{ resp.start_date|date:"Y-m-d" }}</div>
+                                        </div>
+                                        <form action="{% url 'responsibility_delete' pk=resp.pk %}" method="post">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="{% trans 'Remove Responsibility' %}">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            {% empty %}
+                                <div class="text-muted small py-2">{% trans "No active departments assigned." %}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-muted">{% trans "No Vice Rectors available in the system." %}</div>
+        {% endfor %}
+    </div>
+
+    <!-- Active Responsibilities Table -->
+    <div class="content-panel">
+        <h2 class="h5 fw-bold mb-3">{% trans "All Active Supervision Scopes" %}</h2>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>{% trans "Vice Rector" %}</th>
+                        <th>{% trans "Department" %}</th>
+                        <th>{% trans "Effective From" %}</th>
+                        <th class="text-end">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in all_responsibilities %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'user_detail' pk=item.vice_rector.pk %}" class="fw-semibold text-dark text-decoration-none">
+                                    {{ item.vice_rector.display_name }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{% url 'department_detail' pk=item.department.pk %}" class="text-decoration-none">
+                                    {{ item.department.name }}
+                                </a>
+                                <span class="badge bg-light text-secondary ms-1">{{ item.department.code }}</span>
+                            </td>
+                            <td>{{ item.start_date|date:"Y-m-d" }}</td>
+                            <td class="text-end">
+                                <form action="{% url 'responsibility_delete' pk=item.pk %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="{% trans 'Remove' %}">
+                                        <i class="bi bi-trash"></i> {% trans "Remove" %}
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">{% trans "No active responsibilities mapped." %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Responsibility Modal -->
+<div class="modal fade" id="assignRespModal" tabindex="-1" aria-labelledby="assignRespModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{% url 'responsibility_create' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="assignRespModalLabel">{% trans "Assign Department to Vice Rector" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ assign_form.vice_rector.label }}</label>
+                        {{ assign_form.vice_rector }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ assign_form.department.label }}</label>
+                        {{ assign_form.department }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ assign_form.start_date.label }}</label>
+                        {{ assign_form.start_date }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-primary">{% trans "Assign Scope" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
