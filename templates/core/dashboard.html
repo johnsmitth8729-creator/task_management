@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Dashboard" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="page-heading mb-4">
+        <h1 class="h3 mb-1">{% blocktrans with name=user.display_name %}Welcome, {{ name }}{% endblocktrans %}</h1>
+        <p class="text-muted mb-0">{% trans "Phase 1 foundation dashboard" %}</p>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-lg-8">
+            <section class="content-panel">
+                <h2 class="h5 mb-3">{% trans "User profile" %}</h2>
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">{% trans "Role" %}</dt>
+                    <dd class="col-sm-9">
+                        {% for role in user.roles.all %}
+                            <span class="badge text-bg-primary">{{ role.name }}</span>
+                        {% empty %}
+                            <span class="text-muted">{% trans "No role assigned" %}</span>
+                        {% endfor %}
+                    </dd>
+                    <dt class="col-sm-3">{% trans "Department" %}</dt>
+                    <dd class="col-sm-9">{{ user.department|default:_("Not assigned") }}</dd>
+                    <dt class="col-sm-3">{% trans "Position" %}</dt>
+                    <dd class="col-sm-9">{{ user.position|default:_("Not assigned") }}</dd>
+                    <dt class="col-sm-3">{% trans "Language" %}</dt>
+                    <dd class="col-sm-9">{{ user.preferred_language|upper }}</dd>
+                </dl>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

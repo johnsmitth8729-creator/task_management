@@ -1,0 +1,40 @@
+{% load i18n %}
+<aside class="app-sidebar d-none d-lg-flex">
+    <nav class="nav flex-column w-100">
+        <a class="nav-link active" href="{% url 'dashboard' %}">
+            <i class="bi bi-speedometer2"></i>
+            <span>{% trans "Dashboard" %}</span>
+        </a>
+        <a class="nav-link disabled" aria-disabled="true" href="#">
+            <i class="bi bi-person"></i>
+            <span>{% trans "Profile" %}</span>
+        </a>
+        <form action="{% url 'logout' %}" method="post" class="mt-auto">
+            {% csrf_token %}
+            <button class="nav-link text-danger w-100 text-start" type="submit">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>{% trans "Logout" %}</span>
+            </button>
+        </form>
+    </nav>
+</aside>
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="mobileSidebarLabel">{% trans "Menu" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{% trans 'Close' %}"></button>
+    </div>
+    <div class="offcanvas-body">
+        <nav class="nav flex-column">
+            <a class="nav-link active" href="{% url 'dashboard' %}">
+                <i class="bi bi-speedometer2"></i>
+                <span>{% trans "Dashboard" %}</span>
+            </a>
+            <a class="nav-link disabled" aria-disabled="true" href="#">
+                <i class="bi bi-person"></i>
+                <span>{% trans "Profile" %}</span>
+            </a>
+        </nav>
+    </div>
+</div>
+

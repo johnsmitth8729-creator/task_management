@@ -2,7 +2,7 @@
 
 TASK MANAGEMENT is a university-wide internal platform for task management, workflow monitoring, approvals, analytics, KPI, and configurable payroll/bonus calculation.
 
-This repository is currently in **Phase 0: Blueprint & Architecture**. No application implementation, dashboards, task CRUD, notifications, KPI calculation, payroll calculation, reporting, or production deployment is included yet.
+This repository is currently in **Phase 1: Foundation & Authentication**. The foundation Django application connected to PostgreSQL is implemented, with custom User, Role foundation, Department and Position models, authentication flow (login/logout), multilingual support (UZ, EN, RU), Bootstrap 5 UI shell, Django admin, and automated tests.
 
 ## Purpose
 
@@ -13,8 +13,8 @@ Rector or Vice Rector creates a task -> Department receives it -> Department Hea
 ## Technology Stack
 
 Backend:
-- Python
-- Django
+- Python (3.12+)
+- Django (6.1+)
 - Django ORM
 - Django REST Framework where API functionality is appropriate
 
@@ -85,41 +85,114 @@ See `docs/ARCHITECTURE.md` for details.
 
 ## Languages
 
-The final application must support exactly:
+The application supports:
 
-- Uzbek
-- English
-- Russian
+- Uzbek (`uz`)
+- English (`en`)
+- Russian (`ru`)
 
-Django internationalization must be used. UI and system messages must use translation keys instead of hardcoded text in templates or business logic.
+Django internationalization is used across views, forms, and templates with language switcher support.
 
 ## Development Phases
 
 The roadmap is frozen:
 
-- Phase 0: Blueprint & Architecture
-- Phase 1: Foundation & Authentication
-- Phase 2: Organization, Users & RBAC / Admin
-- Phase 3: Complete Task Engine
-- Phase 4: Employee & Department Workflow
-- Phase 5: Approval, Rejection & Completion
-- Phase 6: Notifications, Deadlines & Escalation
-- Phase 7: Files, Notes, History, Search & Reports
-- Phase 8: Analytics, Workload & Performance
-- Phase 9: KPI, Payroll & Final Production
+- [x] **Phase 0: Blueprint & Architecture**
+- [x] **Phase 1: Foundation & Authentication**
+- [ ] Phase 2: Organization, Users & RBAC / Admin
+- [ ] Phase 3: Complete Task Engine
+- [ ] Phase 4: Employee & Department Workflow
+- [ ] Phase 5: Approval, Rejection & Completion
+- [ ] Phase 6: Notifications, Deadlines & Escalation
+- [ ] Phase 7: Files, Notes, History, Search & Reports
+- [ ] Phase 8: Analytics, Workload & Performance
+- [ ] Phase 9: KPI, Payroll & Final Production
 
-Future development must proceed phase by phase. Do not automatically implement the next phase.
+Future development proceeds phase by phase.
 
-## Local Development Prerequisites
+---
 
-Expected tools for later implementation phases:
+## Local Development Setup
 
-- Python 3.12 or current project-approved Python version
-- PostgreSQL
-- Redis
+### 1. Prerequisites
+- Python 3.12+
+- PostgreSQL 14+
 - Git
-- Virtual environment tooling
-- Google Antigravity Pro / Antigravity IDE
 
-No Django project has been created in Phase 0.
+### 2. Environment Setup
+
+```bash
+# Create virtual environment
+python -m venv .venv
+
+# Activate virtual environment (Windows PowerShell)
+.venv\Scripts\Activate.ps1
+# Or on Linux / macOS:
+# source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### 3. Environment Variables
+
+Create `.env` from `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Configure your PostgreSQL database credentials in `.env`:
+```env
+SECRET_KEY=your-secret-key-for-development
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+
+DB_NAME=task_management
+DB_USER=postgres
+DB_PASSWORD=your_postgres_password
+DB_HOST=localhost
+DB_PORT=5432
+
+TIME_ZONE=Asia/Tashkent
+LANGUAGE_CODE=en
+```
+
+### 4. Database Migrations
+
+Apply migrations to your PostgreSQL database:
+
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+### 5. Seed Development Data
+
+Populate initial test roles, departments, positions, and accounts:
+
+```bash
+python manage.py seed_dev
+```
+
+This creates the following development accounts (Password: `ChangeMe12345!`):
+- **Rector**: `rector` (Superadmin)
+- **Vice Rector**: `vice.rector` (Admin / IT Dept)
+- **Department Head**: `department.head` (Head / IT Dept)
+- **Employee 1**: `employee.one` (Developer / IT Dept)
+- **Employee 2**: `employee.two` (Librarian / Library Dept)
+
+### 6. Run Automated Tests
+
+```bash
+python manage.py test
+```
+
+### 7. Start Development Server
+
+```bash
+python manage.py runserver
+```
+
+Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser.
 
