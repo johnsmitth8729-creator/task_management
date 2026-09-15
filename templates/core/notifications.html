@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Notifications" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-3 px-lg-4">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+            <h1 class="h4 fw-bold mb-1">
+                <i class="bi bi-bell-fill text-primary me-2"></i>{% trans "Notification Center" %}
+            </h1>
+            <p class="text-muted small mb-0">
+                {% trans "Track important workflow events, approvals, rejections, and deadline changes." %}
+            </p>
+        </div>
+        {% if unread_notifications_count > 0 %}
+        <form method="post" action="{% url 'notification_mark_all_read' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-check2-all me-1"></i>{% trans "Mark All as Read" %}
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- Notifications list -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        {% if notifications %}
+        <div class="list-group list-group-flush">
+            {% for notif in notifications %}
+            <div class="list-group-item p-3 d-flex align-items-start gap-3 {% if not notif.is_read %}bg-primary-subtle bg-opacity-25 border-start border-3 border-primary{% endif %}">
+                <div class="avatar-sm rounded-circle p-2 d-flex align-items-center justify-content-center {% if not notif.is_read %}bg-primary text-white{% else %}bg-light text-muted{% endif %}" style="width:40px;height:40px;flex-shrink:0;">
+                    {% if notif.notification_type == 'FINAL_APPROVED' %}
+                        <i class="bi bi-check-circle-fill text-success"></i>
+                    {% elif notif.notification_type == 'FINAL_REJECTED' or notif.notification_type == 'FIRST_APPROVAL_REJECTED' %}
+                        <i class="bi bi-x-circle-fill text-danger"></i>
+                    {% elif notif.notification_type == 'DEADLINE_EXTENDED' %}
+                        <i class="bi bi-calendar-event-fill text-warning"></i>
+                    {% elif notif.notification_type == 'TASK_SUBMITTED' %}
+                        <i class="bi bi-file-earmark-arrow-up-fill text-info"></i>
+                    {% else %}
+                        <i class="bi bi-bell-fill"></i>
+                    {% endif %}
+                </div>
+
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <h6 class="fw-bold mb-0 small {% if not notif.is_read %}text-primary{% endif %}">
+                            {{ notif.title }}
+                        </h6>
+                        <span class="text-muted" style="font-size:.75rem;">
+                            {{ notif.created_at|date:"d M Y H:i" }}
+                        </span>
+                    </div>
+                    <p class="mb-2 text-dark small">{{ notif.message }}</p>
+
+                    <div class="d-flex align-items-center gap-2">
+                        {% if notif.link %}
+                        <form method="post" action="{% url 'notification_mark_read' pk=notif.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-xs btn-primary py-1 px-2" style="font-size:.75rem;">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>{% trans "View Details" %}
+                            </button>
+                        </form>
+                        {% endif %}
+                        {% if not notif.is_read and not notif.link %}
+                        <form method="post" action="{% url 'notification_mark_read' pk=notif.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-xs btn-outline-secondary py-1 px-2" style="font-size:.75rem;">
+                                {% trans "Mark Read" %}
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+        <div class="card-footer bg-transparent border-0 py-3 d-flex justify-content-center">
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">{% trans "Previous" %}</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">{% trans "Next" %}</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-bell-slash text-muted" style="font-size:3rem;"></i>
+            <h5 class="fw-bold mt-3 mb-1">{% trans "No Notifications" %}</h5>
+            <p class="text-muted small">{% trans "You are all caught up with your university workflow updates." %}</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

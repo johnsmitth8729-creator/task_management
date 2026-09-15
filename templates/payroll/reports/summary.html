@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Payroll Reports" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">
+                <i class="bi bi-file-earmark-bar-graph text-primary me-2"></i>{% trans "Payroll & Compensation Reports" %}
+            </h1>
+            <p class="text-muted small mb-0">{% trans "Audit statements, period disbursements, and exportable financial summaries." %}</p>
+        </div>
+    </div>
+
+    <!-- Aggregate Totals -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-md-6">
+            <div class="card border-0 shadow-sm rounded-3 p-4">
+                <span class="text-muted small text-uppercase fw-semibold">{% trans "Total Historical Net Disbursed" %}</span>
+                <h2 class="display-6 fw-bold text-success mt-1 mb-0">{{ total_disbursed|floatformat:2 }} <span class="fs-6 text-muted">UZS</span></h2>
+                <p class="text-muted small mb-0 mt-1">{% trans "Across all approved & disbursed cycles" %}</p>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card border-0 shadow-sm rounded-3 p-4">
+                <span class="text-muted small text-uppercase fw-semibold">{% trans "Total KPI Bonuses Disbursed" %}</span>
+                <h2 class="display-6 fw-bold text-warning-emphasis mt-1 mb-0">{{ total_kpi_bonuses|floatformat:2 }} <span class="fs-6 text-muted">UZS</span></h2>
+                <p class="text-muted small mb-0 mt-1">{% trans "Cumulative performance incentives paid" %}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exportable Periods Table -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-header bg-white border-bottom py-3">
+            <h5 class="fw-bold text-dark mb-0">
+                <i class="bi bi-calendar3 text-primary me-2"></i>{% trans "Periods Ready for Export" %}
+            </h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small text-uppercase">
+                    <tr>
+                        <th>{% trans "Period" %}</th>
+                        <th>{% trans "Cycle Code" %}</th>
+                        <th>{% trans "Date Span" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Records" %}</th>
+                        <th class="text-end">{% trans "Export" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in periods %}
+                        <tr>
+                            <td class="fw-bold text-dark">{{ p.name }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ p.code }}</span></td>
+                            <td>{{ p.start_date|date:"Y-m-d" }} &rarr; {{ p.end_date|date:"Y-m-d" }}</td>
+                            <td>
+                                <span class="badge {% if p.status == 'APPROVED' %}bg-success{% elif p.status == 'OPEN' %}bg-primary{% else %}bg-secondary{% endif %}">
+                                    {{ p.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ p.records.count }}</td>
+                            <td class="text-end">
+                                <a href="{% url 'payroll:period_export_excel' pk=p.pk %}" class="btn btn-sm btn-success">
+                                    <i class="bi bi-file-earmark-excel me-1"></i>{% trans "Excel Spreadsheet" %}
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                {% trans "No periods available for report generation." %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

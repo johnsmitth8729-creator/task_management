@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Tax Rules" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">
+                <i class="bi bi-percent text-primary me-2"></i>{% trans "Configurable Payroll Tax Rules" %}
+            </h1>
+            <p class="text-muted small mb-0">{% trans "Configurable tax deduction rules applied during payroll calculation." %}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'payroll:component_list' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-sliders me-1"></i>{% trans "Components" %}
+            </a>
+            <a href="{% url 'payroll:tax_rule_create' %}" class="btn btn-sm btn-primary">
+                <i class="bi bi-plus-lg me-1"></i>{% trans "New Tax Rule" %}
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small text-uppercase">
+                    <tr>
+                        <th>{% trans "Rule Name" %}</th>
+                        <th>{% trans "Code" %}</th>
+                        <th>{% trans "Rate (%)" %}</th>
+                        <th>{% trans "Fixed Amount" %}</th>
+                        <th>{% trans "Applies To" %}</th>
+                        <th>{% trans "Effective Date" %}</th>
+                        <th>{% trans "Status" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in tax_rules %}
+                        <tr>
+                            <td class="fw-bold text-dark">{{ r.name }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ r.code }}</span></td>
+                            <td class="fw-semibold text-danger">{{ r.percentage }}%</td>
+                            <td>{{ r.fixed_amount|floatformat:2 }} UZS</td>
+                            <td>{{ r.get_applies_to_display }}</td>
+                            <td>{{ r.effective_from|date:"Y-m-d" }}</td>
+                            <td>
+                                <span class="badge {% if r.is_active %}bg-success-subtle text-success{% else %}bg-secondary{% endif %}">
+                                    {% if r.is_active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                {% trans "No tax rules configured. Taxes default to 0.00 until rules are configured." %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,1973 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: TASK MANAGEMENT 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-25 22:30+0500\n"
+"PO-Revision-Date: 2026-08-25 22:30+0500\n"
+"Last-Translator: Admin\n"
+"Language-Team: Uzbek\n"
+"Language: uz\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "TASK MANAGEMENT"
+msgstr "VAZIFALARNI BOSHQARISH"
+
+msgid "Dashboard"
+msgstr "Boshqaruv paneli"
+
+msgid "Tasks"
+msgstr "Vazifalar"
+
+msgid "New Task"
+msgstr "Yangi vazifa"
+
+msgid "Templates"
+msgstr "Shablonlar"
+
+msgid "Task Types"
+msgstr "Vazifa turlari"
+
+msgid "Structure"
+msgstr "Tuzilma"
+
+msgid "Departments"
+msgstr "Bo‘limlar"
+
+msgid "Positions"
+msgstr "Lavozimlar"
+
+msgid "Vice Rectors"
+msgstr "Prorektorlar"
+
+msgid "Users"
+msgstr "Foydalanuvchilar"
+
+msgid "Audit Logs"
+msgstr "Audit jurnali"
+
+msgid "Main"
+msgstr "Asosiy"
+
+msgid "Organization"
+msgstr "Tashkilot"
+
+msgid "Administration"
+msgstr "Boshqaruv"
+
+msgid "My Profile"
+msgstr "Mening profilim"
+
+msgid "Django Admin"
+msgstr "Django admin"
+
+msgid "Logout"
+msgstr "Chiqish"
+
+msgid "Language"
+msgstr "Til"
+
+msgid "Switch language"
+msgstr "Tilni almashtirish"
+
+msgid "Toggle theme"
+msgstr "Mavzuni almashtirish"
+
+msgid "Open menu"
+msgstr "Menyuni ochish"
+
+msgid "Close"
+msgstr "Yopish"
+
+msgid "Confirm Action"
+msgstr "Amalni tasdiqlash"
+
+msgid "Are you sure you want to perform this action?"
+msgstr "Ushbu amalni bajarishga ishonchingiz komilmi?"
+
+msgid "Are you sure you want to create this task?"
+msgstr "Ushbu vazifani yaratishga ishonchingiz komilmi?"
+
+msgid "Are you sure you want to cancel this task?"
+msgstr "Ushbu vazifani bekor qilishga ishonchingiz komilmi?"
+
+msgid "Are you sure you want to archive this task? This action cannot be undone."
+msgstr "Ushbu vazifani arxivlashga ishonchingiz komilmi? Bu amalni bekor qilib bo‘lmaydi."
+
+msgid "Are you sure you want to delete this subtask?"
+msgstr "Ushbu quyi vazifani o‘chirishga ishonchingiz komilmi?"
+
+msgid "Are you sure you want to unassign this employee?"
+msgstr "Ushbu xodimni vazifadan chiqarishga ishonchingiz komilmi?"
+
+msgid "Yes"
+msgstr "Ha"
+
+msgid "No"
+msgstr "Yo‘q"
+
+msgid "Yes, create"
+msgstr "Ha, yaratish"
+
+msgid "Yes, cancel"
+msgstr "Ha, bekor qilish"
+
+msgid "Yes, archive"
+msgstr "Ha, arxivlash"
+
+msgid "Yes, delete"
+msgstr "Ha, o‘chirish"
+
+msgid "Yes, unassign"
+msgstr "Ha, chiqarish"
+
+msgid "Yes, deactivate"
+msgstr "Ha, faolsizlantirish"
+
+msgid "Yes, activate"
+msgstr "Ha, faollashtirish"
+
+msgid "Create Task"
+msgstr "Vazifa yaratish"
+
+msgid "Save Changes"
+msgstr "O‘zgarishlarni saqlash"
+
+msgid "Cancel"
+msgstr "Bekor qilish"
+
+msgid "Archive"
+msgstr "Arxivlash"
+
+msgid "Back"
+msgstr "Orqaga"
+
+msgid "Go Back"
+msgstr "Orqaga"
+
+msgid "Confirm Cancellation"
+msgstr "Bekor qilishni tasdiqlash"
+
+msgid "Overdue"
+msgstr "Muddati o‘tgan"
+
+msgid "Draft"
+msgstr "Qoralama"
+
+msgid "Created"
+msgstr "Yaratilgan"
+
+msgid "Assigned"
+msgstr "Biriktirilgan"
+
+msgid "In Progress"
+msgstr "Jarayonda"
+
+msgid "Completed"
+msgstr "Bajarildi"
+
+msgid "Cancelled"
+msgstr "Bekor qilingan"
+
+msgid "Archived"
+msgstr "Arxivlangan"
+
+msgid "Low"
+msgstr "Past"
+
+msgid "Medium"
+msgstr "O‘rta"
+
+msgid "High"
+msgstr "Yuqori"
+
+msgid "Urgent"
+msgstr "Shoshilinch"
+
+msgid "Simple"
+msgstr "Oddiy"
+
+msgid "Complex"
+msgstr "Murakkab"
+
+msgid "Critical"
+msgstr "Kritik"
+
+msgid "English"
+msgstr "Inglizcha"
+
+msgid "Uzbek"
+msgstr "O‘zbekcha"
+
+msgid "Task Completion Progress"
+msgstr "Vazifaning bajarilish jarayoni"
+
+msgid "Task Description & Objectives"
+msgstr "Vazifa tavsifi va maqsadlari"
+
+msgid "No description provided."
+msgstr "Tavsif berilmagan."
+
+msgid "Created on"
+msgstr "Yaratilgan vaqti"
+
+msgid "Creator:"
+msgstr "Yaratuvchi:"
+
+msgid "System"
+msgstr "Tizim"
+
+msgid "Manage Assignees"
+msgstr "Biriktirilganlarni boshqarish"
+
+msgid "Edit Task"
+msgstr "Vazifani tahrirlash"
+
+msgid "Status"
+msgstr "Holat"
+
+msgid "Publish (Mark Created)"
+msgstr "Nashr qilish (Yaratildi)"
+
+msgid "Start Work (In Progress)"
+msgstr "Ishni boshlash (Jarayonda)"
+
+msgid "Mark Completed (100%)"
+msgstr "Bajarildi deb belgilash (100%)"
+
+msgid "Subtasks"
+msgstr "Quyi vazifalar"
+
+msgid "Add Subtask"
+msgstr "Quyi vazifa qo‘shish"
+
+msgid "Dependencies"
+msgstr "Bog‘liqliklar"
+
+msgid "Add Dependency"
+msgstr "Bog‘liqlik qo‘shish"
+
+msgid "Assigned Employees"
+msgstr "Biriktirilgan xodimlar"
+
+msgid "Activity & Audit Trail"
+msgstr "Faoliyat va audit tarixi"
+
+msgid "Fill in task details, responsible department, and timeline"
+msgstr "Vazifa tafsilotlari, mas'ul bo'lim va muddatlarni kiriting"
+
+msgid "Initial Employee Assignments (Optional)"
+msgstr "Dastlabki xodimlarni biriktirish (Ixtiyoriy)"
+
+msgid "My Work"
+msgstr "Mening ishim"
+
+msgid "My Workflow"
+msgstr "Mening ish jarayonim"
+
+msgid "Incoming"
+msgstr "Kiruvchi"
+
+msgid "Submitted"
+msgstr "Yuborilgan"
+
+msgid "Incoming Tasks"
+msgstr "Kiruvchi vazifalar"
+
+msgid "Tasks assigned to you that need acceptance"
+msgstr "Sizga biriktirilgan va qabul qilinishi kerak bo'lgan vazifalar"
+
+msgid "No Incoming Tasks"
+msgstr "Kiruvchi vazifalar yo'q"
+
+msgid "You have no tasks waiting for acceptance."
+msgstr "Sizda qabul qilinishini kutayotgan vazifalar yo'q."
+
+msgid "In Progress"
+msgstr "Jarayonda"
+
+msgid "Tasks you are currently working on"
+msgstr "Siz hozirda ishlayotgan vazifalar"
+
+msgid "No Tasks In Progress"
+msgstr "Jarayondagi vazifalar yo'q"
+
+msgid "Accept incoming tasks to start working."
+msgstr "Ishni boshlash uchun kiruvchi vazifalarni qabul qiling."
+
+msgid "Submitted Tasks"
+msgstr "Yuborilgan vazifalar"
+
+msgid "First Approval"
+msgstr "Birinchi tasdiq"
+
+msgid "Tasks awaiting first approval from your department head"
+msgstr "Bo'lim boshlig'ining birinchi tasdig'ini kutayotgan vazifalar"
+
+msgid "No Submitted Tasks"
+msgstr "Yuborilgan vazifalar yo'q"
+
+msgid "Tasks you submit will appear here while awaiting approval."
+msgstr "Siz yuborgan vazifalar tasdiqlanguncha bu yerda ko'rinadi."
+
+msgid "View Submission"
+msgstr "Yuborilgan ishni ko'rish"
+
+msgid "Accept Task"
+msgstr "Vazifani qabul qilish"
+
+msgid "By accepting this task, you confirm that you will start working on it. The task status will move to In Progress."
+msgstr "Ushbu vazifani qabul qilish orqali siz ish boshlaganingizni tasdiqlaysiz. Vazifa holati 'Jarayonda'ga o'tadi."
+
+msgid "Yes, Accept"
+msgstr "Ha, qabul qilish"
+
+msgid "Update Progress"
+msgstr "Jarayonni yangilash"
+
+msgid "Save Progress"
+msgstr "Jarayonni saqlash"
+
+msgid "Add Work Note"
+msgstr "Ish qaydini qo'shish"
+
+msgid "Write a work note, update, or observation..."
+msgstr "Ish qaydi, yangilanish yoki izoh yozing..."
+
+msgid "Add Note"
+msgstr "Qayd qo'shish"
+
+msgid "Notes"
+msgstr "Qaydlar"
+
+msgid "Submit for First Approval"
+msgstr "Birinchi tasdiqqa yuborish"
+
+msgid "Describe the work done. This will be reviewed by your department head. Your assignment progress will be locked after submission."
+msgstr "Bajarilgan ishni tavsiflang. Bu bo'lim boshlig'ingiz tomonidan ko'rib chiqiladi. Yuborilgandan so'ng jarayon qulflanadi."
+
+msgid "Submit for Approval"
+msgstr "Tasdiqqa yuborish"
+
+msgid "Submit"
+msgstr "Yuborish"
+
+msgid "Are you sure you want to submit this task for first approval? This action cannot be undone."
+msgstr "Haqiqatan ham ushbu vazifani birinchi tasdiqqa yubormoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi."
+
+msgid "Latest Submission"
+msgstr "So'nggi yuborilgan ish"
+
+msgid "Pending First Approval"
+msgstr "Birinchi tasdiq kutilmoqda"
+
+msgid "Submitted on"
+msgstr "Yuborilgan vaqti"
+
+msgid "All Assignees"
+msgstr "Barcha biriktirilganlar"
+
+msgid "Primary"
+msgstr "Asosiy"
+
+msgid "Dept Workflow"
+msgstr "Bo'lim ish jarayoni"
+
+msgid "Dept Dashboard"
+msgstr "Bo'lim boshqaruv paneli"
+
+msgid "Department Dashboard"
+msgstr "Bo'lim boshqaruv paneli"
+
+msgid "Task Distribution"
+msgstr "Vazifalarni taqsimlash"
+
+msgid "Approval Queue"
+msgstr "Tasdiqlash navbati"
+
+msgid "Total Tasks"
+msgstr "Jami vazifalar"
+
+msgid "Active Tasks"
+msgstr "Faol vazifalar"
+
+msgid "Unassigned"
+msgstr "Biriktirilmagan"
+
+msgid "Pending Approval"
+msgstr "Tasdiq kutilmoqda"
+
+msgid "Employees"
+msgstr "Xodimlar"
+
+msgid "Employee Workload"
+msgstr "Xodimlar yuklamasi"
+
+msgid "Employee"
+msgstr "Xodim"
+
+msgid "First Approval Queue"
+msgstr "Birinchi tasdiqlash navbati"
+
+msgid "Employee submissions awaiting your review"
+msgstr "Sizning ko'rib chiqishingizni kutayotgan xodimlar ishlari"
+
+msgid "Review Submission"
+msgstr "Ishni ko'rib chiqish"
+
+msgid "No Pending Submissions"
+msgstr "Kutilayotgan arizalar yo'q"
+
+msgid "Submission Review"
+msgstr "Yuborilgan ishni ko'rib chiqish"
+
+msgid "Submitted By"
+msgstr "Yuboruvchi"
+
+msgid "Accepted"
+msgstr "Qabul qilingan"
+
+msgid "Submission Text"
+msgstr "Ish matni"
+
+msgid "Approval Actions"
+msgstr "Tasdiqlash amallari"
+
+msgid "Assign Employees"
+msgstr "Xodimlarni biriktirish"
+
+msgid "Current Assignments"
+msgstr "Hozirgi biriktirilganlar"
+
+msgid "Search employees..."
+msgstr "Xodimlarni qidirish..."
+
+msgid "Select All"
+msgstr "Barchasini tanlash"
+
+msgid "Task accepted. You can now start working on it."
+msgstr "Vazifa qabul qilindi. Endi ishlashni boshlashingiz mumkin."
+
+msgid "Progress updated successfully."
+msgstr "Jarayon muvaffaqiyatli yangilandi."
+
+msgid "Note added successfully."
+msgstr "Qayd muvaffaqiyatli qo'shildi."
+
+msgid "Task submitted for first approval successfully."
+msgstr "Vazifa birinchi tasdiq uchun muvaffaqiyatli yuborildi."
+
+msgid "Second Approval"
+msgstr "Ikkinchi tasdiq"
+
+msgid "Leadership"
+msgstr "Rahbariyat"
+
+msgid "Approval Center"
+msgstr "Tasdiqlash markazi"
+
+msgid "Second Approval Queue"
+msgstr "Ikkinchi tasdiq navbati"
+
+msgid "Management Approval Center"
+msgstr "Rahbariyat tasdiqlash markazi"
+
+msgid "Completed Tasks"
+msgstr "Yakunlangan vazifalar"
+
+msgid "Successfully Completed Tasks"
+msgstr "Muvaffaqiyatli yakunlangan vazifalar"
+
+msgid "Rejected Tasks"
+msgstr "Rad etilgan vazifalar"
+
+msgid "Rejected Tasks & Submissions"
+msgstr "Rad etilgan vazifalar va arizalar"
+
+msgid "Notification Center"
+msgstr "Xabarnomalar markazi"
+
+msgid "Notifications"
+msgstr "Xabarnomalar"
+
+msgid "Mark All as Read"
+msgstr "Barchasini o'qilgan deb belgilash"
+
+msgid "Final Approve & Complete"
+msgstr "Yakuniy tasdiqlash va yakunlash"
+
+msgid "Reject Task"
+msgstr "Vazifani rad etish"
+
+msgid "Extend Deadline"
+msgstr "Muddatni uzaytirish"
+
+msgid "Rejection Reason"
+msgstr "Rad etish sababi"
+
+msgid "New Deadline"
+msgstr "Yangi muddat"
+
+msgid "Extension Reason"
+msgstr "Uzaytirish sababi"
+
+msgid "On Time"
+msgstr "O'z vaqtida"
+
+msgid "Completed Late"
+msgstr "Kechikib yakunlangan"
+
+msgid "Approve & Send to Second Approval"
+msgstr "Tasdiqlash va 2-bosqichga yuborish"
+
+msgid "Reject Submission"
+msgstr "Arizani rad etish"
+
+msgid "Executive Task Review"
+msgstr "Rahbariyat ko'rib chiqishi"
+
+msgid "Work Evidence, Documents & Reports"
+msgstr "Ish dalillari, hujjatlar va hisobotlar"
+
+msgid "files attached"
+msgstr "biriktirilgan fayllar"
+
+msgid "reports"
+msgstr "hisobotlar"
+
+msgid "Upload Files"
+msgstr "Fayllarni yuklash"
+
+msgid "New Folder"
+msgstr "Yangi papka"
+
+msgid "Create Report"
+msgstr "Hisobot yaratish"
+
+msgid "Export Task"
+msgstr "Vazifani eksport qilish"
+
+msgid "All Files"
+msgstr "Barcha fayllar"
+
+msgid "Root Level"
+msgstr "Bosh papka"
+
+msgid "File Name"
+msgstr "Fayl nomi"
+
+msgid "Folder"
+msgstr "Papka"
+
+msgid "Folder Name"
+msgstr "Papka nomi"
+
+msgid "Evidence Category"
+msgstr "Dalil toifasi"
+
+msgid "Work Evidence"
+msgstr "Ish dalili"
+
+msgid "Requirements & Specs"
+msgstr "Talablar va texnik xususiyatlar"
+
+msgid "Report Attachment"
+msgstr "Hisobot ilovasi"
+
+msgid "Approval Document"
+msgstr "Tasdiqlash hujjati"
+
+msgid "Final Submission Document"
+msgstr "Yakuniy topshirish hujjati"
+
+msgid "General Document"
+msgstr "Umumiy hujjat"
+
+msgid "Choose File(s)"
+msgstr "Fayl(lar)ni tanlang"
+
+msgid "Target Folder"
+msgstr "Mo'ljal papka"
+
+msgid "Root / No Folder"
+msgstr "Bosh papka / Papkasiz"
+
+msgid "Root Level (No Parent)"
+msgstr "Bosh daraja (Ota papkasiz)"
+
+msgid "Description / Notes (Optional)"
+msgstr "Tavsif / Izohlar (Ixtiyoriy)"
+
+msgid "Create New Folder"
+msgstr "Yangi papka yaratish"
+
+msgid "Move File to Folder"
+msgstr "Faylni papkaga ko'chirish"
+
+msgid "Select Destination Folder"
+msgstr "Mo'ljal papkani tanlang"
+
+msgid "Move File"
+msgstr "Faylni ko'chirish"
+
+msgid "File Preview"
+msgstr "Faylni ko'rish"
+
+msgid "Download Original"
+msgstr "Asl nusxani yuklab olish"
+
+msgid "Delete File"
+msgstr "Faylni o'chirish"
+
+msgid "Delete Folder"
+msgstr "Papkani o'chirish"
+
+msgid "Structured Work Reports"
+msgstr "Tuzilmaviy ish hisobotlari"
+
+msgid "Report Title"
+msgstr "Hisobot sarlavhasi"
+
+msgid "Reporting Period / Milestone"
+msgstr "Hisobot davri / Bosqich"
+
+msgid "Executive Summary"
+msgstr "Rahbar uchun qisqacha mazmun"
+
+msgid "Completed Work & Activities"
+msgstr "Bajarilgan ishlar va faoliyatlar"
+
+msgid "Key Results & Deliverables"
+msgstr "Asosiy natijalar va topshiriqlar"
+
+msgid "Identified Challenges & Problems"
+msgstr "Aniqlangan qiyinchiliklar va muammolar"
+
+msgid "Recommendations & Next Steps"
+msgstr "Tavsiyalar va keyingi qadamlar"
+
+msgid "Conclusion"
+msgstr "Xulosa"
+
+msgid "Report Status"
+msgstr "Hisobot holati"
+
+msgid "Export as PDF"
+msgstr "PDF sifatida eksport qilish"
+
+msgid "Export as Word (DOCX)"
+msgstr "Word (DOCX) sifatida eksport qilish"
+
+msgid "Export as Excel (XLSX)"
+msgstr "Excel (XLSX) sifatida eksport qilish"
+
+msgid "Work Report"
+msgstr "Ish hisoboti"
+
+msgid "Awaiting Final Approval"
+msgstr "Yakuniy tasdiqlash kutilmoqda"
+
+msgid "Rename Folder"
+msgstr "Papkani qayta nomlash"
+
+msgid "New Folder Name"
+msgstr "Yangi papka nomi"
+
+msgid "Save Name"
+msgstr "Nomni saqlash"
+
+msgid "No Tasks in Second Approval"
+msgstr "2-bosqich tasdiqlashda vazifalar yo'q"
+
+msgid "Tasks that have passed department head approval will be tracked here while awaiting final executive completion."
+msgstr "Bo'lim boshlig'i tomonidan tasdiqlangan vazifalar rahbariyatning yakuniy tasdiqlashini kutish jarayonida shu yerda aks etadi."
+
+msgid "Return to Dashboard"
+msgstr "Boshqaruv paneliga qaytish"
+
+msgid "Are you sure you want to delete this file? This action cannot be undone."
+msgstr "Ushbu faylni o'chirishni xohlaysizmi? Bu amalni bekor qilib bo'lmaydi."
+
+msgid "Yes, Delete"
+msgstr "Ha, o'chirish"
+
+msgid "Yes, Delete Folder"
+msgstr "Ha, papkani o'chirish"
+
+msgid "Preview"
+msgstr "Ko'rish"
+
+msgid "Download"
+msgstr "Yuklab olish"
+
+msgid "Move to Folder"
+msgstr "Papkaga ko'chirish"
+
+msgid "Delete File"
+msgstr "Faylni o'chirish"
+
+msgid "Delete Folder"
+msgstr "Papkani o'chirish"
+
+msgid "Forwarded"
+msgstr "Yuborilgan"
+
+msgid "My Tasks"
+msgstr "Mening vazifalarim"
+
+msgid "Department Tasks"
+msgstr "Bo'lim vazifalari"
+
+msgid "Technical Superadmin"
+msgstr "Texnik superadmin"
+
+msgid "System Administration"
+msgstr "Tizim ma'muriyati"
+
+msgid "Rector"
+msgstr "Rektor"
+
+msgid "Vice Rector"
+msgstr "Prorektor"
+
+msgid "Department Head"
+msgstr "Bo'lim boshlig'i"
+
+msgid "Employee"
+msgstr "Xodim"
+
+msgid "Al-Khwarizmi University"
+msgstr "Al-Xorazmiy Universiteti"
+
+msgid "Al-Khwarizmi University Digital Governance"
+msgstr "Al-Xorazmiy Universiteti Raqamli Boshqaruvi"
+
+msgid "Al-Khwarizmi University Digital Governance Platform"
+msgstr "Al-Xorazmiy Universiteti Raqamli Boshqaruv Platformasi"
+
+msgid "Capabilities"
+msgstr "Imkoniyatlar"
+
+msgid "About"
+msgstr "Haqida"
+
+msgid "Select language"
+msgstr "Tilni tanlang"
+
+msgid "University"
+msgstr "Universitet"
+
+msgid "Task Management"
+msgstr "Vazifalarni boshqarish"
+
+msgid "Platform"
+msgstr "Platformasi"
+
+msgid "University Task Management Platform"
+msgstr "Universitet vazifalarini boshqarish platformasi"
+
+msgid "A modern digital operating system for assigning, tracking, verifying, and approving academic and administrative workflows across university departments."
+msgstr "Universitet bo'limlari o'rtasida akademik va ma'muriy ish jarayonlarini biriktirish, kuzatish, tekshirish va tasdiqlash uchun zamonaviy raqamli operatsion tizim."
+
+msgid "Login to Platform"
+msgstr "Tizimga kirish"
+
+msgid "Explore Workflow"
+msgstr "Ish jarayonini ko'rish"
+
+msgid "Institutional Security"
+msgstr "Institutsional xavfsizlik"
+
+msgid "Two-Level Approvals"
+msgstr "Ikki bosqichli tasdiqlash"
+
+msgid "Verified Evidence"
+msgstr "Tasdiqlangan dalillar"
+
+msgid "Level 1 Verified"
+msgstr "1-bosqich tasdiqlandi"
+
+msgid "Department Head Sign-off"
+msgstr "Bo'lim boshlig'i imzosi"
+
+msgid "Immutable Evidence Vault"
+msgstr "Daxlsiz dalillar ombori"
+
+msgid "PDF / DOCX / XLSX Reports"
+msgstr "PDF / DOCX / XLSX hisobotlari"
+
+msgid "Due in 5 days"
+msgstr "Muddati: 5 kun qoldi"
+
+msgid "University Academic Accreditation & Digital Curriculum Audit"
+msgstr "Universitet akademik akkreditatsiyasi va raqamli o'quv dasturi auditi"
+
+msgid "Comprehensive syllabus alignment, faculty qualification validation, and research index compilation."
+msgstr "O'quv dasturlarini kompleks muvofiqlashtirish, professor-o'qituvchilar malakasini tekshirish va ilmiy indekslarni jamlash."
+
+msgid "Progress"
+msgstr "Jarayon"
+
+msgid "assigned"
+msgstr "biriktirilgan"
+
+msgid "In Review"
+msgstr "Ko'rib chiqilmoqda"
+
+msgid "Digital Traceability"
+msgstr "Raqamli shaffoflik"
+
+msgid "Zero lost paper directives"
+msgstr "Qog'oz topshiriqlar yo'qolishiga chek"
+
+msgid "Rigorous Approvals"
+msgstr "Qat'iy tasdiqlar"
+
+msgid "Dept Head + Executive"
+msgstr "Bo'lim boshlig'i + Rahbariyat"
+
+msgid "Strict Governance"
+msgstr "Qat'iy boshqaruv"
+
+msgid "IDOR & Scoped RBAC"
+msgstr "IDOR va Scoped RBAC"
+
+msgid "Audit & Notifications"
+msgstr "Audit va bildirishnomalar"
+
+msgid "Continuous compliance tracking"
+msgstr "Doimiy ijro intizomi nazorati"
+
+msgid "Platform Capabilities"
+msgstr "Platforma imkoniyatlari"
+
+msgid "Engineered for University Excellence"
+msgstr "Universitet samaradorligi uchun yaratilgan"
+
+msgid "Designed specifically for higher education governance, streamlining communication between Rectorate, Vice Rectors, Department Heads, and Employees."
+msgstr "Oliy ta'lim boshqaruvi uchun maxsus ishlab chiqilgan bo'lib, Rektorat, Prorektorlar, Bo'lim boshliqlari va Xodimlar o'rtasidagi aloqani soddalashtiradi."
+
+msgid "Operational Task Delegation"
+msgstr "Operatsion vazifalarni topshirish"
+
+msgid "Structured directives with clear department ownership, priorities, complexities, and enforced academic deadlines."
+msgstr "Aniq bo'lim mas'uliyati, ustuvorliklar, murakkablik darajasi va belgilangan ijro muddatlariga ega tizimli topshiriqlar."
+
+msgid "Two-Stage Approval System"
+msgstr "Ikki bosqichli tasdiqlash tizimi"
+
+msgid "Stage 1 Department Head verification followed by Stage 2 Vice Rector or Rector executive sign-off with mandatory review rationale."
+msgstr "1-bosqich Bo'lim boshlig'i tekshiruvi va 2-bosqich Prorektor yoki Rektorning majburiy izohli yakuniy tasdiqlashi."
+
+msgid "Protected Evidence Vault"
+msgstr "Himoyalangan dalillar ombori"
+
+msgid "Folder-based file management, PDF/DOCX/XLSX work reports, and immutable proof of completion for approved submissions."
+msgstr "Papkalar asosida fayllarni boshqarish, PDF/DOCX/XLSX hisobotlari va tasdiqlangan topshiriqlar uchun o'zgarmas ijro dalillari."
+
+msgid "Executive & Dept Dashboards"
+msgstr "Rahbariyat va bo'lim panellari"
+
+msgid "Live workload metrics, overdue task tracking, completion ratios, and structured operational work centers."
+msgstr "Real vaqtdagi yuklama ko'rsatkichlari, muddati o'tgan vazifalar monitoringi, bajarilish foizlari va operatsion ish markazlari."
+
+msgid "Instant Real-Time Alerts"
+msgstr "Tezkor real vaqt bildirishnomalari"
+
+msgid "Automated in-app alerts on new task assignments, submission status changes, review feedback, and deadline reminders."
+msgstr "Yangi topshiriqlar, holat o'zgarishlari, tekshiruv xulosalari va ijro muddatlari haqida avtomatik tizim bildirishnomalari."
+
+msgid "Institutional Security & RBAC"
+msgstr "Institutsional xavfsizlik va RBAC"
+
+msgid "Technical Superadmin separation, department-scoped authorization, IDOR protection, and complete audit logging."
+msgstr "Texnik superadmin ajratilishi, bo'limlar bo'yicha ruxsatlar, IDOR himoyasi va to'liq audit jurnali."
+
+msgid "Lifecycle Flow"
+msgstr "Ijro bosqichlari"
+
+msgid "How Tasks Move from Directive to Approval"
+msgstr "Topshiriqlarning yaratilishdan tasdiqlanishgacha bo'lgan yo'li"
+
+msgid "A transparent, structured 5-stage lifecycle ensuring quality, accountability, and timely completion."
+msgstr "Sifat, mas'uliyat va o'z vaqtida bajarilishini ta'minlovchi 5 bosqichli shaffof jarayon."
+
+msgid "Directive Created"
+msgstr "Topshiriq yaratish"
+
+msgid "Rector or Vice Rector initiates a structured task with official deadline and department assignment."
+msgstr "Rektor yoki Prorektor rasmiy muddat va mas'ul bo'limni belgilagan holda topshiriq yaratadi."
+
+msgid "Dept Distribution"
+msgstr "Bo'limda taqsimlash"
+
+msgid "Department Head assigns responsible specialist employees with specific roles and instructions."
+msgstr "Bo'lim boshlig'i mas'ul mutaxassis xodimlarga aniq ko'rsatmalar bilan vazifani biriktiradi."
+
+msgid "Execution & Evidence"
+msgstr "Bajarish va dalillar"
+
+msgid "Employee updates progress (0-100%), attaches deliverables, and submits for Stage 1 approval."
+msgstr "Xodim ijro jarayonini (0-100%) yangilaydi, hisobotlarni biriktiradi va 1-bosqich tasdig'iga yuboradi."
+
+msgid "Dept Head Review"
+msgstr "Bo'lim boshlig'i tekshiruvi"
+
+msgid "Department Head reviews attached reports and either approves to Level 2 or returns with notes."
+msgstr "Bo'lim boshlig'i biriktirilgan hisobotlarni ko'rib chiqadi va 2-bosqichga tasdiqlaydi yoki izoh bilan qaytaradi."
+
+msgid "Executive Approval"
+msgstr "Rahbariyat tasdig'i"
+
+msgid "Vice Rector or Rector grants final approval, permanently locking verified evidence."
+msgstr "Prorektor yoki Rektor yakuniy tasdiqni beradi va tekshirilgan dalillarni daxlsiz qilib arxivlaydi."
+
+msgid "Institutional Integrity & Governance"
+msgstr "Institutsional yaxlitlik va boshqaruv"
+
+msgid "Every directive, review, file download, and deadline adjustment is cryptographically traceable and scoped to authorized personnel."
+msgstr "Har bir topshiriq, tekshiruv, fayl yuklab olish va muddat o'zgarishi qayd etiladi hamda faqat vakolatli xodimlarga taqdim etiladi."
+
+msgid "Technical Superadmin Separation"
+msgstr "Texnik superadmin ajratilishi"
+
+msgid "Django Admin access is strictly isolated from university operational roles."
+msgstr "Django Admin kirishi universitetning operatsion boshqaruv rollaridan qat'iy ajratilgan."
+
+msgid "Full Audit Logging"
+msgstr "To'liq audit jurnali"
+
+msgid "Comprehensive timestamped event log for every state transition and review."
+msgstr "Har bir holat o'zgarishi va tekshiruv uchun aniq vaqt ko'rsatilgan hodisalar jurnali."
+
+msgid "IDOR & Cross-Dept Protection"
+msgstr "IDOR va bo'limlararo himoya"
+
+msgid "Backend queryset scoping prevents unauthorized cross-department data tampering."
+msgstr "Backend darajasidagi scoping boshqa bo'lim ma'lumotlariga ruxsatsiz kirishni butunlay to'sadi."
+
+msgid "Immutable Approved Evidence"
+msgstr "O'zgarmas tasdiqlangan dalillar"
+
+msgid "Approved work submissions cannot be deleted or overwritten by any user."
+msgstr "Tasdiqlangan ish hisobotlari va fayllari hech bir foydalanuvchi tomonidan o'chirib yoki o'zgartirib bo'lmaydi."
+
+msgid "Ready to access your workspace?"
+msgstr "Ishchi maydoningizga kirishga tayyormisiz?"
+
+msgid "Sign in with your university credentials to view assigned directives, update progress, and review pending approvals."
+msgstr "Biriktirilgan topshiriqlarni ko'rish, ijro jarayonini yangilash va tasdiqlarni ko'rib chiqish uchun universitet ma'lumotlaringiz bilan kiring."
+
+msgid "Digital Task Management & Workflow Operating System"
+msgstr "Universitet vazifalarini boshqarish va raqamli ish jarayonlari tizimi"
+
+msgid "Al-Khwarizmi University. All rights reserved."
+msgstr "Al-Xorazmiy Universiteti. Barcha huquqlar himoyalangan."
+
+msgid "Operational Platform"
+msgstr "Operatsion platforma"
+
+msgid "HR Manager"
+msgstr "Kadrlar bo'limi boshlig'i"
+
+msgid "Employee Directory & HR"
+msgstr "Xodimlar ro'yxati va Kadrlar"
+
+msgid "Human Resources & Employee Governance"
+msgstr "Inson resurslari va xodimlarni boshqarish"
+
+msgid "Manage university staff, organizational grades, hierarchy, and departmental assignments"
+msgstr "Universitet xodimlari, tashkiliy darajalar, bo'ysunuvchilik va bo'lim biriktirishlarini boshqarish"
+
+msgid "Employee Grades"
+msgstr "Xodim darajalari / Darajalar"
+
+msgid "Employee Grades & Levels"
+msgstr "Xodimlar malaka darajalari va toifalari"
+
+msgid "Define and manage university staff ranking structures, seniority levels, and grade codes"
+msgstr "Universitet xodimlarining toifa tizimi, malaka darajalari va kodlarini boshqarish"
+
+msgid "HR Permissions"
+msgstr "HR vakolatlari"
+
+msgid "Add Employee"
+msgstr "Yangi xodim qo'shish"
+
+msgid "Add New Employee"
+msgstr "Yangi xodim kiritish"
+
+msgid "Total Headcount"
+msgstr "Jami xodimlar"
+
+msgid "Active Staff"
+msgstr "Faol xodimlar"
+
+msgid "On Leave"
+msgstr "Ta'tilda"
+
+msgid "Inactive / Departed"
+msgstr "Faol emas / Ketgan"
+
+msgid "All Grades"
+msgstr "Barcha darajalar"
+
+msgid "All Statuses"
+msgstr "Barcha holatlar"
+
+msgid "Employee"
+msgstr "Xodim"
+
+msgid "Grade / Level"
+msgstr "Daraja / Toifa"
+
+msgid "Direct Supervisor"
+msgstr "To'g'ridan-to'g'ri rahbar"
+
+msgid "Reporting Hierarchy"
+msgstr "Bo'ysunish iyerarxiyasi"
+
+msgid "Organizational Placement"
+msgstr "Tashkiliy joylashuvi"
+
+msgid "Subordinates & Direct Reports"
+msgstr "Bo'ysunuvchi xodimlar"
+
+msgid "Reports To (Supervisor)"
+msgstr "Rahbari"
+
+msgid "Performance & KPI"
+msgstr "Samaradorlik va KPI"
+
+msgid "Performance & KPI Dashboard"
+msgstr "Samaradorlik va KPI boshqaruv paneli"
+
+msgid "Performance & KPI Summary"
+msgstr "Samaradorlik va KPI xulosasi"
+
+msgid "University-Wide KPI & Performance Overview"
+msgstr "Universitet bo'yicha KPI va samaradorlik umumiy ko'rinishi"
+
+msgid "Supervised Sectors Performance"
+msgstr "Biriktirilgan yo'nalishlar samaradorligi"
+
+msgid "Department Performance & KPI"
+msgstr "Bo'lim samaradorligi va KPI"
+
+msgid "My Performance & KPI"
+msgstr "Mening samaradorligim va KPI"
+
+msgid "KPI Definitions & Metrics Catalog"
+msgstr "KPI ko'rsatkichlari va mezonlar katalogi"
+
+msgid "KPI Definitions"
+msgstr "KPI mezonlari"
+
+msgid "KPI Catalog"
+msgstr "KPI katalogi"
+
+msgid "KPI Assignments"
+msgstr "KPI biriktirishlari"
+
+msgid "KPI Assignments & Result Evaluation"
+msgstr "KPI biriktirishlari va natijalarni baholash"
+
+msgid "KPI Evaluation Periods"
+msgstr "KPI baholash davrlari"
+
+msgid "Evaluate KPI Indicator"
+msgstr "KPI ko'rsatkichini baholash"
+
+msgid "Save Evaluation"
+msgstr "Baholashni saqlash"
+
+msgid "Approve & Finalize"
+msgstr "Tasdiqlash va yakunlash"
+
+msgid "Current KPI Score"
+msgstr "Joriy KPI balli"
+
+msgid "Task Completion Rate"
+msgstr "Vazifalarni bajarish ko'rsatkichi"
+
+msgid "Deadline Compliance Rate"
+msgstr "Muddatga rioya qilish ko'rsatkichi"
+
+msgid "Rector HR Governance & Authority"
+msgstr "Rektorning HR boshqaruvi va vakolatlari"
+
+msgid "Granular Authority Principle"
+msgstr "Granulyar vakolatlar prinsipi"
+
+msgid "People & HR"
+msgstr "Xodimlar va Kadrlar"
+
+msgid "Sector Performance"
+msgstr "Sektor samaradorligi"
+
+msgid "Dept Performance"
+msgstr "Bo'lim samaradorligi"
+
+msgid "My Performance"
+msgstr "Mening ko'rsatkichlarim"
+
+msgid "Performance Overview"
+msgstr "Samaradorlik ko'rinishi"
+
+msgid "Access Forbidden"
+msgstr "Kirish taqiqlangan"
+
+msgid "Access Denied / Forbidden"
+msgstr "Kirish rad etildi / Ruxsat berilmagan"
+
+msgid "You do not have the required role or administrative permissions to access this university resource or operation."
+msgstr "Ushbu universitet resursi yoki amalidan foydalanish uchun sizda yetarli rol yoki ma'muriy ruxsatlar mavjud emas."
+
+msgid "Page Not Found"
+msgstr "Sahifa topilmadi"
+
+msgid "The URL link you requested does not exist, has been moved, or is temporarily unavailable."
+msgstr "Siz so'ragan URL havola mavjud emas, ko'chirilgan yoki vaqtincha ishlamayapti."
+
+msgid "Bad Request"
+msgstr "Noto'g'ri so'rov"
+
+msgid "The server could not understand the request due to invalid syntax or parameters."
+msgstr "Server noto'g'ri sintaksis yoki parametrlar sababli so'rovni qabul qila olmadi."
+
+msgid "Go Back"
+msgstr "Orqaga qaytish"
+
+msgid "Payroll & Compensation"
+msgstr "Ish haqi va kompensatsiya"
+
+msgid "Payroll Dashboard"
+msgstr "Ish haqi boshqaruv paneli"
+
+msgid "Payroll Periods"
+msgstr "Ish haqi davrlari"
+
+msgid "Payroll Records"
+msgstr "Ish haqi yozuvlari"
+
+msgid "Salary Management"
+msgstr "Maoshlarni boshqarish"
+
+msgid "Compensation Rules"
+msgstr "Kompensatsiya qoidalari"
+
+msgid "Payroll Reports"
+msgstr "Ish haqi hisobotlari"
+
+msgid "Payroll Overview"
+msgstr "Ish haqi umumiy ko'rinishi"
+
+msgid "Payroll Approvals"
+msgstr "Ish haqi tasdiqlari"
+
+msgid "Compensation"
+msgstr "Kompensatsiya"
+
+msgid "Department Payroll"
+msgstr "Bo'lim ish haqi"
+
+msgid "Dept Compensation"
+msgstr "Bo'lim kompensatsiyasi"
+
+msgid "My Salary"
+msgstr "Mening maoshim"
+
+msgid "My Payslips"
+msgstr "Mening hisob-kitob varaqalarim"
+
+msgid "Create Period"
+msgstr "Davr yaratish"
+
+msgid "Total Gross Payroll"
+msgstr "Jami hisoblangan maosh (Gross)"
+
+msgid "Total Net Payable"
+msgstr "Jami to'lanadigan sof maosh (Net)"
+
+msgid "KPI Bonuses Paid"
+msgstr "To'langan KPI bonuslari"
+
+msgid "Average Salary"
+msgstr "O'rtacha maosh"
+
+msgid "Run Payroll Calculation"
+msgstr "Ish haqini hisoblash"
+
+msgid "Approve All Records"
+msgstr "Barcha yozuvlarni tasdiqlash"
+
+msgid "Export Excel"
+msgstr "Excelga eksport"
+
+msgid "Mark as Paid"
+msgstr "To'langan deb belgilash"
+
+msgid "Download Payslip (PDF)"
+msgstr "Hisob-kitob varaqasini yuklab olish (PDF)"
+
+msgid "Itemized Compensation & Deductions"
+msgstr "Batafsil kompensatsiya va ushlanmalar"
+
+# Phase 9 Electronic Signatures & Verification
+msgid "Electronic Signature"
+msgstr "Elektron imzo"
+
+msgid "Official Electronic Signature"
+msgstr "Rasmiy elektron imzo"
+
+msgid "Electronic Signatures & Verification"
+msgstr "Elektron imzolar va tekshirish"
+
+msgid "electronic signature"
+msgstr "elektron imzo"
+
+msgid "electronic signatures"
+msgstr "elektron imzolar"
+
+msgid "Verify Signature"
+msgstr "Imzoni tekshirish"
+
+msgid "Verified Electronic Signature"
+msgstr "Tasdiqlangan elektron imzo"
+
+msgid "Signature Valid"
+msgstr "Imzo haqiqiy"
+
+msgid "VALID SIGNATURE"
+msgstr "HAQIQIY IMZO"
+
+msgid "SIGNATURE REVOKED"
+msgstr "IMZO BEKOR QILINGAN"
+
+msgid "INVALID SIGNATURE"
+msgstr "NOQONUNIY / YAROQSIZ IMZO"
+
+msgid "Document Integrity Verified"
+msgstr "Hujjat butunligi tasdiqlandi"
+
+msgid "Document Integrity Verified & Authentic"
+msgstr "Hujjat butunligi tasdiqlandi va haqiqiy"
+
+msgid "Signed By"
+msgstr "Imzolagan shaxs"
+
+msgid "Signed At"
+msgstr "Imzolangan vaqt"
+
+msgid "Signing Timestamp"
+msgstr "Imzolash vaqti"
+
+msgid "Verification ID"
+msgstr "Tekshiruv identifikatori"
+
+msgid "Scan QR Code"
+msgstr "QR kodni skanerlang"
+
+msgid "Scan to verify"
+msgstr "Tekshirish uchun skanerlang"
+
+msgid "Download QR"
+msgstr "QR kodni yuklab olish"
+
+msgid "Confirm Signature"
+msgstr "Imzoni tasdiqlash"
+
+msgid "Sign Electronically"
+msgstr "Elektron imzolash"
+
+msgid "Electronically Signed"
+msgstr "Elektron imzolangan"
+
+msgid "Revoke Signature"
+msgstr "Imzoni bekor qilish"
+
+msgid "Revoke Electronic Signature"
+msgstr "Elektron imzoni bekor qilish"
+
+msgid "Electronic Signature Verification"
+msgstr "Elektron imzoni tekshirish"
+
+msgid "Official University Public Verification Service"
+msgstr "Universitetning rasmiy ommaviy tekshirish xizmati"
+
+msgid "Signed Task Information"
+msgstr "Imzolangan vazifa ma'lumotlari"
+
+msgid "Cryptographic Integrity Profile"
+msgstr "Kriptografik butunlik profili"
+
+msgid "Signed Payload Hash (SHA-256)"
+msgstr "Imzolangan ma'lumotlar xeshi (SHA-256)"
+
+msgid "Sign Completed Task"
+msgstr "Tugallangan vazifani imzolash"
+
+msgid "I confirm that I have reviewed this task and approve this electronic signature."
+msgstr "Men ushbu vazifani ko'rib chiqqanimni tasdiqlayman va ushbu elektron imzoni ma'qullayman."
+
+msgid "You are about to electronically sign this completed task. After signing, the record becomes immutable."
+msgstr "Siz ushbu yakunlangan vazifani elektron imzolamoqchisiz. Imzolangandan so'ng yozuv o'zgarmas holatga keladi."
+
+msgid "Signed Tasks"
+msgstr "Imzolangan vazifalar"
+
+msgid "Pending Signature"
+msgstr "Imzolanishi kutilayotgan"
+
+msgid "Open Public Verification"
+msgstr "Ommaviy tekshiruvni ochish"
+
+msgid "Rector Electronic Signature"
+msgstr "Rektorning elektron imzosi"
+
+msgid "Vice Rector Electronic Signature"
+msgstr "Prorektorning elektron imzosi"
+
+# Phase 10 — Advanced Analytics & Reporting
+msgid "Analytics & Reports"
+msgstr "Tahlil va hisobotlar"
+
+msgid "Executive Analytics"
+msgstr "Rahbariyat tahlili"
+
+msgid "Sector Analytics"
+msgstr "Soha tahlili"
+
+msgid "Dept Analytics"
+msgstr "Bo'lim tahlili"
+
+msgid "Workforce Analytics"
+msgstr "Xodimlar tarkibi tahlili"
+
+msgid "Payroll Analytics"
+msgstr "Ish haqi tahlili"
+
+msgid "Signature Analytics"
+msgstr "Elektron imzo tahlili"
+
+msgid "Security Analytics"
+msgstr "Xavfsizlik tahlili"
+
+msgid "Report Center"
+msgstr "Hisobotlar markazi"
+
+msgid "My Analytics"
+msgstr "Mening tahlilim"
+
+msgid "Executive Monitoring & Strategic Analytics"
+msgstr "Rahbariyat monitoringi va strategik tahlil"
+
+msgid "Institutional performance, workload distribution, and bottleneck detection."
+msgstr "Universitet ko'rsatkichlari, yuklama taqsimoti va kechikishlarni aniqlash."
+
+msgid "Export PDF"
+msgstr "PDF eksport"
+
+msgid "Export Excel"
+msgstr "Excel eksport"
+
+msgid "Export CSV"
+msgstr "CSV eksport"
+
+msgid "Quick Date Range"
+msgstr "Vaqt oralig'i"
+
+msgid "Department Performance Comparison"
+msgstr "Bo'limlar samaradorligi taqqoslovi"
+
+msgid "Task Status Breakdown"
+msgstr "Vazifalar holati taqsimoti"
+
+msgid "Task Creation vs Completion Trends"
+msgstr "Vazifalar yaratilishi va bajarilishi dinamikasi"
+
+msgid "Workflow Bottleneck Radar"
+msgstr "Ish oqimi kechikishlari radari"
+
+msgid "Executive Attention Panel"
+msgstr "Rahbariyat diqqat markazi"
+
+msgid "On-Time Delivery Rate"
+msgstr "O'z vaqtida bajarilish darajasi"
+
+msgid "Average Task Turnaround"
+msgstr "O'rtacha bajarilish muddati"
+
+msgid "Deadline Compliance"
+msgstr "Muddatlarga rioya etilishi"
+
+msgid "University Report Center"
+msgstr "Universitet hisobotlar markazi"
+
+msgid "Generate, schedule, and export comprehensive institutional reports."
+msgstr "Mukammal universitet hisobotlarini yaratish, rejalashtirish va eksport qilish."
+
+msgid "Saved Report Presets"
+msgstr "Saqlangan hisobot shablonlari"
+
+msgid "HR Workforce & Headcount Distribution"
+msgstr "Xodimlar tarkibi va shtatlar taqsimoti"
+
+msgid "Security & Audit Analytics"
+msgstr "Xavfsizlik va audit tahlili"
+
+msgid "Back"
+msgstr "Orqaga"
+
+msgid "Toggle sidebar collapse"
+msgstr "Yon panelni yig'ish/ochish"
+
+msgid "Toggle sidebar"
+msgstr "Yon panelni almashtirish"
+
+msgid "Main Navigation"
+msgstr "Asosiy navigatsiya"
+
+msgid "Main"
+msgstr "Asosiy"
+
+msgid "Dept Workflow"
+msgstr "Bo'lim ish oqimi"
+
+msgid "Hire Date"
+msgstr "Ishga qabul qilingan sana"
+
+msgid "Work Presence"
+msgstr "Ishda bor / yo'qligi"
+
+msgid "At Work / Present"
+msgstr "Ishda"
+
+msgid "Working Remotely"
+msgstr "Masofaviy ish"
+
+msgid "Absent / Not at Work"
+msgstr "Ishda emas"
+
+msgid "Leave / Permission Status"
+msgstr "Ruxsat / Ta'til holati"
+
+msgid "None / Active Duty"
+msgstr "Faol / Ishda"
+
+msgid "Excused Absence / Permission"
+msgstr "Ruxsat olgan"
+
+msgid "Vacation / Annual Leave"
+msgstr "Mehnat ta'tili"
+
+msgid "Sick Leave"
+msgstr "Kasallik ta'tili"
+
+msgid "Business Trip"
+msgstr "Xizmat safari"
+
+msgid "Unpaid Leave"
+msgstr "Oyliksiz ta'til"
+
+msgid "CV / Resume (PDF)"
+msgstr "CV / Rezyume (PDF)"
+
+msgid "View / Download CV (PDF)"
+msgstr "CV ko'rish / yuklab olish (PDF)"
+
+msgid "View My CV (PDF)"
+msgstr "Mening CVimni ko'rish (PDF)"
+
+msgid "No CV uploaded"
+msgstr "CV yuklanmagan"
+
+msgid "Upload PDF CV"
+msgstr "PDF CV yuklash"
+
+msgid "Delete User"
+msgstr "Foydalanuvchini o'chirish"
+
+msgid "Confirm User Deletion"
+msgstr "Foydalanuvchini o'chirishni tasdiqlash"
+
+msgid "Yes, Delete User"
+msgstr "Ha, foydalanuvchini o'chirish"
+
+msgid "Upload your CV in PDF format (maximum 10 MB)."
+msgstr "CVingizni PDF formatida yuklang (maksimal 10 MB)."
+
+msgid "Only PDF files are allowed for CV / Resume."
+msgstr "CV / Rezyume uchun faqat PDF fayllarga ruxsat berilgan."
+
+msgid "CV file size must not exceed 10 MB."
+msgstr "CV fayl hajmi 10 MB dan oshmasligi kerak."
+
+msgid "Ready for Signing"
+msgstr "Imzoga tayyor"
+
+msgid "Tasks Ready for Signing"
+msgstr "Imzoga tayyor topshiriqlar"
+
+msgid "Signed Tasks"
+msgstr "Imzolangan topshiriqlar"
+
+msgid "Review & Sign"
+msgstr "Ko'rib chiqish va imzolash"
+
+msgid "Sign & Approve"
+msgstr "Imzolash va tasdiqlash"
+
+msgid "Sign Task Electronically"
+msgstr "Topshiriqni elektron imzolash"
+
+msgid "Approve Task"
+msgstr "Topshiriqni tasdiqlash"
+
+msgid "Reject Task"
+msgstr "Topshiriqni rad etish"
+
+msgid "Reject Task (Executive Decision)"
+msgstr "Topshiriqni rad etish (Rahbariyat qarori)"
+
+msgid "Electronically Signed"
+msgstr "Elektron imzolangan"
+
+msgid "Official Signed PDF"
+msgstr "Rasmiy imzolangan PDF"
+
+msgid "Certified with Official Electronic Digital Signature"
+msgstr "Rasmiy elektron raqamli imzo bilan tasdiqlangan"
+
+msgid "This task has received final approval and is certified with a QR-coded digital signature."
+msgstr "Ushbu topshiriq yakuniy tasdiqlanib, unga QR-kodli elektron raqamli imzo qo'yilgan."
+
+msgid "Download Signed PDF"
+msgstr "Imzolangan PDFni yuklab olish"
+
+msgid "Signer"
+msgstr "Imzolovchi"
+
+msgid "Signed Date"
+msgstr "Imzolangan sana"
+
+msgid "Signed Date/Time"
+msgstr "Imzolangan vaqt"
+
+msgid "Verification ID"
+msgstr "Verifikatsiya ID"
+
+msgid "Algorithm"
+msgstr "Algoritm"
+
+msgid "No signed tasks available at this time"
+msgstr "Hozircha imzolangan topshiriqlar mavjud emas"
+
+msgid "No tasks awaiting executive signature"
+msgstr "Imzoga tayyor topshiriqlar mavjud emas"
+
+msgid "Approved and electronically signed tasks are archived in this section."
+msgstr "Tasdiqlangan va imzolangan topshiriqlar ushbu bo'limda arxivlanadi."
+
+msgid "Tasks approved during first approval by Department Heads appear here for executive review and signing."
+msgstr "Bo'lim boshliqlari tomonidan birinchi tasdiqdan o'tgan topshiriqlar bu yerda ko'rinadi."
+
+msgid "Executive Review Decision"
+msgstr "Rahbariyat ko'rib chiqish qarori"
+
+msgid "Approve and certify execution, or reject if unsatisfactory."
+msgstr "Ijroni tasdiqlang va imzolang, yoki qoniqarsiz bo'lsa rad eting."
+
+msgid "Please provide a clear and comprehensive reason for rejection. This reason will be recorded in the audit log and dispatched to the employee and Department Head."
+msgstr "Iltimos, rad etishning aniq va to'liq sababini ko'rsating. Ushbu sabab audit jurnalida qayd etiladi hamda xodim va bo'lim boshlig'iga yuboriladi."
+
+msgid "Rejection Reason"
+msgstr "Rad etish sababi"
+
+msgid "Specify why the deliverables do not meet university standards..."
+msgstr "Topshiriq natijasi nima sababdan universitet talablariga javob bermasligini ko'rsating..."
+
+msgid "Confirm Rejection"
+msgstr "Rad etishni tasdiqlash"
+
+msgid "The department head must belong to this department."
+msgstr "Bo'lim boshlig'i ushbu bo'limga tegishli bo'lishi shart."
+
+msgid "Assign Acting Rector"
+msgstr "Rektor v.b. tayinlash"
+
+msgid "Assign Acting Rector (Rektor v.b.)"
+msgstr "Rektor vazifasini bajaruvchi (Rektor v.b.) tayinlash"
+
+msgid "Acting Rector (Rektor v.b.)"
+msgstr "Rektor vazifasini bajaruvchi (Rektor v.b.)"
+
+msgid "Acting Rector"
+msgstr "Rektor v.b."
+
+msgid "Revoke Delegation"
+msgstr "Vakolatni bekor qilish"
+
+msgid "Confirm Delegation"
+msgstr "Vakolatni tasdiqlash"
+
+msgid "Designate a Vice Rector to assume Rector duties, signature authority, and university-wide operational oversight during the Rector's absence."
+msgstr "Rektor yo'qligida uning vazifalarini, imzo huquqini va universitet operatsion nazoratini bajarish uchun prorektorni tayinlang."
+
+msgid "Vice Rector (Acting Rector)"
+msgstr "Prorektor (Rektor v.b.)"
+
+msgid "reason for delegation"
+msgstr "vazifani yuklash sababi"
+
+msgid "Reason (Vacation, Leave, Mission, etc.)"
+msgstr "Sabab (Mehnat ta'tili, xizmat safari va h.k.)"
+
+msgid "e.g. Annual Leave, Overseas Conference"
+msgstr "masalan: Mehnat ta'tili, xorijiy xizmat safari"
+
+msgid "Indefinite"
+msgstr "Muddatsiz"
+
+msgid "Official Signed PDF"
+msgstr "Rasmiy imzolangan PDF"
+
+msgid "co-responsible / secondary departments"
+msgstr "hammaslahatchi / biriktirilgan bo'limlar"
+
+msgid "Only a Vice Rector can be designated as Acting Rector."
+msgstr "Faqat prorektor rektor vazifasini bajaruvchi etib tayinlanishi mumkin."
+
+msgid "Successfully assigned %(vr)s as Acting Rector."
+msgstr "%(vr)s muvaffaqiyatli rektor vazifasini bajaruvchi etib tayinlandi."
+
+msgid "Revoked Acting Rector duties from %(vr)s."
+msgstr "%(vr)s dan rektor vazifasini bajaruvchi vakolati bekor qilindi."
+
+msgid "Additional Departments"
+msgstr "Qo'shimcha bo'limlar"
+
+msgid "Primary Responsible Department"
+msgstr "Asosiy mas'ul bo'lim"
+
+msgid "Optional additional departments involved in this task."
+msgstr "Ushbu topshiriqda ishtirok etadigan ixtiyoriy qo'shimcha bo'limlar."
+
+msgid "Select any additional departments participating in this task."
+msgstr "Ushbu topshiriqda ishtirok etadigan qo'shimcha bo'limlarni tanlang."
+
+msgid "Assign one or more employees from the chosen departments. You can designate one as the Primary Assignee."
+msgstr "Tanlangan bo'limlardan bir yoki bir nechta xodimlarni biriktiring. Ulardan birini Asosiy ijrochi sifatida belgilashingiz mumkin."
+
+msgid "employees selected"
+msgstr "ta xodim tanlandi"
+
+msgid "Search employees by name, role or username..."
+msgstr "Xodimlarni ismi, lavozimi yoki foydalanuvchi nomi bo'yicha qidirish..."
+
+msgid "Clear all"
+msgstr "Barchasini tozalash"
+
+msgid "Select a department above."
+msgstr "Yuqorida bo'limni tanlang."
+
+msgid "Choose a Primary Responsible Department (and optional additional departments) to view and assign departmental employees."
+msgstr "Bo'lim xodimlarini ko'rish va biriktirish uchun Asosiy mas'ul bo'limni (va ixtiyoriy qo'shimcha bo'limlarni) tanlang."
+
+msgid "No employees found in the selected department(s)."
+msgstr "Tanlangan bo'lim(lar)da xodimlar topilmadi."
+
+msgid "Not chosen"
+msgstr "Tanlanmagan"
+
+msgid "Click '⭐ Primary' on any selected employee to change."
+msgstr "O'zgartirish uchun tanlangan xodimlardan birida '⭐ Asosiy' tugmasini bosing."
+
+msgid "Set Primary"
+msgstr "Asosiy qilish"
+
+msgid "Primary"
+msgstr "Asosiy"
+
+msgid "Select all"
+msgstr "Barchasini tanlash"
+
+msgid "Management View"
+msgstr "Boshqaruv ko‘rinishi"
+
+msgid "My Work Area"
+msgstr "Mening ish maydonim"
+
+msgid "Workflow"
+msgstr "Ish oqimi"
+
+msgid "Department Approvals"
+msgstr "Bo‘lim tasdiqlari"
+
+msgid "Final Approval Center"
+msgstr "Yakuniy tasdiqlash markazi"
+
+msgid "Task Templates"
+msgstr "Vazifa shablonlari"
+
+msgid "Documents & Reports"
+msgstr "Hujjatlar va hisobotlar"
+
+msgid "Official Documents"
+msgstr "Rasmiy hujjatlar"
+
+msgid "Digital Signatures"
+msgstr "Elektron raqamli imzolar"
+
+msgid "Performance Dashboard"
+msgstr "Samaradorlik ko‘rsatkichlari"
+
+msgid "KPI Evaluations"
+msgstr "KPI baholashlari"
+
+msgid "Institutional Analytics"
+msgstr "Universitet tahlili"
+
+msgid "My Department"
+msgstr "Mening bo‘limim"
+
+msgid "My Departments"
+msgstr "Mening bo‘limlarim"
+
+msgid "University Structure"
+msgstr "Universitet tuzilmasi"
+
+msgid "Employee Directory"
+msgstr "Xodimlar ro‘yxati"
+
+msgid "Communication"
+msgstr "Muloqot va aloqa"
+
+msgid "Telegram Bot"
+msgstr "Telegram bot"
+
+msgid "Calendar Feed"
+msgstr "Taqvim integratsiyasi"
+
+msgid "Integration Hub"
+msgstr "Integratsiya markazi"
+
+msgid "Operations & Services"
+msgstr "Xizmatlar va arizalar"
+
+msgid "Service Catalog"
+msgstr "Xizmatlar katalogi"
+
+msgid "My Applications"
+msgstr "Mening arizalarim"
+
+msgid "Requests Approval"
+msgstr "Arizalarni tasdiqlash"
+
+msgid "Automation & SLA"
+msgstr "Avtomatlashtirish va SLA"
+
+msgid "Automation Hub"
+msgstr "Avtomatlashtirish markazi"
+
+msgid "Event Rules"
+msgstr "Hodisa qoidalari"
+
+msgid "Recurring Tasks"
+msgstr "Takroriy vazifalar"
+
+msgid "SLA Policies"
+msgstr "SLA siyosatlari"
+
+msgid "Escalations"
+msgstr "Eskalatsiyalar"
+
+msgid "Execution Logs"
+msgstr "Ijro jurnallari"
+
+msgid "AI & Intelligence"
+msgstr "Sun’iy intellekt va tahlil"
+
+msgid "AI Assistant"
+msgstr "AI yordamchi"
+
+msgid "Risk Center"
+msgstr "Xavflar markazi"
+
+msgid "Executive Briefings"
+msgstr "Rahbariyat hisobotlari"
+
+msgid "User Accounts"
+msgstr "Foydalanuvchi hisoblari"
+
+msgid "System Health"
+msgstr "Tizim holati"
+
+msgid "Working Year"
+msgstr "Ishchi yil"
+
+msgid "Select Working Year"
+msgstr "Ishchi yilni tanlash"
+
+msgid "Ishchi yil"
+msgstr "Ishchi yil"
+
+msgid "Ishchi yilni tanlash"
+msgstr "Ishchi yilni tanlash"
+
+msgid "O'zgartirish"
+msgstr "O'zgartirish"
+
+msgid "Hozirgi faol yil"
+msgstr "Hozirgi faol yil"
+
+msgid "Joriy yil"
+msgstr "Joriy yil"
+
+msgid "O'tgan yil (Arxiv)"
+msgstr "O'tgan yil (Arxiv)"
+
+msgid "Yangi yil"
+msgstr "Yangi yil"
+
+msgid "Har bir yil ma'lumotlari yangidan boshlanadi. O'tgan yillardagi barcha vazifalar, hisobotlar va statistika to'liq saqlanadi."
+msgstr "Har bir yil ma'lumotlari yangidan boshlanadi. O'tgan yillardagi barcha vazifalar, hisobotlar va statistika to'liq saqlanadi."
+
+msgid "Joriy asosiy kalendar yili"
+msgstr "Joriy asosiy kalendar yili"
+
+msgid "O'tgan yil — hisobotlar saqlangan"
+msgstr "O'tgan yil — hisobotlar saqlangan"
+
+msgid "Yangi yil — ma'lumotlar yangidan boshlanadi"
+msgstr "Yangi yil — ma'lumotlar yangidan boshlanadi"
+
+msgid "Faol"
+msgstr "Faol"
+
+msgid "Boshqa yil"
+msgstr "Boshqa yil"
+
+msgid "Boshqa yil (masalan: 2023)"
+msgstr "Boshqa yil (masalan: 2023)"
+
+msgid "O'tish"
+msgstr "O'tish"
+
+msgid "Yopish"
+msgstr "Yopish"
+
+msgid "Ishchi yil %(year)s ga muvaffaqiyatli o'zgartirildi."
+msgstr "Ishchi yil %(year)s ga muvaffaqiyatli o'zgartirildi."
+
+msgid "Tasks & Execution"
+msgstr "Topshiriqlar va ijro"
+
+msgid "Under Control"
+msgstr "Nazoratda"
+
+msgid "In Approval"
+msgstr "Tasdiqlashda"
+
+msgid "Overdue"
+msgstr "Muddati o'tganlar"
+
+msgid "All Tasks"
+msgstr "Barcha topshiriqlar"
+
+msgid "All Scoped Tasks"
+msgstr "Barcha topshiriqlar ro'yxati"
+
+msgid "Tasks Under Supervision & Control"
+msgstr "Nazoratdagi va nazorat ostidagi topshiriqlar"
+
+msgid "Approval Center & Submission Review"
+msgstr "Tasdiqlash markazi va topshiriqlarni ko'rib chiqish"
+
+msgid "Overdue Tasks Requiring Action"
+msgstr "Muddati o'tgan topshiriqlar"
+
+msgid "Rejected & Returned Tasks"
+msgstr "Rad etilgan va qaytarilgan topshiriqlar"
+
+msgid "Create New Task"
+msgstr "Yangi topshiriq yaratish"
+
+msgid "Task Templates"
+msgstr "Topshiriq shablonlari"
+
+msgid "Task Types"
+msgstr "Topshiriq turlari"
+
+msgid "Tasks Under Control"
+msgstr "Nazoratdagi topshiriqlar"
+
+msgid "Overdue Tasks"
+msgstr "Muddati o'tgan topshiriqlar"
+
+msgid "Department Tasks"
+msgstr "Bo'lim topshiriqlari"
+
+msgid "Are you sure you want to remove this department responsibility?"
+msgstr "Ushbu bo'lim mas'uliyatini olib tashlashga ishonchingiz komilmi?"
+
+msgid "Remove Responsibility"
+msgstr "Mas'uliyatni olib tashlash"
+msgid "Select Working Year"
+msgstr "Ishchi yilni tanlash"
+
+msgid "Current Active Year"
+msgstr "Hozirgi faol yil"
+
+msgid "Current Year"
+msgstr "Joriy yil"
+
+msgid "Archive Year"
+msgstr "Arxiv yil"
+
+msgid "New Year"
+msgstr "Yangi yil"
+
+msgid "Each year's data starts fresh from scratch. All previous years' tasks, reports, and records remain securely preserved."
+msgstr "Har bir yil ma'lumotlari yangidan boshlanadi. O'tgan yillardagi barcha vazifalar, hisobotlar va statistika to'liq saqlanadi."
+
+msgid "Current calendar year"
+msgstr "Joriy asosiy kalendar yili"
+
+msgid "Past year — preserved historical records"
+msgstr "O'tgan yil — hisobotlar saqlangan"
+
+msgid "New year — starts fresh with new data"
+msgstr "Yangi yil — ma'lumotlar yangidan boshlanadi"
+
+msgid "Active"
+msgstr "Faol"
+
+msgid "Other year"
+msgstr "Boshqa yil"
+
+msgid "Other year (e.g. 2028)"
+msgstr "Boshqa yil (masalan: 2028)"
+
+msgid "Switch"
+msgstr "O'tish"
+
+msgid "Close"
+msgstr "Yopish"
+
+msgid "Working Year"
+msgstr "Ishchi yil"
+
+msgid "Archived Year"
+msgstr "Arxiv yil"
+
+msgid "Archive"
+msgstr "Arxiv"
+
+msgid "New"
+msgstr "Yangi"
+
+msgid "Change"
+msgstr "O'zgartirish"

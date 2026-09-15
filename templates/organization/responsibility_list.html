@@ -50,9 +50,12 @@
                                             <span class="badge bg-light text-secondary ms-1">{{ resp.department.code }}</span>
                                             <div class="small text-muted">{% trans "Since" %} {{ resp.start_date|date:"Y-m-d" }}</div>
                                         </div>
-                                        <form action="{% url 'responsibility_delete' pk=resp.pk %}" method="post">
+                                        <form action="{% url 'responsibility_delete' pk=resp.pk %}" method="post" onsubmit="return confirm('{% trans "Are you sure you want to remove this department responsibility?" %}');">
                                             {% csrf_token %}
-                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="{% trans 'Remove Responsibility' %}">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                    data-confirm="{% trans 'Are you sure you want to remove this department responsibility?' %}"
+                                                    data-confirm-title="{% trans 'Remove Responsibility' %}"
+                                                    title="{% trans 'Remove Responsibility' %}">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
@@ -99,9 +102,12 @@
                             </td>
                             <td>{{ item.start_date|date:"Y-m-d" }}</td>
                             <td class="text-end">
-                                <form action="{% url 'responsibility_delete' pk=item.pk %}" method="post" class="d-inline">
+                                <form action="{% url 'responsibility_delete' pk=item.pk %}" method="post" class="d-inline" onsubmit="return confirm('{% trans "Are you sure you want to remove this department responsibility?" %}');">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="{% trans 'Remove' %}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm"
+                                            data-confirm="{% trans 'Are you sure you want to remove this department responsibility?' %}"
+                                            data-confirm-title="{% trans 'Remove Responsibility' %}"
+                                            title="{% trans 'Remove' %}">
                                         <i class="bi bi-trash"></i> {% trans "Remove" %}
                                     </button>
                                 </form>

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "System Health & Diagnostics" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+    {% include "core/includes/system_health_body.html" %}
+{% endblock %}
+
+{% block auth_content %}
+    <div class="container py-4">
+        {% include "core/includes/system_health_body.html" %}
+    </div>
+{% endblock %}

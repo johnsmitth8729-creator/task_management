@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Automation & SLA Center" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h1 class="h3 fw-bold text-gradient mb-1">
+                <i class="bi bi-robot me-2 text-primary"></i>{% trans "Automation & SLA Control Center" %}
+            </h1>
+            <p class="text-muted small mb-0">
+                {% trans "Manage automated workflows, event-driven rules, recurring tasks, SLA compliance, and multi-tier escalation policies." %}
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            {% if user.is_superuser %}
+                <form method="post" action="{% url 'automation:run_cycle' %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-play-circle me-1"></i>{% trans "Run Cycle Now" %}
+                    </button>
+                </form>
+                <a href="{% url 'automation:rule_create' %}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>{% trans "New Rule" %}
+                </a>
+            {% endif %}
+            {% if user.is_superuser or user.is_rector %}
+                <a href="{% url 'automation:recurring_create' %}" class="btn btn-success btn-sm">
+                    <i class="bi bi-calendar-plus me-1"></i>{% trans "Schedule Recurring Task" %}
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Metric KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100 kpi-card">
+                <div class="card-body d-flex align-items-center p-3">
+                    <div class="rounded-3 bg-primary bg-opacity-10 p-3 text-primary me-3">
+                        <i class="bi bi-gear-wide-connected fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold">{% trans "Active Rules" %}</div>
+                        <div class="fs-4 fw-bold text-dark">{{ metrics.active_rules }} / {{ metrics.total_rules }}</div>
+                        <div class="small text-muted">{% trans "Configured triggers" %}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100 kpi-card">
+                <div class="card-body d-flex align-items-center p-3">
+                    <div class="rounded-3 bg-success bg-opacity-10 p-3 text-success me-3">
+                        <i class="bi bi-calendar-check fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold">{% trans "Recurring Tasks" %}</div>
+                        <div class="fs-4 fw-bold text-dark">{{ metrics.active_recurring }}</div>
+                        <div class="small text-success">{% trans "Active schedules" %}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100 kpi-card">
+                <div class="card-body d-flex align-items-center p-3">
+                    <div class="rounded-3 bg-info bg-opacity-10 p-3 text-info me-3">
+                        <i class="bi bi-shield-check fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold">{% trans "SLA Policies" %}</div>
+                        <div class="fs-4 fw-bold text-dark">{{ metrics.active_sla_policies }}</div>
+                        <div class="small text-muted">{{ metrics.total_escalations }} {% trans "escalation tiers" %}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100 kpi-card">
+                <div class="card-body d-flex align-items-center p-3">
+                    <div class="rounded-3 {% if metrics.sla_breached_count > 0 %}bg-danger bg-opacity-10 text-danger{% else %}bg-secondary bg-opacity-10 text-secondary{% endif %} p-3 me-3">
+                        <i class="bi bi-exclamation-octagon fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold">{% trans "SLA Breaches" %}</div>
+                        <div class="fs-4 fw-bold {% if metrics.sla_breached_count > 0 %}text-danger{% else %}text-dark{% endif %}">
+                            {{ metrics.sla_breached_count }}
+                        </div>
+                        <div class="small text-muted">{{ metrics.sla_warning_count }} {% trans "in warning state" %}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Hub Tabs / Quick Links -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
+                    <h5 class="card-title fw-bold mb-0">
+                        <i class="bi bi-lightning-charge me-2 text-warning"></i>{% trans "Active Event Rules" %}
+                    </h5>
+                    <a href="{% url 'automation:rule_list' %}" class="btn btn-sm btn-outline-primary">{% trans "View All" %}</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>{% trans "Rule Name" %}</th>
+                                    <th>{% trans "Trigger Event" %}</th>
+                                    <th>{% trans "Action" %}</th>
+                                    <th>{% trans "Status" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rule in active_rules %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ rule.name }}</td>
+                                        <td><span class="badge bg-light text-dark border">{{ rule.get_trigger_event_display }}</span></td>
+                                        <td><span class="badge bg-primary bg-opacity-10 text-primary">{{ rule.get_action_type_display }}</span></td>
+                                        <td>
+                                            {% if rule.is_active %}
+                                                <span class="badge bg-success">{% trans "Active" %}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{% trans "Inactive" %}</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-muted">{% trans "No active automation rules defined." %}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
+                    <h5 class="card-title fw-bold mb-0">
+                        <i class="bi bi-calendar-event me-2 text-success"></i>{% trans "Scheduled Recurring Tasks" %}
+                    </h5>
+                    <a href="{% url 'automation:recurring_list' %}" class="btn btn-sm btn-outline-success">{% trans "View All" %}</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>{% trans "Task Title" %}</th>
+                                    <th>{% trans "Department" %}</th>
+                                    <th>{% trans "Recurrence" %}</th>
+                                    <th>{% trans "Last Executed" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in recurring_tasks %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ item.title }}</td>
+                                        <td><span class="badge bg-secondary">{{ item.responsible_department.code }}</span></td>
+                                        <td><span class="badge bg-info bg-opacity-10 text-info">{{ item.get_recurrence_type_display }}</span></td>
+                                        <td class="small text-muted">{{ item.last_run_at|date:"Y-m-d H:i"|default:"Pending" }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-muted">{% trans "No recurring tasks scheduled." %}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Execution History Log -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-3">
+            <h5 class="card-title fw-bold mb-0">
+                <i class="bi bi-journal-text me-2 text-secondary"></i>{% trans "Recent Automation Executions" %}
+            </h5>
+            <a href="{% url 'automation:execution_history' %}" class="btn btn-sm btn-outline-secondary">{% trans "Full Audit Log" %}</a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>{% trans "Timestamp" %}</th>
+                            <th>{% trans "Trigger / Rule" %}</th>
+                            <th>{% trans "Target Entity" %}</th>
+                            <th>{% trans "Status" %}</th>
+                            <th>{% trans "Result Summary" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for exec in recent_executions %}
+                            <tr>
+                                <td class="small text-muted">{{ exec.executed_at|date:"Y-m-d H:i:s" }}</td>
+                                <td>
+                                    <div class="fw-semibold">{{ exec.rule.name|default:exec.trigger_event }}</div>
+                                    <small class="text-muted">{{ exec.trigger_event }}</small>
+                                </td>
+                                <td><span class="badge bg-light text-dark border">{{ exec.target_repr }}</span></td>
+                                <td>
+                                    {% if exec.status == 'SUCCESS' %}
+                                        <span class="badge bg-success">{% trans "SUCCESS" %}</span>
+                                    {% elif exec.status == 'FAILED' %}
+                                        <span class="badge bg-danger">{% trans "FAILED" %}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ exec.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="small">{{ exec.result_summary|truncatechars:80 }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">{% trans "No automation executions recorded yet." %}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
@@ -5,6 +6,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
+from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView, DetailView, ListView, TemplateView, UpdateView, View
 
@@ -13,6 +15,7 @@ from accounts.models import Role, User
 from accounts.permissions import (
     RectorRequiredMixin,
     ScopedUserAccessMixin,
+    can_delete_user,
     can_edit_user,
     can_view_user,
 )
@@ -31,7 +34,12 @@ class UserLoginView(LoginView):
             self.request.session.set_expiry(0)
         else:
             self.request.session.set_expiry(None)
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        user = form.get_user()
+        if user and getattr(user, 'preferred_language', None):
+            self.request.session[settings.LANGUAGE_COOKIE_NAME] = user.preferred_language
+            response.set_cookie(settings.LANGUAGE_COOKIE_NAME, user.preferred_language)
+        return response
 
 
 class UserLogoutView(LogoutView):
@@ -47,8 +55,8 @@ class UserListView(LoginRequiredMixin, ListView):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('login')
-        # Employees cannot view the user management directory
-        if request.user.is_employee and not (request.user.is_rector or request.user.is_vice_rector or request.user.is_department_head):
+        # Only users with directory viewing roles (Superadmin, HR, Rector, Vice Rector, Department Head)
+        if not (request.user.is_superuser or request.user.is_hr or request.user.is_rector or request.user.is_vice_rector or request.user.is_department_head):
             raise PermissionDenied(_('You do not have permission to view the employee directory.'))
         return super().dispatch(request, *args, **kwargs)
 
@@ -100,6 +108,9 @@ class UserListView(LoginRequiredMixin, ListView):
         context['positions'] = Position.objects.filter(is_active=True).order_by('name')
         context['roles'] = Role.objects.filter(is_active=True).order_by('name')
         context['total_users'] = self.get_queryset().count()
+        query_dict = self.request.GET.copy()
+        query_dict.pop('page', None)
+        context['filter_params'] = query_dict.urlencode()
         return context
 
 
@@ -110,15 +121,30 @@ class UserDetailView(ScopedUserAccessMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['can_edit'] = can_edit_user(self.request.user, self.object)
+        viewer = self.request.user
+        target_user = self.object
+        context['can_edit'] = can_edit_user(viewer, target_user)
+        context['can_delete'] = can_delete_user(viewer, target_user)
+        context['can_toggle_active'] = (
+            (viewer.is_superuser or viewer.can_act_as_rector or viewer.is_hr)
+            and viewer.id != target_user.id
+            and not (target_user.is_superuser and not viewer.is_superuser)
+        )
         return context
 
 
-class UserCreateView(RectorRequiredMixin, CreateView):
+class UserCreateView(LoginRequiredMixin, CreateView):
     model = User
     form_class = UserCreateForm
     template_name = 'accounts/user_form.html'
     success_url = reverse_lazy('user_list')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('login')
+        if not (request.user.is_superuser or request.user.can_act_as_rector or request.user.is_hr):
+            raise PermissionDenied(_('Only Technical Superadmin, Rector, and HR Managers have permission to create users.'))
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -147,6 +173,9 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
         if not request.user.is_authenticated:
             return redirect('login')
         target_user = self.get_object()
+        # If standard user wants to edit self, send them to profile_edit
+        if target_user.id == request.user.id and not (request.user.is_superuser or request.user.is_hr):
+            return redirect('profile_edit')
         if not can_edit_user(request.user, target_user):
             raise PermissionDenied(_('You do not have permission to edit this user.'))
         return super().dispatch(request, *args, **kwargs)
@@ -176,11 +205,45 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
         return response
 
 
-class UserToggleActiveView(RectorRequiredMixin, View):
+class UserDeleteView(LoginRequiredMixin, View):
     def post(self, request, pk):
+        target_user = get_object_or_404(User, pk=pk)
+        if not can_delete_user(request.user, target_user):
+            raise PermissionDenied(_('You do not have permission to delete this user.'))
+
+        target_name = target_user.display_name
+        user_id_str = str(target_user.id)
+        username = target_user.username
+        email = target_user.email
+
+        log_audit(
+            actor=request.user,
+            action=AuditLog.Actions.USER_DELETED,
+            target_repr=target_name,
+            details={
+                'user_id': user_id_str,
+                'username': username,
+                'email': email,
+            },
+            request=request,
+        )
+        target_user.delete()
+        messages.success(request, _('User "%(name)s" was deleted successfully.') % {'name': target_name})
+        return redirect('user_list')
+
+
+class UserToggleActiveView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        if not (request.user.is_superuser or request.user.can_act_as_rector or request.user.is_hr):
+            raise PermissionDenied(_('Only Technical Superadmin, Rector, and HR Managers have permission to activate or deactivate accounts.'))
+
         target_user = get_object_or_404(User, pk=pk)
         if target_user.id == request.user.id:
             messages.error(request, _('You cannot deactivate your own account.'))
+            return redirect('user_detail', pk=target_user.pk)
+
+        if target_user.is_superuser and not request.user.is_superuser:
+            messages.error(request, _('Only a Technical Superadmin can change another superadmin account.'))
             return redirect('user_detail', pk=target_user.pk)
 
         target_user.is_active = not target_user.is_active
@@ -219,6 +282,10 @@ class ProfileEditView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
+        new_lang = form.cleaned_data.get('preferred_language')
+        if new_lang:
+            self.request.session[settings.LANGUAGE_COOKIE_NAME] = new_lang
+            response.set_cookie(settings.LANGUAGE_COOKIE_NAME, new_lang)
         log_audit(
             actor=self.request.user,
             action=AuditLog.Actions.USER_UPDATED,

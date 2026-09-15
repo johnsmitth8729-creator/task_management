@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Task Distribution" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/workflow.css' %}?v=4" rel="stylesheet">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/workflow.js' %}?v=4" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-3 px-lg-4">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+        <div>
+            <h1 class="h4 fw-bold mb-0">{% trans "Task Distribution" %}</h1>
+            <p class="text-muted small mb-0">{% trans "Manage employee task assignments" %}</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <form method="get" class="row g-2 mb-4">
+        <div class="col-auto">
+            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="">{% trans "All Statuses" %}</option>
+                {% for val, label in task_statuses %}
+                    <option value="{{ val }}" {% if current_status == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <select name="priority" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="">{% trans "All Priorities" %}</option>
+                {% for val, label in task_priorities %}
+                    <option value="{{ val }}" {% if current_priority == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% if current_status or current_priority %}
+        <div class="col-auto">
+            <a href="{% url 'dept_task_list' %}" class="btn btn-sm btn-outline-secondary">{% trans "Clear" %}</a>
+        </div>
+        {% endif %}
+    </form>
+
+    {% if tasks %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+        {% for task in tasks %}
+        <div class="col">
+            <div class="assignment-card">
+                <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-1">
+                    <span class="task-number-pill">{{ task.task_number }}</span>
+                    <div class="d-flex gap-1 flex-wrap">
+                        <span class="badge badge-status-{{ task.status|lower }}">{{ task.get_status_display }}</span>
+                        <span class="badge badge-priority-{{ task.priority|lower }}">{{ task.get_priority_display }}</span>
+                    </div>
+                </div>
+                <h6 class="fw-bold mb-1">{{ task.title }}</h6>
+                <p class="text-muted small mb-2">{{ task.description|truncatechars:80 }}</p>
+
+                <!-- Assignees -->
+                {% if task.assignments.all %}
+                <div class="d-flex align-items-center gap-1 mb-2 flex-wrap">
+                    {% for a in task.assignments.all|slice:":4" %}
+                        <div class="avatar-sm {% if a.is_primary %}avatar-primary{% endif %}" title="{{ a.user.display_name }}">
+                            {{ a.user.display_name|first|upper }}
+                        </div>
+                    {% endfor %}
+                    {% if task.assignments.all|length > 4 %}
+                        <span class="text-muted small">+{{ task.assignments.all|length|add:"-4" }}</span>
+                    {% endif %}
+                    <span class="text-muted small ms-1">{% blocktrans count c=task.assignments.all|length %}{{ c }} employee{% plural %}{{ c }} employees{% endblocktrans %}</span>
+                </div>
+                {% else %}
+                <p class="text-muted small mb-2"><i class="bi bi-person-x me-1"></i>{% trans "No employees assigned" %}</p>
+                {% endif %}
+
+                <!-- Deadline -->
+                {% if task.deadline %}
+                <div class="task-meta mb-2">
+                    <span class="badge {% if task.is_overdue %}badge-overdue{% else %}badge-secondary{% endif %}" style="{% if not task.is_overdue %}background:var(--app-badge-soft-bg);color:var(--app-badge-soft-text);{% endif %}">
+                        <i class="bi bi-calendar3 me-1"></i>{{ task.deadline|date:"d M Y" }}
+                    </span>
+                </div>
+                {% endif %}
+
+                <!-- Progress -->
+                {% with value=task.progress %}
+                {% include "includes/workflow/progress_bar.html" %}
+                {% endwith %}
+
+                <div class="d-flex gap-2 mt-3">
+                    <a href="{% url 'task_detail' pk=task.pk %}" class="btn btn-sm btn-primary flex-grow-1">
+                        <i class="bi bi-eye me-1"></i>{% trans "Manage" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <nav class="mt-4 d-flex justify-content-center">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ current_status }}&priority={{ current_priority }}"><i class="bi bi-chevron-left"></i></a></li>{% endif %}
+            {% for i in page_obj.paginator.page_range %}<li class="page-item {% if page_obj.number == i %}active{% endif %}"><a class="page-link" href="?page={{ i }}&status={{ current_status }}&priority={{ current_priority }}">{{ i }}</a></li>{% endfor %}
+            {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ current_status }}&priority={{ current_priority }}"><i class="bi bi-chevron-right"></i></a></li>{% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state text-center py-5">
+        <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
+        <h5 class="fw-bold">{% trans "No tasks found" %}</h5>
+        <p class="text-muted">{% trans "No tasks match the current filters." %}</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

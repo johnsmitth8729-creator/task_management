@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Successfully Completed Tasks" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/workflow.css' %}?v=4" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-3 px-lg-4">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+            <h1 class="h4 fw-bold mb-1 text-success">
+                <i class="bi bi-patch-check-fill me-2"></i>{% trans "Successfully Completed Tasks" %}
+            </h1>
+            <p class="text-muted small mb-0">
+                {% trans "Repository of all university tasks completed and verified with final leadership approval." %}
+            </p>
+        </div>
+        <div>
+            <span class="badge bg-success fs-6 px-3 py-2">
+                {{ paginator.count }} {% trans "Completed" %}
+            </span>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-12 col-md-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" name="q" value="{{ search_query }}" class="form-control border-start-0" placeholder="{% trans 'Search completed task #, title, assignee...' %}">
+                    </div>
+                </div>
+                {% if departments %}
+                <div class="col-12 col-md-4">
+                    <select name="department" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">{% trans "All Departments" %}</option>
+                        {% for d in departments %}
+                        <option value="{{ d.id }}" {% if selected_dept == d.id|stringformat:"s" %}selected{% endif %}>
+                            {{ d.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                <div class="col-12 col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-sm btn-primary w-100">
+                        <i class="bi bi-filter me-1"></i>{% trans "Filter" %}
+                    </button>
+                    {% if search_query or selected_dept %}
+                    <a href="{% url 'completed_tasks' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-x"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Completed Tasks List -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        {% if tasks %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">{% trans "Task #" %}</th>
+                        <th>{% trans "Title" %}</th>
+                        <th>{% trans "Department" %}</th>
+                        <th>{% trans "Assignee(s)" %}</th>
+                        <th>{% trans "Completed Date" %}</th>
+                        <th>{% trans "Status / Timeliness" %}</th>
+                        <th class="text-end pe-4">{% trans "Action" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tasks %}
+                    <tr>
+                        <td class="ps-4">
+                            <span class="task-number-pill">{{ t.task_number }}</span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-truncate" style="max-width:320px;">
+                                {{ t.title }}
+                            </div>
+                            <div class="small text-muted">{{ t.task_type.name|default:"" }}</div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">
+                                {{ t.responsible_department.name|default:"—" }}
+                            </span>
+                        </td>
+                        <td>
+                            {% for a in t.assignments.all %}
+                            <div class="small fw-semibold">{{ a.user.display_name }}</div>
+                            {% empty %}
+                            <span class="text-muted small">—</span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <div class="small fw-semibold">{{ t.completed_at|date:"d M Y H:i"|default:"—" }}</div>
+                        </td>
+                        <td>
+                            <span class="badge bg-success mb-1 d-inline-block">{% trans "Completed" %} (100%)</span>
+                            {% if t.deadline and t.completed_at %}
+                                {% if t.completed_at.date <= t.deadline %}
+                                    <div class="text-success small fw-semibold"><i class="bi bi-check-all me-1"></i>{% trans "On Time" %}</div>
+                                {% else %}
+                                    <div class="text-warning small fw-semibold"><i class="bi bi-clock-history me-1"></i>{% trans "Completed Late" %}</div>
+                                {% endif %}
+                            {% endif %}
+                            {% if t.signatures.exists %}
+                                <div class="mt-1">
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.72rem;">
+                                        <i class="bi bi-patch-check-fill me-1"></i>{% trans "Signed" %}
+                                    </span>
+                                </div>
+                            {% else %}
+                                <div class="mt-1">
+                                    <span class="badge bg-secondary-subtle text-muted border border-secondary-subtle" style="font-size: 0.72rem;">
+                                        <i class="bi bi-pen me-1"></i>{% trans "Unsigned" %}
+                                    </span>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <a href="{% url 'task_detail' pk=t.pk %}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-eye-fill me-1"></i>{% trans "Details" %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+        <div class="card-footer bg-transparent border-0 py-3 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 border-top">
+            <small class="text-muted">
+                {% blocktrans with start=page_obj.start_index end=page_obj.end_index total=paginator.count %}
+                    Showing {{ start }} to {{ end }} of {{ total }} completed tasks
+                {% endblocktrans %}
+            </small>
+            <nav aria-label="Completed tasks page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filter_params %}&{{ filter_params }}{% endif %}" aria-label="{% trans 'Previous' %}">&laquo;</a></li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                    {% endif %}
+
+                    {% for num in paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item"><a class="page-link" href="?page={{ num }}{% if filter_params %}&{{ filter_params }}{% endif %}">{{ num }}</a></li>
+                        {% elif num == 1 or num == paginator.num_pages %}
+                            <li class="page-item"><a class="page-link" href="?page={{ num }}{% if filter_params %}&{{ filter_params }}{% endif %}">{{ num }}</a></li>
+                        {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filter_params %}&{{ filter_params }}{% endif %}" aria-label="{% trans 'Next' %}">&raquo;</a></li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-patch-check text-muted" style="font-size:3rem;"></i>
+            <h5 class="fw-bold mt-3 mb-1">{% trans "No Completed Tasks Found" %}</h5>
+            <p class="text-muted small">{% trans "Completed tasks will appear here once finalized by management." %}</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

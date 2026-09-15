@@ -4,6 +4,7 @@ from .views import (
     ProfileEditView,
     ProfileView,
     UserCreateView,
+    UserDeleteView,
     UserDetailView,
     UserListView,
     UserLoginView,
@@ -23,5 +24,6 @@ urlpatterns = [
     path('users/create/', UserCreateView.as_view(), name='user_create'),
     path('users/<uuid:pk>/', UserDetailView.as_view(), name='user_detail'),
     path('users/<uuid:pk>/edit/', UserUpdateView.as_view(), name='user_edit'),
+    path('users/<uuid:pk>/delete/', UserDeleteView.as_view(), name='user_delete'),
     path('users/<uuid:pk>/toggle-active/', UserToggleActiveView.as_view(), name='user_toggle_active'),
 ]

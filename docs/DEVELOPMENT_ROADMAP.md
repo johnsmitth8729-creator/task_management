@@ -42,9 +42,13 @@ Implement secure files, notes, comments, task history timeline, search/filtering
 
 Implement analytics dashboards, department/employee performance metrics, workload calculation foundation, and Chart.js views.
 
-## PHASE 9 - KPI, Payroll & Final Production
+## PHASE 9 - Electronic Signature, QR Verification & Cryptographic Task Signing
 
-Implement configurable KPI rules, KPI snapshots, payroll/bonus calculation foundation, production settings, Gunicorn/Nginx deployment documentation, and final hardening.
+Implement Ed25519 asymmetric electronic signatures, canonical JSON task snapshots, SHA-256 integrity verification, public `/verify/<verification_id>/` endpoint, server-side 2D QR codes, double-signing prevention, revocation workflows, and ReportLab PDF completion certificate signing blocks.
+
+## PHASE 10 - Advanced Analytics, Executive Monitoring & Reporting
+
+Implement high-performance aggregated analytics, role-based scoping, bottleneck detection, executive alert thresholds, saved report configurations, Report Center, multi-format streaming exports (PDF, Excel, CSV), Chart.js visual integrations, and data integrity health check command.
 
 ## AI Development Rule
 

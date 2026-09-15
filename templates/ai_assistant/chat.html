@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "AI Management Assistant" %} | University Task Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="h3 fw-bold mb-1"><i class="bi bi-robot text-primary me-2"></i>{% trans "AI Management Assistant" %}</h2>
+            <p class="text-muted mb-0">{% trans "Grounded university intelligence assistant analyzing live tasks, bottlenecks, and KPIs within your authorized scope." %}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'ai_assistant:risk_center' %}" class="btn btn-outline-danger">
+                <i class="bi bi-shield-exclamation me-1"></i>{% trans "Risk Center" %}
+            </a>
+            <a href="{% url 'ai_assistant:briefing_list' %}" class="btn btn-outline-primary">
+                <i class="bi bi-file-earmark-text me-1"></i>{% trans "Executive Briefings" %}
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Conversation Sidebar -->
+        <div class="col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">{% trans "Discussions" %}</h6>
+                    <a href="{% url 'ai_assistant:chat' %}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus-lg"></i> {% trans "New" %}
+                    </a>
+                </div>
+                <div class="list-group list-group-flush" style="max-height: 550px; overflow-y: auto;">
+                    {% for conv in conversations %}
+                        <a href="{% url 'ai_assistant:chat_conversation' conv_id=conv.id %}" class="list-group-item list-group-item-action {% if active_conversation.id == conv.id %}active{% endif %} py-3">
+                            <div class="fw-semibold text-truncate">{{ conv.title }}</div>
+                            <small class="{% if active_conversation.id == conv.id %}text-light{% else %}text-muted{% endif %} d-block">
+                                {{ conv.updated_at|timesince }} {% trans "ago" %}
+                            </small>
+                        </a>
+                    {% empty %}
+                        <div class="text-center py-4 text-muted small">{% trans "No previous discussions." %}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Main Area -->
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-sm d-flex flex-column" style="height: 600px;">
+                <!-- Chat Messages Feed -->
+                <div class="card-body p-4 overflow-auto flex-grow-1" id="chatFeed">
+                    {% if not messages_list %}
+                        <!-- Welcome / Prompt Starter Suggestions -->
+                        <div class="text-center py-5">
+                            <div class="p-3 bg-primary-subtle text-primary rounded-circle d-inline-flex mb-3">
+                                <i class="bi bi-stars fs-1"></i>
+                            </div>
+                            <h4 class="fw-bold">{% trans "How can I assist your operations today?" %}</h4>
+                            <p class="text-muted mx-auto mb-4" style="max-width: 500px;">
+                                {% trans "Ask about overdue tasks, approval bottlenecks, performance metrics, or university applications." %}
+                            </p>
+
+                            <!-- Suggestion Chips -->
+                            <div class="d-flex flex-wrap justify-content-center gap-2">
+                                <button type="button" class="btn btn-outline-secondary btn-sm prompt-chip" onclick="submitPrompt('{% trans "What are the most urgent overdue tasks and approval bottlenecks?" %}');">
+                                    <i class="bi bi-exclamation-triangle text-warning me-1"></i>{% trans "Overdue & bottlenecks summary" %}
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm prompt-chip" onclick="submitPrompt('{% trans "Provide my active performance and KPI summary." %}');">
+                                    <i class="bi bi-speedometer text-info me-1"></i>{% trans "My performance summary" %}
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm prompt-chip" onclick="submitPrompt('{% trans "How do I submit an application in the Service Catalog?" %}');">
+                                    <i class="bi bi-grid text-primary me-1"></i>{% trans "Service Catalog guide" %}
+                                </button>
+                            </div>
+                        </div>
+                    {% else %}
+                        {% for msg in messages_list %}
+                            {% if msg.role == 'USER' %}
+                                <div class="d-flex justify-content-end mb-3">
+                                    <div class="p-3 bg-primary text-white rounded-3 shadow-sm" style="max-width: 75%;">
+                                        <div class="small fw-semibold mb-1"><i class="bi bi-person me-1"></i>{% trans "You" %}</div>
+                                        <div style="white-space: pre-wrap;">{{ msg.content }}</div>
+                                        <div class="text-end text-white-50 small mt-1">{{ msg.created_at|date:"H:i" }}</div>
+                                    </div>
+                                </div>
+                            {% elif msg.role == 'ASSISTANT' %}
+                                <div class="d-flex justify-content-start mb-3">
+                                    <div class="p-3 bg-light border rounded-3 shadow-sm" style="max-width: 85%;">
+                                        <div class="small fw-bold text-primary mb-1"><i class="bi bi-robot me-1"></i>{% trans "University AI Assistant" %}</div>
+                                        <div class="markdown-content" style="white-space: pre-wrap;">{{ msg.content }}</div>
+                                        <div class="text-muted small mt-2 d-flex justify-content-between">
+                                            <span><i class="bi bi-shield-check text-success me-1"></i>{% trans "Role-scoped & verified" %}</span>
+                                            <span>{{ msg.created_at|date:"H:i" }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Input Box -->
+                <div class="card-footer bg-white border-top p-3">
+                    <form method="post" action="{% if active_conversation %}{% url 'ai_assistant:chat_conversation' conv_id=active_conversation.id %}{% else %}{% url 'ai_assistant:chat' %}{% endif %}" id="chatForm">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" name="prompt" id="promptInput" class="form-control" placeholder="{% trans 'Ask about tasks, bottlenecks, KPIs, policies...' %}" required autocomplete="off">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-send-fill me-1"></i>{% trans "Send" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function submitPrompt(text) {
+    const input = document.getElementById('promptInput');
+    input.value = text;
+    document.getElementById('chatForm').submit();
+}
+// Auto-scroll to bottom of chat feed
+const chatFeed = document.getElementById('chatFeed');
+if (chatFeed) {
+    chatFeed.scrollTop = chatFeed.scrollHeight;
+}
+</script>
+{% endblock %}

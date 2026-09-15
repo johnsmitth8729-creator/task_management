@@ -1,0 +1,626 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{{ page_title }} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">{% trans "Dashboard" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'task_list' %}">{% trans "Tasks" %}</a></li>
+            {% if not is_create %}
+                <li class="breadcrumb-item"><a href="{% url 'task_detail' pk=task.pk %}">{{ task.task_number }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="content-panel">
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                    <div>
+                        <h1 class="h4 fw-bold text-dark mb-1">{{ page_title }}</h1>
+                        <p class="text-muted small mb-0">{% trans "Fill in task details, responsible department, and timeline" %}</p>
+                    </div>
+                </div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger py-2 small mb-3">
+                            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Title -->
+                    <div class="mb-3">
+                        <label for="{{ form.title.id_for_label }}" class="form-label fw-semibold">
+                            {{ form.title.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.title }}
+                        {% for error in form.title.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold">
+                            {{ form.description.label }}
+                        </label>
+                        {{ form.description }}
+                        {% for error in form.description.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <!-- Department & Task Type -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.responsible_department.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.responsible_department.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.responsible_department }}
+                            {% for error in form.responsible_department.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.task_type.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.task_type.label }}
+                            </label>
+                            {{ form.task_type }}
+                            {% for error in form.task_type.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    {% if is_create and form.secondary_departments and not form.secondary_departments.is_hidden %}
+                        <!-- Additional Departments (Secondary Departments) -->
+                        <div class="mb-3" id="secondaryDepartmentsWrapper">
+                            <label class="form-label fw-semibold d-flex align-items-center justify-content-between">
+                                <span>{{ form.secondary_departments.label }}</span>
+                                <span class="badge bg-light text-muted border fw-normal">{% trans "Optional" %}</span>
+                            </label>
+                            <p class="text-muted small mb-2">{% trans "Select any additional departments participating in this task." %}</p>
+                            <div class="d-flex flex-wrap gap-2 p-2.5 bg-light rounded-3 border" id="secondaryDeptsPills">
+                                {% for pk, choice_label in form.secondary_departments.field.choices %}
+                                    {% if pk %}
+                                        <div class="dept-pill-item">
+                                            <input type="checkbox" name="secondary_departments" value="{{ pk }}" id="sec_dept_{{ pk }}" class="btn-check sec-dept-checkbox" autocomplete="off"
+                                                   {% if form.secondary_departments.value and pk|stringformat:"s" in form.secondary_departments.value|stringformat:"s" %}checked{% endif %}>
+                                            <label class="btn btn-outline-secondary btn-sm rounded-pill d-inline-flex align-items-center gap-1.5 px-3 py-1" for="sec_dept_{{ pk }}">
+                                                <i class="bi bi-building small"></i> {{ choice_label }}
+                                            </label>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% for error in form.secondary_departments.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Priority & Complexity -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.priority.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.priority.label }}
+                            </label>
+                            {{ form.priority }}
+                            {% for error in form.priority.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.complexity.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.complexity.label }}
+                            </label>
+                            {{ form.complexity }}
+                            {% for error in form.complexity.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Dates -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.start_date.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.start_date.label }}
+                            </label>
+                            {{ form.start_date }}
+                            {% for error in form.start_date.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.deadline.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.deadline.label }}
+                            </label>
+                            {{ form.deadline }}
+                            {% for error in form.deadline.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    {% if is_create %}
+                        <!-- Initial Employee Assignments (Dynamic Modern Component) -->
+                        <div class="card bg-light border-0 p-3 p-md-4 mb-4 rounded-3 shadow-xs" id="employeeAssignmentCard">
+                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+                                <div>
+                                    <h2 class="h6 fw-bold mb-1 d-flex align-items-center gap-2">
+                                        <i class="bi bi-people-fill text-primary"></i>
+                                        {% trans "Initial Employee Assignments (Optional)" %}
+                                    </h2>
+                                    <p class="text-muted small mb-0">
+                                        {% trans "Assign one or more employees from the chosen departments. You can designate one as the Primary Assignee." %}
+                                    </p>
+                                </div>
+                                <div id="selectionSummaryBadge" class="badge bg-white text-dark border px-3 py-2 small d-none align-self-start align-self-sm-center shadow-xs">
+                                    <span id="selectedCountText" class="fw-bold text-primary">0</span> {% trans "employees selected" %}
+                                </div>
+                            </div>
+
+                            <!-- Search & Controls Bar -->
+                            <div id="employeeControlsBar" class="row g-2 mb-3 d-none">
+                                <div class="col-12 col-md-7">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                                        <input type="text" id="employeeSearchInput" class="form-control border-start-0" placeholder="{% trans 'Search employees by name, role or username...' %}">
+                                        <button class="btn btn-outline-secondary d-none" type="button" id="clearSearchBtn"><i class="bi bi-x"></i></button>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-5 d-flex justify-content-md-end align-items-center gap-2">
+                                    <button type="button" id="clearAllSelectionBtn" class="btn btn-sm btn-link text-danger text-decoration-none py-0 small d-none">
+                                        <i class="bi bi-trash me-1"></i>{% trans "Clear all" %}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Notice when no department selected -->
+                            <div id="noDeptSelectedNotice" class="alert alert-info py-3 px-3 d-flex align-items-center gap-3 mb-0 border-0 rounded-3">
+                                <div class="fs-4 text-primary"><i class="bi bi-building-exclamation"></i></div>
+                                <div class="small">
+                                    <strong>{% trans "Select a department above." %}</strong>
+                                    {% trans "Choose a Primary Responsible Department (and optional additional departments) to view and assign departmental employees." %}
+                                </div>
+                            </div>
+
+                            <!-- Notice when no employees found in active departments -->
+                            <div id="noEmployeesFoundNotice" class="alert alert-warning py-3 px-3 small d-none mb-0 border-0 rounded-3">
+                                <i class="bi bi-info-circle me-1"></i>{% trans "No employees found in the selected department(s)." %}
+                            </div>
+
+                            <!-- Dynamic Employee Container -->
+                            <div id="employeeCardsContainer" class="d-none">
+                                <!-- Rendered dynamically by JavaScript -->
+                            </div>
+
+                            <!-- Primary Assignee Helper Note -->
+                            <div id="primaryAssigneeGuideNote" class="mt-3 p-2.5 bg-white rounded-3 border small d-none align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2">
+                                        <i class="bi bi-star-fill text-warning me-1"></i>{% trans "Primary Assignee" %}
+                                    </span>
+                                    <span id="currentPrimaryNameText" class="fw-semibold text-dark">{% trans "Not chosen" %}</span>
+                                </div>
+                                <span class="text-muted" style="font-size: 11px;">
+                                    {% trans "Click '⭐ Primary' on any selected employee to change." %}
+                                </span>
+                            </div>
+
+                            <!-- Hidden standard Django form selects to guarantee submission integrity -->
+                            <div class="d-none">
+                                {{ form.initial_assignees }}
+                                {{ form.primary_assignee }}
+                            </div>
+                            {% for error in form.initial_assignees.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                            {% for error in form.primary_assignee.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    {% else %}
+                        <!-- Progress (Edit only) -->
+                        <div class="mb-4">
+                            <label for="{{ form.progress.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.progress.label }}
+                            </label>
+                            <div class="input-group" style="max-width: 200px;">
+                                {{ form.progress }}
+                                <span class="input-group-text">%</span>
+                            </div>
+                            {% for error in form.progress.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        {% if is_create %}
+                            <a href="{% url 'task_list' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+                            <button type="submit" class="btn btn-primary px-4"
+                                    data-confirm="{% trans 'Are you sure you want to create this task?' %}"
+                                    data-confirm-yes="{% trans 'Yes, create' %}">
+                                <i class="bi bi-plus-circle me-1"></i>{% trans "Create Task" %}
+                            </button>
+                        {% else %}
+                            <a href="{% url 'task_detail' pk=task.pk %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+                            <button type="submit" class="btn btn-primary px-4">{% trans "Save Changes" %}</button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if is_create %}
+<style>
+.employee-assignment-card {
+    transition: all 0.18s ease-in-out;
+    background: #ffffff;
+    cursor: pointer;
+}
+.employee-assignment-card:hover {
+    border-color: var(--bs-primary) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+.employee-assignment-card.is-selected {
+    border-color: rgba(13, 110, 253, 0.6) !important;
+    background: rgba(13, 110, 253, 0.03);
+}
+.employee-assignment-card.is-primary {
+    border-color: var(--bs-primary) !important;
+    background: rgba(13, 110, 253, 0.07);
+    box-shadow: 0 0 0 1px var(--bs-primary);
+}
+.dept-pill-item .btn-check:checked + .btn-outline-secondary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: #ffffff;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const rawEmployees = {{ employees_json|default:"[]"|safe }};
+    const primaryDeptSelect = document.getElementById('id_responsible_department');
+    const secDeptCheckboxes = document.querySelectorAll('.sec-dept-checkbox');
+    const hiddenAssigneesSelect = document.getElementById('id_initial_assignees');
+    const hiddenPrimarySelect = document.getElementById('id_primary_assignee');
+
+    const noDeptNotice = document.getElementById('noDeptSelectedNotice');
+    const noEmployeesNotice = document.getElementById('noEmployeesFoundNotice');
+    const controlsBar = document.getElementById('employeeControlsBar');
+    const container = document.getElementById('employeeCardsContainer');
+    const searchInput = document.getElementById('employeeSearchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const selectionBadge = document.getElementById('selectionSummaryBadge');
+    const selectedCountText = document.getElementById('selectedCountText');
+    const clearAllBtn = document.getElementById('clearAllSelectionBtn');
+    const primaryNote = document.getElementById('primaryAssigneeGuideNote');
+    const currentPrimaryText = document.getElementById('currentPrimaryNameText');
+
+    // Track state
+    const selectedEmpIds = new Set();
+    let currentPrimaryId = hiddenPrimarySelect ? hiddenPrimarySelect.value : null;
+
+    // Initialize pre-selected from hidden form controls if any
+    if (hiddenAssigneesSelect) {
+        Array.from(hiddenAssigneesSelect.options).forEach(opt => {
+            if (opt.selected) selectedEmpIds.add(opt.value);
+        });
+    }
+
+    function getActiveDepartmentIds() {
+        const ids = new Set();
+        if (primaryDeptSelect && primaryDeptSelect.value) {
+            ids.add(primaryDeptSelect.value);
+        }
+        secDeptCheckboxes.forEach(cb => {
+            if (cb.checked && cb.value) {
+                ids.add(cb.value);
+            }
+        });
+        return Array.from(ids);
+    }
+
+    function syncHiddenForm() {
+        // Sync initial_assignees select
+        if (hiddenAssigneesSelect) {
+            Array.from(hiddenAssigneesSelect.options).forEach(opt => {
+                opt.selected = selectedEmpIds.has(opt.value);
+            });
+        }
+        // Sync primary_assignee select
+        if (hiddenPrimarySelect) {
+            hiddenPrimarySelect.value = currentPrimaryId || '';
+        }
+
+        // Update UI summary indicators
+        const count = selectedEmpIds.size;
+        if (selectedCountText) selectedCountText.textContent = count;
+        if (selectionBadge) selectionBadge.classList.toggle('d-none', count === 0);
+        if (clearAllBtn) clearAllBtn.classList.toggle('d-none', count === 0);
+
+        if (primaryNote && currentPrimaryText) {
+            if (currentPrimaryId && selectedEmpIds.has(currentPrimaryId)) {
+                const emp = rawEmployees.find(e => e.id === currentPrimaryId);
+                currentPrimaryText.textContent = emp ? emp.name : '{% trans "Selected" %}';
+                primaryNote.classList.remove('d-none');
+                primaryNote.classList.add('d-flex');
+            } else {
+                primaryNote.classList.add('d-none');
+                primaryNote.classList.remove('d-flex');
+            }
+        }
+    }
+
+    function renderEmployees() {
+        const activeDeptIds = getActiveDepartmentIds();
+        const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+
+        if (clearSearchBtn) {
+            clearSearchBtn.classList.toggle('d-none', !query);
+        }
+
+        if (activeDeptIds.length === 0) {
+            if (noDeptNotice) noDeptNotice.classList.remove('d-none');
+            if (controlsBar) controlsBar.classList.add('d-none');
+            if (container) {
+                container.classList.add('d-none');
+                container.innerHTML = '';
+            }
+            if (noEmployeesNotice) noEmployeesNotice.classList.add('d-none');
+            syncHiddenForm();
+            return;
+        }
+
+        if (noDeptNotice) noDeptNotice.classList.add('d-none');
+        if (controlsBar) controlsBar.classList.remove('d-none');
+
+        // Filter employees belonging to active departments
+        const filtered = rawEmployees.filter(emp => {
+            if (!activeDeptIds.includes(emp.department_id)) return false;
+            if (query) {
+                const matchName = emp.name.toLowerCase().includes(query);
+                const matchUser = emp.username.toLowerCase().includes(query);
+                const matchPos = (emp.position_name || '').toLowerCase().includes(query);
+                if (!matchName && !matchUser && !matchPos) return false;
+            }
+            return true;
+        });
+
+        if (filtered.length === 0) {
+            if (noEmployeesNotice) noEmployeesNotice.classList.remove('d-none');
+            if (container) {
+                container.classList.add('d-none');
+                container.innerHTML = '';
+            }
+            syncHiddenForm();
+            return;
+        }
+
+        if (noEmployeesNotice) noEmployeesNotice.classList.add('d-none');
+        if (container) container.classList.remove('d-none');
+
+        // Group by department
+        const grouped = {};
+        filtered.forEach(emp => {
+            const dName = emp.department_name || '{% trans "Other Department" %}';
+            if (!grouped[dName]) grouped[dName] = [];
+            grouped[dName].push(emp);
+        });
+
+        let html = '';
+        Object.keys(grouped).forEach(deptName => {
+            const emps = grouped[deptName];
+            html += `
+                <div class="department-group-block mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                        <span class="fw-bold small text-dark d-flex align-items-center gap-1.5">
+                            <i class="bi bi-building text-secondary"></i> ${deptName}
+                            <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-0.5" style="font-size: 10px;">${emps.length}</span>
+                        </span>
+                        <button type="button" class="btn btn-sm btn-link text-primary text-decoration-none py-0 px-1 small select-dept-all-btn" data-dept-name="${deptName}">
+                            {% trans "Select all" %}
+                        </button>
+                    </div>
+                    <div class="row g-2">
+            `;
+
+            emps.forEach(emp => {
+                const isChecked = selectedEmpIds.has(emp.id);
+                const isPrimary = (currentPrimaryId === emp.id && isChecked);
+
+                let cardClasses = 'card h-100 employee-assignment-card border rounded-3 p-2.5';
+                if (isPrimary) cardClasses += ' is-primary';
+                else if (isChecked) cardClasses += ' is-selected';
+
+                html += `
+                    <div class="col-12 col-md-6">
+                        <div class="${cardClasses}" data-emp-id="${emp.id}" onclick="window._toggleEmployeeCard('${emp.id}', event)">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2.5 overflow-hidden flex-grow-1">
+                                    <div class="form-check m-0" onclick="event.stopPropagation()">
+                                        <input class="form-check-input emp-checkbox cursor-pointer" type="checkbox"
+                                               value="${emp.id}" id="emp_check_${emp.id}"
+                                               ${isChecked ? 'checked' : ''}
+                                               onchange="window._toggleEmployee('${emp.id}', this.checked)">
+                                    </div>
+                                    <div class="avatar-circle-sm bg-primary-subtle text-primary fw-bold rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; font-size: 13px;">
+                                        ${emp.photo_url ? `<img src="${emp.photo_url}" class="rounded-circle w-100 h-100 object-fit-cover">` : emp.initials}
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <label for="emp_check_${emp.id}" class="fw-semibold text-dark mb-0 text-truncate d-block small cursor-pointer" onclick="event.stopPropagation()">
+                                            ${emp.name}
+                                        </label>
+                                        <div class="text-muted text-truncate" style="font-size: 11px;">
+                                            ${emp.position_name || '{% trans "Employee" %}'}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="primary-action-zone flex-shrink-0 ms-2" onclick="event.stopPropagation()">
+                                    ${isChecked ? (
+                                        isPrimary ? `
+                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2 py-1 shadow-xs" style="font-size: 11px;">
+                                                <i class="bi bi-star-fill text-warning me-1"></i>{% trans "Primary" %}
+                                            </span>
+                                        ` : `
+                                            <button type="button" class="btn btn-sm btn-outline-secondary py-0.5 px-2 rounded-pill" style="font-size: 11px;" onclick="window._setPrimaryAssignee('${emp.id}')" title="{% trans 'Set as Primary Assignee' %}">
+                                                <i class="bi bi-star me-1 text-warning"></i>{% trans "Set Primary" %}
+                                            </button>
+                                        `
+                                    ) : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+        });
+
+        if (container) container.innerHTML = html;
+        syncHiddenForm();
+    }
+
+    // Global handlers for inline event handlers
+    window._toggleEmployee = function(empId, isChecked) {
+        if (isChecked) {
+            selectedEmpIds.add(empId);
+            // If no primary assigned yet, make this employee primary
+            if (!currentPrimaryId || !selectedEmpIds.has(currentPrimaryId)) {
+                currentPrimaryId = empId;
+            }
+        } else {
+            selectedEmpIds.delete(empId);
+            if (currentPrimaryId === empId) {
+                // If primary unchecked, shift to next selected employee or null
+                const remaining = Array.from(selectedEmpIds);
+                currentPrimaryId = remaining.length > 0 ? remaining[0] : null;
+            }
+        }
+        renderEmployees();
+    };
+
+    window._toggleEmployeeCard = function(empId, event) {
+        const checkbox = document.getElementById(`emp_check_${empId}`);
+        if (checkbox) {
+            checkbox.checked = !checkbox.checked;
+            window._toggleEmployee(empId, checkbox.checked);
+        }
+    };
+
+    window._setPrimaryAssignee = function(empId) {
+        if (!selectedEmpIds.has(empId)) {
+            selectedEmpIds.add(empId);
+        }
+        currentPrimaryId = empId;
+        renderEmployees();
+    };
+
+    // Department group Select All button
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('select-dept-all-btn')) {
+            const deptName = e.target.getAttribute('data-dept-name');
+            const activeDeptIds = getActiveDepartmentIds();
+            const deptEmps = rawEmployees.filter(emp => emp.department_name === deptName && activeDeptIds.includes(emp.department_id));
+
+            const allSelected = deptEmps.every(emp => selectedEmpIds.has(emp.id));
+            deptEmps.forEach(emp => {
+                if (allSelected) {
+                    selectedEmpIds.delete(emp.id);
+                    if (currentPrimaryId === emp.id) currentPrimaryId = null;
+                } else {
+                    selectedEmpIds.add(emp.id);
+                    if (!currentPrimaryId) currentPrimaryId = emp.id;
+                }
+            });
+            if (!currentPrimaryId && selectedEmpIds.size > 0) {
+                currentPrimaryId = Array.from(selectedEmpIds)[0];
+            }
+            renderEmployees();
+        }
+    });
+
+    // Clear all assignees button
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener('click', function() {
+            selectedEmpIds.clear();
+            currentPrimaryId = null;
+            renderEmployees();
+        });
+    }
+
+    // Search input
+    if (searchInput) {
+        searchInput.addEventListener('input', renderEmployees);
+    }
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', function() {
+            if (searchInput) searchInput.value = '';
+            renderEmployees();
+        });
+    }
+
+    // React to Primary Department change
+    if (primaryDeptSelect) {
+        primaryDeptSelect.addEventListener('change', function() {
+            const newPrimaryId = this.value;
+            // Uncheck and disable secondary department pill if it matches primary
+            secDeptCheckboxes.forEach(cb => {
+                const label = document.querySelector(`label[for="${cb.id}"]`);
+                if (cb.value === newPrimaryId) {
+                    cb.checked = false;
+                    cb.disabled = true;
+                    if (label) label.classList.add('opacity-50', 'disabled');
+                } else {
+                    cb.disabled = false;
+                    if (label) label.classList.remove('opacity-50', 'disabled');
+                }
+            });
+
+            // Clean up any selected employees who no longer belong to active departments
+            const activeDeptIds = getActiveDepartmentIds();
+            selectedEmpIds.forEach(empId => {
+                const emp = rawEmployees.find(e => e.id === empId);
+                if (emp && !activeDeptIds.includes(emp.department_id)) {
+                    selectedEmpIds.delete(empId);
+                    if (currentPrimaryId === empId) currentPrimaryId = null;
+                }
+            });
+            if (!currentPrimaryId && selectedEmpIds.size > 0) {
+                currentPrimaryId = Array.from(selectedEmpIds)[0];
+            }
+
+            renderEmployees();
+        });
+
+        // Trigger on initial page load if primary department is selected
+        if (primaryDeptSelect.value) {
+            secDeptCheckboxes.forEach(cb => {
+                const label = document.querySelector(`label[for="${cb.id}"]`);
+                if (cb.value === primaryDeptSelect.value) {
+                    cb.checked = false;
+                    cb.disabled = true;
+                    if (label) label.classList.add('opacity-50', 'disabled');
+                }
+            });
+        }
+    }
+
+    // React to Secondary Departments changes
+    secDeptCheckboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            const activeDeptIds = getActiveDepartmentIds();
+            selectedEmpIds.forEach(empId => {
+                const emp = rawEmployees.find(e => e.id === empId);
+                if (emp && !activeDeptIds.includes(emp.department_id)) {
+                    selectedEmpIds.delete(empId);
+                    if (currentPrimaryId === empId) currentPrimaryId = null;
+                }
+            });
+            if (!currentPrimaryId && selectedEmpIds.size > 0) {
+                currentPrimaryId = Array.from(selectedEmpIds)[0];
+            }
+            renderEmployees();
+        });
+    });
+
+    // Initial render
+    renderEmployees();
+});
+</script>
+{% endif %}
+{% endblock %}

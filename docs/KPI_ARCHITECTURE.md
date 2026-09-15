@@ -1,94 +1,33 @@
-# KPI Architecture
+# KPI ARCHITECTURE & PERFORMANCE GOVERNANCE
 
-## Phase Boundary
+## 1. Objective & Scope
+The KPI engine provides transparent, mathematical, role-scoped performance measurement for university personnel, departments, and vice-rector sectors.
 
-Phase 0 designs KPI architecture only. It does not implement KPI calculation.
+---
 
-## Goal
+## 2. Model Structure
+1. **`KPICategory`**: High-level classification (e.g. Task Execution, Quality Standards, Innovation, Compliance).
+2. **`KPIPeriod`**: Evaluation cycle (`MONTHLY`, `QUARTERLY`, `YEARLY`) with statuses: `DRAFT` $\to$ `OPEN` $\to$ `CLOSED`.
+3. **`KPIDefinition`**: Indicator template with target value, weight, measurement type (`PERCENTAGE`, `NUMERIC`, `BOOLEAN`, `COUNT`, `RATING`).
+4. **`KPIAssignment`**: Indicator bound to an employee for a specific period.
+5. **`KPIResult`**: Recorded score with evaluation notes, evaluator reference, and approval status (`DRAFT`, `SUBMITTED`, `REVIEWED`, `APPROVED`).
 
-The platform must later calculate configurable KPI scores using task and workflow data. KPI must not use a hardcoded final formula.
+---
 
-## KPI Inputs
+## 3. Mathematical Scoring Engine
 
-Possible KPI factors:
+$$\text{Raw Score} = \min\left(100, \frac{\text{Actual Value}}{\text{Target Value}} \times 100\right)$$
 
-- task quantity
-- task complexity
-- task priority
-- deadline compliance
-- quality
-- workload
-- approved work
-- rejected work
-- manager evaluation
+$$\text{Weighted Score} = \frac{\text{Raw Score} \times \text{Weight}}{100}$$
 
-## Periods
+$$\text{Total Performance Score} = \sum_{i=1}^n \text{Weighted Score}_i$$
 
-KPI must support:
+- Task completion rate and deadline compliance rate are dynamically calculated by the service layer directly from historical task records.
 
-- monthly
-- quarterly
-- yearly
+---
 
-## Core Models
-
-### KPIRule
-
-Configurable rule definition:
-
-- code
-- name
-- period type
-- weight
-- metric source
-- condition JSON
-- formula/expression JSON or reference
-- active flag
-- effective dates
-
-### KPI
-
-Calculated KPI summary:
-
-- employee
-- period type
-- period start
-- period end
-- score
-- status
-- calculated_at
-
-### KPISnapshot
-
-Immutable calculation snapshot:
-
-- KPI record
-- input data JSON
-- rule results JSON
-- final score
-- created_at
-
-## Data Sources
-
-KPI engine should read from:
-
-- completed tasks
-- approval decisions
-- rejection records
-- deadline compliance
-- priority and complexity
-- workload summaries
-- manager evaluations when added
-
-## Design Rules
-
-- Use stable metric codes.
-- Store rule configuration separately from calculation results.
-- Preserve snapshots so future rule changes do not rewrite historical KPI.
-- Make recalculation explicit and auditable.
-- Keep salary/payroll calculation separate from KPI calculation.
-
-## Integration With Payroll
-
-Payroll may consume approved KPI results or KPI snapshots. Payroll must not recalculate KPI independently.
-
+## 4. Role-Scoped KPI Visibility (Anti-IDOR)
+- **Employee**: Can only view own performance dashboard and KPI breakdown.
+- **Department Head**: Can view own department's performance scorecard, team headcount, and employee metrics.
+- **Vice Rector**: Can view supervised sectors and department comparative performance.
+- **Rector / HR / Superadmin**: University-wide performance overview, global KPI average, and department rankings.

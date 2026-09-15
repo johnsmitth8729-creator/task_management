@@ -48,17 +48,33 @@ INSTALLED_APPS = [
     'core',
     'organization',
     'accounts',
+    'tasks',
+    'workflow',
+    'files',
+    'hr',
+    'kpi',
+    'payroll',
+    'signatures',
+    'analytics',
+    'automation',
+    'communication',
+    'operations',
+    'ai_assistant',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'core.middleware.SecurityHeadersMiddleware',
+    'core.middleware.RateLimitingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'core.middleware.ActiveYearMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.CustomErrorPageMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -73,6 +89,10 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.notifications_context',
+                'core.context_processors.hr_authority_context',
+                'core.context_processors.navigation_context',
+                'core.context_processors.active_year_context',
             ],
         },
     },
@@ -121,9 +141,8 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = os.getenv('LANGUAGE_CODE', 'en')
 
 LANGUAGES = [
-    ('uz', _('Uzbek')),
     ('en', _('English')),
-    ('ru', _('Russian')),
+    ('uz', _('Uzbek')),
 ]
 
 LOCALE_PATHS = [BASE_DIR / 'locale']
@@ -167,3 +186,36 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+
+# ===========================================================================
+# Phase 6 — File Management & Upload Limits
+# ===========================================================================
+
+MAX_FILE_SIZE_MB = int(os.getenv('MAX_FILE_SIZE_MB', '50'))
+MAX_VIDEO_SIZE_MB = int(os.getenv('MAX_VIDEO_SIZE_MB', '200'))
+MAX_TOTAL_SUBMISSION_SIZE_MB = int(os.getenv('MAX_TOTAL_SUBMISSION_SIZE_MB', '250'))
+
+ALLOWED_FILE_EXTENSIONS = [
+    'pdf',
+    'doc', 'docx',
+    'xls', 'xlsx',
+    'csv',
+    'ppt', 'pptx',
+    'txt',
+    'jpg', 'jpeg', 'png', 'webp', 'gif',
+    'mp4', 'webm',
+    'zip', 'rar',
+]
+
+DISALLOWED_FILE_EXTENSIONS = [
+    'exe', 'bat', 'cmd', 'ps1', 'sh', 'dll', 'scr',
+    'vbs', 'js', 'jar', 'msi', 'com', 'pif', 'hta', 'cpl', 'iso',
+]
+
+# ===========================================================================
+# Phase 9 — Electronic Signature & Cryptographic Verification Settings
+# ===========================================================================
+SIGNATURE_ALGORITHM = os.getenv('SIGNATURE_ALGORITHM', 'Ed25519')
+SIGNATURE_KEY_ID = os.getenv('SIGNATURE_KEY_ID', 'v1')
+SIGNATURE_PRIVATE_KEY_B64 = os.getenv('SIGNATURE_PRIVATE_KEY_B64', '')

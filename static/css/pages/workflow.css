@@ -1,0 +1,333 @@
+/* ==========================================================================
+   WORKFLOW — Phase 4 Styles
+   Employee dashboard, assignment cards, dept head monitoring
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   Workflow Nav Cards (4-card dashboard)
+   --------------------------------------------------------------------------- */
+.workflow-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+}
+
+@media (max-width: 991.98px) {
+    .workflow-cards-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 575.98px) {
+    .workflow-cards-grid { grid-template-columns: 1fr; }
+}
+
+.workflow-card {
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: .875rem;
+    padding: 1.5rem;
+    text-align: center;
+    text-decoration: none;
+    color: var(--app-text);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .75rem;
+    box-shadow: var(--app-card-shadow);
+    position: relative;
+    overflow: hidden;
+}
+.workflow-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 .75rem 2rem rgba(15,23,42,.12);
+    color: var(--app-text);
+}
+.workflow-card .wf-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+}
+.workflow-card .wf-count {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+}
+.workflow-card .wf-label {
+    font-size: .925rem;
+    font-weight: 600;
+    color: var(--app-text-muted);
+}
+.workflow-card.card-incoming  { border-top: 3px solid #3b82f6; }
+.workflow-card.card-inprogress{ border-top: 3px solid #f59e0b; }
+.workflow-card.card-approval1 { border-top: 3px solid #10b981; }
+.workflow-card.card-approval2 { border-top: 3px solid #8b5cf6; }
+
+.workflow-card.card-incoming  .wf-icon { background: #eff6ff; color: #3b82f6; }
+.workflow-card.card-inprogress .wf-icon { background: #fffbeb; color: #d97706; }
+.workflow-card.card-approval1 .wf-icon { background: #f0fdf4; color: #059669; }
+.workflow-card.card-approval2 .wf-icon { background: #f5f3ff; color: #7c3aed; }
+
+[data-theme="dark"] .workflow-card.card-incoming  .wf-icon { background:rgba(59,130,246,.15); color:#60a5fa; }
+[data-theme="dark"] .workflow-card.card-inprogress .wf-icon { background:rgba(245,158,11,.15); color:#fcd34d; }
+[data-theme="dark"] .workflow-card.card-approval1 .wf-icon { background:rgba(16,185,129,.15); color:#34d399; }
+[data-theme="dark"] .workflow-card.card-approval2 .wf-icon { background:rgba(139,92,246,.15); color:#a78bfa; }
+
+.wf-future-badge {
+    position: absolute;
+    top: .5rem;
+    right: .5rem;
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    background: var(--app-badge-soft-bg);
+    color: var(--app-text-muted);
+    border: 1px solid var(--app-border);
+    padding: .1rem .4rem;
+    border-radius: .25rem;
+}
+
+/* ---------------------------------------------------------------------------
+   Assignment Card
+   --------------------------------------------------------------------------- */
+.assignment-card {
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: .75rem;
+    padding: 1.25rem;
+    box-shadow: var(--app-card-shadow);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+.assignment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 .5rem 1.5rem rgba(15,23,42,.1);
+}
+.assignment-card .task-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-bottom: .75rem;
+}
+
+/* ---------------------------------------------------------------------------
+   Progress Bar Component
+   --------------------------------------------------------------------------- */
+.wf-progress-bar-wrap {
+    position: relative;
+    height: 10px;
+    background: var(--app-badge-soft-bg);
+    border-radius: 999px;
+    overflow: hidden;
+}
+.wf-progress-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #3b82f6, #1e40af);
+    transition: width .4s ease;
+}
+.wf-progress-bar-fill.fill-complete { background: linear-gradient(90deg, #10b981, #059669); }
+.wf-progress-bar-fill.fill-warning  { background: linear-gradient(90deg, #f59e0b, #d97706); }
+
+.wf-progress-label {
+    font-size: .75rem;
+    font-weight: 700;
+    color: var(--app-text-muted);
+    margin-top: .25rem;
+}
+
+/* ---------------------------------------------------------------------------
+   Progress Slider (employee work area)
+   --------------------------------------------------------------------------- */
+.progress-slider-wrap {
+    padding: 1rem 0;
+}
+.progress-slider-wrap input[type="range"] {
+    width: 100%;
+    accent-color: var(--app-primary);
+}
+.progress-display {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--app-primary);
+    text-align: center;
+    line-height: 1;
+    margin-bottom: .5rem;
+}
+
+/* ---------------------------------------------------------------------------
+   Timeline component
+   --------------------------------------------------------------------------- */
+.wf-timeline {
+    position: relative;
+    padding-left: 2rem;
+    margin: 0;
+    list-style: none;
+}
+.wf-timeline::before {
+    content: '';
+    position: absolute;
+    left: .6rem;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: var(--app-border);
+}
+.wf-timeline li {
+    position: relative;
+    padding-bottom: 1.25rem;
+}
+.wf-timeline li:last-child { padding-bottom: 0; }
+.wf-timeline .tl-dot {
+    position: absolute;
+    left: -2rem;
+    top: .3rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--app-surface);
+    border: 2.5px solid var(--app-primary);
+}
+.wf-timeline .tl-event { font-weight: 600; font-size: .9rem; color: var(--app-text); }
+.wf-timeline .tl-meta  { font-size: .8rem; color: var(--app-text-muted); }
+
+/* ---------------------------------------------------------------------------
+   Submission card
+   --------------------------------------------------------------------------- */
+.submission-card {
+    background: var(--app-muted-surface);
+    border: 1px solid var(--app-border);
+    border-radius: .75rem;
+    padding: 1.25rem;
+}
+.submission-version-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    background: var(--app-primary-subtle);
+    color: var(--app-primary);
+    font-weight: 700;
+    font-size: .8rem;
+    padding: .2rem .6rem;
+    border-radius: .375rem;
+}
+
+/* ---------------------------------------------------------------------------
+   Assign Employee Modal — employee item
+   --------------------------------------------------------------------------- */
+.employee-assign-item {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .625rem .5rem;
+    border-radius: .5rem;
+    cursor: pointer;
+    transition: background .1s ease;
+    border: 1px solid transparent;
+}
+.employee-assign-item:hover { background: var(--app-table-hover); }
+.employee-assign-item input[type="checkbox"] { flex-shrink: 0; }
+.employee-assign-item .emp-workload {
+    margin-left: auto;
+    font-size: .8rem;
+    color: var(--app-text-muted);
+    white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+   Dept head stat row
+   --------------------------------------------------------------------------- */
+.dept-stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.dept-stat-item {
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: .75rem;
+    padding: 1rem 1.25rem;
+    text-align: center;
+    box-shadow: var(--app-card-shadow);
+}
+.dept-stat-item .stat-value { font-size: 1.75rem; font-weight: 800; line-height: 1; }
+.dept-stat-item .stat-key   { font-size: .8rem; color: var(--app-text-muted); font-weight: 600; margin-top: .25rem; }
+
+/* ---------------------------------------------------------------------------
+   Deadline pill
+   --------------------------------------------------------------------------- */
+.deadline-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    font-size: .8rem;
+    font-weight: 600;
+    padding: .2rem .6rem;
+    border-radius: .375rem;
+}
+.deadline-pill.overdue   { background: #fee2e2; color: #b91c1c; }
+.deadline-pill.today     { background: #fef3c7; color: #b45309; }
+.deadline-pill.soon      { background: #dbeafe; color: #1d4ed8; }
+.deadline-pill.normal    { background: var(--app-badge-soft-bg); color: var(--app-text-muted); }
+
+[data-theme="dark"] .deadline-pill.overdue  { background:rgba(220,38,38,.2); color:#f87171; }
+[data-theme="dark"] .deadline-pill.today    { background:rgba(245,158,11,.2); color:#fcd34d; }
+[data-theme="dark"] .deadline-pill.soon     { background:rgba(59,130,246,.2); color:#93c5fd; }
+[data-theme="dark"] .deadline-pill.normal   { background:var(--app-badge-soft-bg); color:var(--app-text-muted); }
+
+/* ---------------------------------------------------------------------------
+   Work area panel
+   --------------------------------------------------------------------------- */
+.work-area-panel {
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: .875rem;
+    padding: 1.5rem;
+    box-shadow: var(--app-card-shadow);
+}
+
+/* Phase 5 placeholder notice */
+.phase-placeholder {
+    border: 2px dashed var(--app-border);
+    border-radius: .75rem;
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--app-text-muted);
+}
+.phase-placeholder i { font-size: 2rem; display: block; margin-bottom: .5rem; }
+
+/* ---------------------------------------------------------------------------
+   Phase 6 — File Evidence & Document Explorer
+   --------------------------------------------------------------------------- */
+.btn-xs {
+    padding: .15rem .45rem;
+    font-size: .75rem;
+    border-radius: .3rem;
+}
+
+.folder-filter-btn {
+    font-weight: 500;
+    transition: all .15s ease;
+}
+
+[data-theme="dark"] #filesTable thead {
+    background-color: #1e293b !important;
+    color: #f1f5f9;
+}
+
+[data-theme="dark"] #filesTable tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] .bg-light {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="dark"] .submission-card {
+    background-color: var(--app-surface) !important;
+    border-color: var(--app-border) !important;
+    color: var(--app-text) !important;
+}
+

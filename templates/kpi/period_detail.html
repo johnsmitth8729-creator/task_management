@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{{ period.name }} | {% trans "KPI Period Details" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h1 class="h3 fw-bold text-dark mb-0">{{ period.name }}</h1>
+                <span class="badge bg-primary-subtle text-primary font-monospace">{{ period.code }}</span>
+                {% if period.status == 'RECTOR_SIGNED' %}
+                    <span class="badge bg-success"><i class="bi bi-shield-check me-1"></i>{% trans "Electronically Signed by Rector" %}</span>
+                {% elif period.status == 'RECTOR_APPROVED' %}
+                    <span class="badge bg-info-subtle text-info"><i class="bi bi-check-all me-1"></i>{% trans "Rector Approved" %}</span>
+                {% elif period.status == 'HR_VERIFIED' %}
+                    <span class="badge bg-primary-subtle text-primary"><i class="bi bi-check-circle me-1"></i>{% trans "HR Verified" %}</span>
+                {% elif period.status == 'PENDING_RECTOR_APPROVAL' %}
+                    <span class="badge bg-warning-subtle text-warning"><i class="bi bi-hourglass-split me-1"></i>{% trans "Awaiting Rector Review" %}</span>
+                {% elif period.status == 'UNDER_REVIEW' %}
+                    <span class="badge bg-warning-subtle text-dark">{% trans "Under Review" %}</span>
+                {% elif period.status == 'CALCULATING' %}
+                    <span class="badge bg-info-subtle text-info"><span class="spinner-border spinner-border-sm me-1"></span>{% trans "Calculating" %}</span>
+                {% elif period.status == 'CLOSED' %}
+                    <span class="badge bg-secondary">{% trans "Closed / Archived" %}</span>
+                {% else %}
+                    <span class="badge bg-light text-dark border">{{ period.get_status_display }}</span>
+                {% endif %}
+            </div>
+            <p class="text-muted mb-0">
+                <i class="bi bi-calendar3 me-1"></i>{{ period.start_date|date:"d M Y" }} &mdash; {{ period.end_date|date:"d M Y" }}
+                <span class="mx-2">&bull;</span>
+                <i class="bi bi-clock me-1"></i>{% trans "Cycle" %}: {{ period.get_period_type_display }}
+            </p>
+        </div>
+
+        <!-- Action Buttons depending on status and role -->
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'kpi:period_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>{% trans "All Periods" %}
+            </a>
+
+            {% if not period.is_immutable %}
+                {% if can_calculate %}
+                    <form action="{% url 'kpi:period_calculate' pk=period.pk %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="bi bi-calculator me-1"></i>{% trans "Run Calculation" %}
+                        </button>
+                    </form>
+                {% endif %}
+
+                {% if can_verify and period.status == 'UNDER_REVIEW' %}
+                    <form action="{% url 'kpi:period_hr_verify' pk=period.pk %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-patch-check me-1"></i>{% trans "HR Verify & Submit" %}
+                        </button>
+                    </form>
+                {% endif %}
+
+                {% if can_rector %}
+                    {% if period.status in 'HR_VERIFIED,PENDING_RECTOR_APPROVAL,UNDER_REVIEW' %}
+                        <a href="{% url 'kpi:period_rector_review' pk=period.pk %}" class="btn btn-warning text-dark fw-bold">
+                            <i class="bi bi-pen me-1"></i>{% trans "Executive Review" %}
+                        </a>
+                    {% elif period.status == 'RECTOR_APPROVED' %}
+                        <form action="{% url 'kpi:period_rector_sign' pk=period.pk %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success fw-bold shadow-sm" onclick="return confirm('{% trans "Are you sure you want to officially electronically sign this KPI period? This action is legally binding and locks all scores." %}');">
+                                <i class="bi bi-award me-1"></i>{% trans "Sign Electronically (Ed25519)" %}
+                            </button>
+                        </form>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+
+            {% if period.status == 'RECTOR_SIGNED' and can_rector %}
+                <form action="{% url 'kpi:period_close' pk=period.pk %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-secondary" onclick="return confirm('{% trans "Archive and close this period?" %}');">
+                        <i class="bi bi-archive me-1"></i>{% trans "Archive / Close" %}
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Rejection Alert if returned -->
+    {% if period.rejection_reason %}
+        <div class="alert alert-warning border-warning d-flex align-items-start gap-3 mb-4 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-4 text-warning flex-shrink-0"></i>
+            <div>
+                <h5 class="alert-heading fw-bold mb-1">{% trans "Returned for Revision by Rector" %}</h5>
+                <p class="mb-0">{{ period.rejection_reason }}</p>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Signed Certificate Banner -->
+    {% if period.status == 'RECTOR_SIGNED' and period.signed_by %}
+        <div class="card border-success shadow-sm mb-4 bg-success-subtle">
+            <div class="card-body p-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="p-3 bg-success text-white rounded-circle">
+                            <i class="bi bi-shield-check fs-2"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold text-success mb-1">{% trans "Official University Performance Certificate" %}</h4>
+                            <p class="text-muted mb-0">
+                                {% trans "Electronically signed with Ed25519 asymmetric cryptography by" %} <strong>{{ period.signed_by.display_name }}</strong>
+                                {% if period.signed_at %} on {{ period.signed_at|date:"d M Y, H:i" }}{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% if signatures %}
+                        {% with sig=signatures.first %}
+                            <div class="text-md-end">
+                                <span class="d-block font-monospace small text-muted">ID: {{ sig.verification_id }}</span>
+                                <a href="{% url 'signatures:verify' verification_id=sig.verification_id %}" class="btn btn-sm btn-outline-success mt-1" target="_blank">
+                                    <i class="bi bi-qr-code me-1"></i>{% trans "Verify Signature" %}
+                                </a>
+                            </div>
+                        {% endwith %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- University Aggregate KPI Metrics -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3">
+                <span class="text-muted small fw-semibold text-uppercase">{% trans "University Average" %}</span>
+                <div class="d-flex align-items-baseline gap-2 mt-2">
+                    <span class="display-6 fw-bold text-primary">{{ university_summary.university_avg_score }}</span>
+                    <span class="text-muted">/ 100</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3">
+                <span class="text-muted small fw-semibold text-uppercase">{% trans "Total Departments" %}</span>
+                <div class="d-flex align-items-baseline gap-2 mt-2">
+                    <span class="display-6 fw-bold text-dark">{{ university_summary.total_departments }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3">
+                <span class="text-muted small fw-semibold text-uppercase">{% trans "Tasks Evaluated" %}</span>
+                <div class="d-flex align-items-baseline gap-2 mt-2">
+                    <span class="display-6 fw-bold text-dark">{{ university_summary.total_tasks }}</span>
+                    <span class="text-muted small">({{ university_summary.completed_tasks }} {% trans "completed" %})</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3">
+                <span class="text-muted small fw-semibold text-uppercase">{% trans "Task Completion Rate" %}</span>
+                <div class="d-flex align-items-baseline gap-2 mt-2">
+                    <span class="display-6 fw-bold text-success">{{ university_summary.task_completion_rate }}%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Department Score Summary Table -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-header bg-white py-3 border-0">
+            <h5 class="card-title fw-bold text-dark mb-0">{% trans "Department Performance Breakdown" %}</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">{% trans "Department" %}</th>
+                        <th>{% trans "Headcount" %}</th>
+                        <th>{% trans "Evaluated Staff" %}</th>
+                        <th>{% trans "Tasks (Comp / Total)" %}</th>
+                        <th>{% trans "Completion Rate" %}</th>
+                        <th class="pe-3 text-end">{% trans "Average KPI Score" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in university_summary.departments %}
+                        <tr>
+                            <td class="ps-3 fw-semibold text-dark">{{ d.department.name }}</td>
+                            <td>{{ d.headcount }}</td>
+                            <td>{{ d.evaluated_headcount }}</td>
+                            <td>{{ d.completed_tasks }} / {{ d.total_tasks }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height: 6px;">
+                                        <div class="progress-bar bg-success" style="width: {{ d.task_completion_rate }}%;"></div>
+                                    </div>
+                                    <span class="small font-monospace">{{ d.task_completion_rate }}%</span>
+                                </div>
+                            </td>
+                            <td class="pe-3 text-end">
+                                <span class="badge fs-6 {% if d.avg_kpi_score >= 80 %}bg-success-subtle text-success{% elif d.avg_kpi_score >= 60 %}bg-warning-subtle text-warning{% else %}bg-danger-subtle text-danger{% endif %}">
+                                    {{ d.avg_kpi_score }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">{% trans "No department performance data recorded for this period." %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

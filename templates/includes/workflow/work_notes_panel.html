@@ -1,0 +1,103 @@
+{% load i18n %}
+
+<div class="content-panel mb-4 shadow-sm" id="workNotesPanel" style="border-top:3px solid #6366f1;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 fw-bold mb-0 text-dark">
+            <i class="bi bi-journal-text text-primary me-2"></i>{% trans "Work Notes & Progress Log" %}
+            <span class="badge bg-primary-subtle text-primary fs-6 ms-2">{{ work_notes|length }}</span>
+        </h2>
+    </div>
+
+    <!-- Notes list -->
+    {% if work_notes %}
+    <div class="d-flex flex-column gap-3 mb-3">
+        {% for note in work_notes %}
+        <div class="p-3 border rounded-3 bg-light">
+            <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:36px;height:36px;font-size:0.875rem;">
+                        {{ note.author.display_name|default:"?"|first|upper }}
+                    </div>
+                    <div>
+                        <div class="fw-bold text-dark small">{{ note.author.display_name|default:_("Unknown") }}</div>
+                        <div class="text-muted" style="font-size:0.75rem;">
+                            {% if note.author.position %}{{ note.author.position.name }}{% elif note.author.department %}{{ note.author.department.name }}{% endif %}
+                            {% if note.author.is_rector %}<span class="badge bg-danger-subtle text-danger ms-1">{% trans "Rector" %}</span>
+                            {% elif note.author.is_vice_rector %}<span class="badge bg-warning-subtle text-warning ms-1">{% trans "Vice Rector" %}</span>
+                            {% elif note.author.is_department_head %}<span class="badge bg-info-subtle text-info ms-1">{% trans "Department Head" %}</span>
+                            {% elif note.author.is_employee %}<span class="badge bg-secondary-subtle text-secondary ms-1">{% trans "Employee" %}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div class="text-muted small" style="font-size:0.75rem;">
+                        <i class="bi bi-clock me-1"></i>{{ note.created_at|date:"d M Y H:i" }}
+                    </div>
+                    {% if note.assignment and note.assignment.user != note.author %}
+                    <span class="badge bg-light text-muted border mt-1" style="font-size:0.7rem;">
+                        <i class="bi bi-person me-1"></i>{% trans "Assignee" %}: {{ note.assignment.user.display_name }}
+                    </span>
+                    {% endif %}
+                    {% if note.visibility == 'MANAGEMENT' %}
+                    <span class="badge bg-warning-subtle text-warning-emphasis border mt-1" style="font-size:0.7rem;">
+                        <i class="bi bi-shield-lock me-1"></i>{% trans "Management Only" %}
+                    </span>
+                    {% elif note.visibility == 'DEPARTMENT_HEAD' %}
+                    <span class="badge bg-info-subtle text-info-emphasis border mt-1" style="font-size:0.7rem;">
+                        <i class="bi bi-building me-1"></i>{% trans "Department Head" %}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="small text-dark mt-2 ps-1" style="white-space: pre-wrap; word-break: break-word; line-height: 1.5;">{{ note.content }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-4 text-muted bg-light rounded-3 mb-3">
+        <i class="bi bi-journal-x fs-3 d-block mb-2 text-secondary"></i>
+        <p class="small mb-0">{% trans "No work notes recorded during task execution." %}</p>
+    </div>
+    {% endif %}
+
+    <!-- Add Note Form -->
+    {% if can_add_note %}
+    <hr class="my-3">
+    <div>
+        <h6 class="fw-bold mb-2 text-dark small"><i class="bi bi-pencil-square me-1 text-primary"></i>{% trans "Add Work Note" %}</h6>
+        <form method="post" action="{% url 'task_add_note' pk=task.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <div class="mb-2">
+                <textarea name="content" class="form-control form-control-sm" rows="3"
+                          placeholder="{% trans 'Write a work note, update, or observation...' %}"
+                          required maxlength="5000"></textarea>
+            </div>
+            {% if request.user.is_rector or request.user.is_vice_rector or request.user.is_department_head %}
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="form-label mb-0 small text-muted">{% trans "Visibility" %}:</label>
+                    <select name="visibility" class="form-select form-select-sm" style="width: auto;">
+                        <option value="EMPLOYEE" selected>{% trans "All (Assignees & Management)" %}</option>
+                        <option value="DEPARTMENT_HEAD">{% trans "Department Head & Management" %}</option>
+                        {% if request.user.is_rector or request.user.is_vice_rector %}
+                        <option value="MANAGEMENT">{% trans "Management Only (Rector / Vice Rector)" %}</option>
+                        {% endif %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>{% trans "Add Note" %}
+                </button>
+            </div>
+            {% else %}
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>{% trans "Add Note" %}
+                </button>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+    {% endif %}
+</div>

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Promulgate Document" %} | University Task Management{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 800px;">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="h3 fw-bold mb-1"><i class="bi bi-file-earmark-ruled text-primary me-2"></i>{% trans "Promulgate University Document" %}</h2>
+            <p class="text-muted mb-0">{% trans "Register official Rector Orders, Regulations, or Senate Protocols into the university registry." %}</p>
+        </div>
+        <a href="{% url 'operations:document_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>{% trans "Documents Registry" %}
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">{% trans "Document Reference Number" %} <span class="text-danger">*</span></label>
+                        {{ form.doc_number }}
+                        {% if form.doc_number.errors %}<div class="text-danger small">{{ form.doc_number.errors }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">{% trans "Document Type" %} <span class="text-danger">*</span></label>
+                        {{ form.document_type }}
+                        {% if form.document_type.errors %}<div class="text-danger small">{{ form.document_type.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">{% trans "Official Document Title" %} <span class="text-danger">*</span></label>
+                        {{ form.title }}
+                        {% if form.title.errors %}<div class="text-danger small">{{ form.title.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">{% trans "Executive Summary / Scope" %}</label>
+                        {{ form.description }}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">{% trans "Official Document File (PDF)" %} <span class="text-danger">*</span></label>
+                        {{ form.file }}
+                        {% if form.file.errors %}<div class="text-danger small">{{ form.file.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">{% trans "Effective Date" %} <span class="text-danger">*</span></label>
+                        {{ form.effective_date }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">{% trans "Expiry Date" %}</label>
+                        {{ form.expiry_date }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">{% trans "Status" %}</label>
+                        {{ form.status }}
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'operations:document_list' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-upload me-1"></i>{% trans "Register & Promulgate" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

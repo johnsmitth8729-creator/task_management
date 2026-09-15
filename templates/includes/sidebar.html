@@ -1,80 +1,18 @@
-{% load i18n %}
-<aside class="app-sidebar d-none d-lg-flex">
-    <nav class="nav flex-column w-100">
-        <div class="nav-section-title">{% trans "Main" %}</div>
-        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
-            <i class="bi bi-speedometer2"></i>
-            <span>{% trans "Dashboard" %}</span>
-        </a>
+{% load i18n static %}
+<!-- Desktop Sidebar -->
+<aside class="app-sidebar d-none d-lg-flex" aria-label="{% trans 'Main Navigation' %}">
+    <nav class="nav flex-column w-100 sidebar-nav-container">
+        {% include "includes/sidebar_menu.html" with nav_id_prefix="desktop" %}
 
-        {% if user.is_rector %}
-            <div class="nav-section-title mt-2">{% trans "Organization" %}</div>
-            <a class="nav-link {% if request.resolver_match.url_name == 'organization_overview' %}active{% endif %}" href="{% url 'organization_overview' %}">
-                <i class="bi bi-diagram-3"></i>
-                <span>{% trans "Structure" %}</span>
+        <!-- BOTTOM ACCOUNT / LOGOUT -->
+        <div class="sidebar-account-footer mt-auto pt-2 border-top">
+            <a class="nav-link" href="{% url 'profile' %}" data-bs-title="{% trans 'My Profile' %}">
+                <i class="bi bi-person-circle"></i>
+                <span>{% trans "My Profile" %}</span>
             </a>
-            <a class="nav-link {% if 'department' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'department_list' %}">
-                <i class="bi bi-building"></i>
-                <span>{% trans "Departments" %}</span>
-            </a>
-            <a class="nav-link {% if 'position' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'position_list' %}">
-                <i class="bi bi-briefcase"></i>
-                <span>{% trans "Positions" %}</span>
-            </a>
-            <a class="nav-link {% if 'responsibility' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'responsibility_list' %}">
-                <i class="bi bi-diagram-2"></i>
-                <span>{% trans "Vice Rectors" %}</span>
-            </a>
-
-            <div class="nav-section-title mt-2">{% trans "Administration" %}</div>
-            <a class="nav-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'user_list' %}">
-                <i class="bi bi-people"></i>
-                <span>{% trans "Users" %}</span>
-            </a>
-            <a class="nav-link {% if request.resolver_match.url_name == 'audit_list' %}active{% endif %}" href="{% url 'audit_list' %}">
-                <i class="bi bi-clock-history"></i>
-                <span>{% trans "Audit Logs" %}</span>
-            </a>
-
-        {% elif user.is_vice_rector %}
-            <div class="nav-section-title mt-2">{% trans "Management" %}</div>
-            <a class="nav-link {% if 'department' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'department_list' %}">
-                <i class="bi bi-building"></i>
-                <span>{% trans "My Departments" %}</span>
-            </a>
-            <a class="nav-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'user_list' %}">
-                <i class="bi bi-people"></i>
-                <span>{% trans "Employees" %}</span>
-            </a>
-            <a class="nav-link {% if request.resolver_match.url_name == 'organization_overview' %}active{% endif %}" href="{% url 'organization_overview' %}">
-                <i class="bi bi-diagram-3"></i>
-                <span>{% trans "Organization" %}</span>
-            </a>
-
-        {% elif user.is_department_head %}
-            <div class="nav-section-title mt-2">{% trans "Management" %}</div>
-            {% if user.department %}
-                <a class="nav-link {% if 'department' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'department_detail' pk=user.department.pk %}">
-                    <i class="bi bi-building"></i>
-                    <span>{% trans "My Department" %}</span>
-                </a>
-            {% endif %}
-            <a class="nav-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'user_list' %}">
-                <i class="bi bi-people"></i>
-                <span>{% trans "Employees" %}</span>
-            </a>
-        {% endif %}
-
-        <div class="nav-section-title mt-2">{% trans "Account" %}</div>
-        <a class="nav-link {% if 'profile' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'profile' %}">
-            <i class="bi bi-person"></i>
-            <span>{% trans "My Profile" %}</span>
-        </a>
-
-        <div class="mt-auto pt-3 border-top">
-            <form action="{% url 'logout' %}" method="post">
+            <form action="{% url 'logout' %}" method="post" class="m-0">
                 {% csrf_token %}
-                <button class="nav-link text-danger w-100 text-start border-0 bg-transparent" type="submit">
+                <button class="nav-link text-danger w-100 text-start border-0 bg-transparent" type="submit" data-bs-title="{% trans 'Logout' %}">
                     <i class="bi bi-box-arrow-right"></i>
                     <span>{% trans "Logout" %}</span>
                 </button>
@@ -83,81 +21,34 @@
     </nav>
 </aside>
 
-<!-- Mobile Offcanvas Sidebar -->
+<!-- Mobile Offcanvas Drawer Sidebar -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
-    <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title fw-bold" id="mobileSidebarLabel">{% trans "Menu" %}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{% trans 'Close' %}"></button>
+    <div class="offcanvas-header border-bottom py-3">
+        <a class="navbar-brand d-flex align-items-center gap-2 py-0 text-decoration-none" href="{% url 'dashboard' %}">
+            <img src="{% static 'images/logo-dark.png' %}" alt="Al-Xorazmiy Universiteti" class="brand-logo-img logo-dark-variant">
+            <img src="{% static 'images/logo-light.png' %}" alt="Al-Xorazmiy Universiteti" class="brand-logo-img logo-light-variant">
+            <span class="fw-bold fs-6">{% trans "Al-Khwarizmi University" %}</span>
+        </a>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="{% trans 'Close' %}"></button>
     </div>
     <div class="offcanvas-body p-3">
-        <nav class="nav flex-column">
-            <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
-                <i class="bi bi-speedometer2"></i>
-                <span>{% trans "Dashboard" %}</span>
-            </a>
+        <nav class="nav flex-column w-100 sidebar-nav-container">
+            {% include "includes/sidebar_menu.html" with nav_id_prefix="mobile" %}
 
-            {% if user.is_rector %}
-                <div class="nav-section-title mt-2">{% trans "Organization" %}</div>
-                <a class="nav-link" href="{% url 'organization_overview' %}">
-                    <i class="bi bi-diagram-3"></i>
-                    <span>{% trans "Structure" %}</span>
+            <!-- BOTTOM ACCOUNT / LOGOUT -->
+            <div class="sidebar-account-footer mt-auto pt-2 border-top">
+                <a class="nav-link" href="{% url 'profile' %}" data-bs-title="{% trans 'My Profile' %}">
+                    <i class="bi bi-person-circle"></i>
+                    <span>{% trans "My Profile" %}</span>
                 </a>
-                <a class="nav-link" href="{% url 'department_list' %}">
-                    <i class="bi bi-building"></i>
-                    <span>{% trans "Departments" %}</span>
-                </a>
-                <a class="nav-link" href="{% url 'position_list' %}">
-                    <i class="bi bi-briefcase"></i>
-                    <span>{% trans "Positions" %}</span>
-                </a>
-                <a class="nav-link" href="{% url 'responsibility_list' %}">
-                    <i class="bi bi-diagram-2"></i>
-                    <span>{% trans "Vice Rectors" %}</span>
-                </a>
-                <div class="nav-section-title mt-2">{% trans "Administration" %}</div>
-                <a class="nav-link" href="{% url 'user_list' %}">
-                    <i class="bi bi-people"></i>
-                    <span>{% trans "Users" %}</span>
-                </a>
-                <a class="nav-link" href="{% url 'audit_list' %}">
-                    <i class="bi bi-clock-history"></i>
-                    <span>{% trans "Audit Logs" %}</span>
-                </a>
-
-            {% elif user.is_vice_rector %}
-                <div class="nav-section-title mt-2">{% trans "Management" %}</div>
-                <a class="nav-link" href="{% url 'department_list' %}">
-                    <i class="bi bi-building"></i>
-                    <span>{% trans "My Departments" %}</span>
-                </a>
-                <a class="nav-link" href="{% url 'user_list' %}">
-                    <i class="bi bi-people"></i>
-                    <span>{% trans "Employees" %}</span>
-                </a>
-                <a class="nav-link" href="{% url 'organization_overview' %}">
-                    <i class="bi bi-diagram-3"></i>
-                    <span>{% trans "Organization" %}</span>
-                </a>
-
-            {% elif user.is_department_head %}
-                <div class="nav-section-title mt-2">{% trans "Management" %}</div>
-                {% if user.department %}
-                    <a class="nav-link" href="{% url 'department_detail' pk=user.department.pk %}">
-                        <i class="bi bi-building"></i>
-                        <span>{% trans "My Department" %}</span>
-                    </a>
-                {% endif %}
-                <a class="nav-link" href="{% url 'user_list' %}">
-                    <i class="bi bi-people"></i>
-                    <span>{% trans "Employees" %}</span>
-                </a>
-            {% endif %}
-
-            <div class="nav-section-title mt-2">{% trans "Account" %}</div>
-            <a class="nav-link" href="{% url 'profile' %}">
-                <i class="bi bi-person"></i>
-                <span>{% trans "My Profile" %}</span>
-            </a>
+                <form action="{% url 'logout' %}" method="post" class="m-0">
+                    {% csrf_token %}
+                    <button class="nav-link text-danger w-100 text-start border-0 bg-transparent" type="submit" data-bs-title="{% trans 'Logout' %}">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>{% trans "Logout" %}</span>
+                    </button>
+                </form>
+            </div>
         </nav>
     </div>
 </div>

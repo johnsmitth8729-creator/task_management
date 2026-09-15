@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Search Results" %} | University Task Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4" style="max-width: 1100px;">
+    <!-- Search Form Header -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h3 class="fw-bold mb-3"><i class="bi bi-search text-primary me-2"></i>{% trans "Enterprise Global Search" %}</h3>
+            <form method="get" action="{% url 'global_search' %}">
+                <div class="input-group input-group-lg">
+                    <input type="text" name="q" class="form-control" placeholder="{% trans 'Search across Tasks, Requests, Documents, Employees...' %}" value="{{ search_query }}" autofocus>
+                    <button class="btn btn-primary px-4" type="submit">{% trans "Search" %}</button>
+                </div>
+            </form>
+            {% if search_query %}
+                <div class="mt-2 text-muted small">
+                    {% blocktrans count count=total_matches %}Found {{ count }} result matching your query.{% plural %}Found {{ count }} results matching your query.{% endblocktrans %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if search_query %}
+        <div class="row g-4">
+            <!-- 1. Tasks Results -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0"><i class="bi bi-check2-square text-primary me-2"></i>{% trans "Tasks" %} ({{ tasks|length }})</h6>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for task in tasks %}
+                            <a href="{% url 'task_detail' pk=task.id %}" class="list-group-item list-group-item-action py-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="font-monospace fw-bold small text-primary">{{ task.task_number }}</span>
+                                    <span class="badge {% if task.status == 'COMPLETED' %}bg-success{% elif task.is_overdue %}bg-danger{% else %}bg-secondary{% endif %}">
+                                        {{ task.get_status_display }}
+                                    </span>
+                                </div>
+                                <h6 class="mb-1 fw-bold">{{ task.title }}</h6>
+                                <small class="text-muted d-block">{{ task.responsible_department.name|default:"General" }}</small>
+                            </a>
+                        {% empty %}
+                            <div class="p-3 text-center text-muted small">{% trans "No matching tasks found." %}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Requests / Applications Results -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0"><i class="bi bi-file-earmark-text text-info me-2"></i>{% trans "University Applications" %} ({{ requests|length }})</h6>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for req in requests %}
+                            <a href="{% url 'operations:request_detail' pk=req.id %}" class="list-group-item list-group-item-action py-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="font-monospace fw-bold small text-info">{{ req.request_number }}</span>
+                                    <span class="badge {% if req.status == 'APPROVED' %}bg-success{% elif req.status == 'REJECTED' %}bg-danger{% else %}bg-primary{% endif %}">
+                                        {{ req.get_status_display }}
+                                    </span>
+                                </div>
+                                <h6 class="mb-1 fw-bold">{{ req.subject }}</h6>
+                                <small class="text-muted d-block">{{ req.request_type.name }} • {{ req.requester.display_name }}</small>
+                            </a>
+                        {% empty %}
+                            <div class="p-3 text-center text-muted small">{% trans "No matching applications found." %}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Official Documents Results -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0"><i class="bi bi-file-earmark-ruled text-secondary me-2"></i>{% trans "Official Documents & Orders" %} ({{ documents|length }})</h6>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for doc in documents %}
+                            <a href="{% url 'operations:document_detail' pk=doc.id %}" class="list-group-item list-group-item-action py-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="font-monospace fw-bold small text-secondary">{{ doc.doc_number }}</span>
+                                    <span class="badge bg-light text-dark">v{{ doc.version }}</span>
+                                </div>
+                                <h6 class="mb-1 fw-bold">{{ doc.title }}</h6>
+                                <small class="text-muted d-block">{{ doc.get_document_type_display }}</small>
+                            </a>
+                        {% empty %}
+                            <div class="p-3 text-center text-muted small">{% trans "No matching documents found." %}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Employees / Users Directory Results -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0"><i class="bi bi-people text-success me-2"></i>{% trans "Staff Directory" %} ({{ users|length }})</h6>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for u in users %}
+                            <div class="list-group-item py-3 d-flex align-items-center gap-3">
+                                <div class="rounded-circle bg-success text-white p-2 d-flex align-items-center justify-content-center fw-bold" style="width: 38px; height: 38px;">
+                                    {{ u.initials }}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0 fw-bold">{{ u.display_name }}</h6>
+                                    <small class="text-muted d-block">{{ u.department.name|default:"General Staff" }} • {{ u.position.name|default:"Staff" }}</small>
+                                    <small class="text-secondary font-monospace">{{ u.email }}</small>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="p-3 text-center text-muted small">{% trans "No matching employees found." %}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

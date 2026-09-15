@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ req.request_number }} | {% trans "Request Details" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4" style="max-width: 1100px;">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-secondary font-monospace">{{ req.request_number }}</span>
+                {% if req.status == 'APPROVED' %}
+                    <span class="badge bg-success">{% trans "Approved" %}</span>
+                {% elif req.status == 'REJECTED' %}
+                    <span class="badge bg-danger">{% trans "Rejected" %}</span>
+                {% elif req.status == 'CANCELLED' %}
+                    <span class="badge bg-secondary">{% trans "Cancelled" %}</span>
+                {% else %}
+                    <span class="badge bg-primary">{% trans "In Review" %}</span>
+                {% endif %}
+                {% if req.is_urgent %}
+                    <span class="badge bg-warning text-dark"><i class="bi bi-lightning-fill"></i> {% trans "Urgent" %}</span>
+                {% endif %}
+            </div>
+            <h2 class="h3 fw-bold mb-0">{{ req.subject }}</h2>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'operations:my_requests' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>{% trans "My Applications" %}
+            </a>
+            {% if req.requester == user and req.status == 'SUBMITTED' %}
+                <form action="{% url 'operations:request_cancel' pk=req.id %}" method="post" onsubmit="return confirm('{% trans 'Are you sure you want to cancel this request?' %}');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="bi bi-x-circle me-1"></i>{% trans "Cancel Request" %}
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Main Content & Details -->
+        <div class="col-lg-7">
+            <!-- Summary Info -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title fw-bold mb-0"><i class="bi bi-info-circle me-2 text-primary"></i>{% trans "Application Details" %}</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">{% trans "Service / Request Type" %}</small>
+                            <span class="fw-semibold">{{ req.request_type.name }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">{% trans "Category" %}</small>
+                            <span>{{ req.request_type.category.name }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">{% trans "Requester" %}</small>
+                            <span class="fw-semibold">{{ req.requester.display_name }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">{% trans "Department" %}</small>
+                            <span>{{ req.department.name|default:"General Staff" }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">{% trans "Submitted On" %}</small>
+                            <span>{{ req.created_at|date:"M d, Y H:i" }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">{% trans "Resolution SLA" %}</small>
+                            <span class="font-monospace">{{ req.request_type.sla_resolution_hours }} {% trans "hours" %}</span>
+                        </div>
+                    </div>
+
+                    {% if req.details_payload %}
+                        <hr class="my-4">
+                        <h6 class="fw-bold mb-3">{% trans "Custom Form Submission Data" %}</h6>
+                        <dl class="row mb-0">
+                            {% for key, val in req.details_payload.items %}
+                                <dt class="col-sm-4 text-muted">{{ key|title }}</dt>
+                                <dd class="col-sm-8 fw-semibold">{{ val }}</dd>
+                            {% endfor %}
+                        </dl>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Decision Box for Authorized Approver -->
+            {% if can_decide and form %}
+                <div class="card border-0 shadow-sm border-start border-4 border-warning">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title fw-bold mb-0 text-warning-emphasis">
+                            <i class="bi bi-pen-fill me-2"></i>{% trans "Your Decision Required" %} ({{ pending_step.get_approver_role_display }})
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">{% trans "Official Decision" %}</label>
+                                <div class="d-flex gap-4">
+                                    {% for choice in form.decision %}
+                                        <div class="form-check">
+                                            {{ choice.tag }}
+                                            <label class="form-check-label fw-semibold" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">{% trans "Comments / Justification" %}</label>
+                                {{ form.comments }}
+                            </div>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check2-circle me-1"></i>{% trans "Submit Decision" %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Approval Timeline -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title fw-bold mb-0"><i class="bi bi-diagram-3 me-2 text-primary"></i>{% trans "Approval Pipeline" %}</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="timeline">
+                        {% for step in steps %}
+                            <div class="d-flex gap-3 mb-4 position-relative">
+                                <div>
+                                    {% if step.status == 'APPROVED' %}
+                                        <div class="rounded-circle bg-success text-white p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                            <i class="bi bi-check-lg"></i>
+                                        </div>
+                                    {% elif step.status == 'REJECTED' %}
+                                        <div class="rounded-circle bg-danger text-white p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                            <i class="bi bi-x-lg"></i>
+                                        </div>
+                                    {% elif step.status == 'PENDING' %}
+                                        <div class="rounded-circle bg-primary text-white p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                            <i class="bi bi-hourglass-split"></i>
+                                        </div>
+                                    {% else %}
+                                        <div class="rounded-circle bg-secondary-subtle text-secondary p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                            <i class="bi bi-dash"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="fw-bold mb-0">Step {{ step.step_number }}: {{ step.get_approver_role_display }}</h6>
+                                        <span class="badge {% if step.status == 'APPROVED' %}bg-success{% elif step.status == 'REJECTED' %}bg-danger{% elif step.status == 'PENDING' %}bg-primary{% else %}bg-secondary{% endif %}">
+                                            {{ step.get_status_display }}
+                                        </span>
+                                    </div>
+                                    {% if step.decided_by %}
+                                        <small class="text-muted d-block mt-1">{% trans "Decided by" %} {{ step.decided_by.display_name }} on {{ step.decided_at|date:"M d, H:i" }}</small>
+                                    {% elif step.assigned_approver %}
+                                        <small class="text-muted d-block mt-1">{% trans "Assigned to" %} {{ step.assigned_approver.display_name }}</small>
+                                    {% endif %}
+                                    {% if step.comments %}
+                                        <div class="p-2 bg-light rounded small mt-2 border text-secondary">
+                                            <em>"{{ step.comments }}"</em>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p class="text-muted small">{% trans "No approval steps defined." %}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

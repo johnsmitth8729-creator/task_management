@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "KPI Evaluation Periods" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">{% trans "KPI Evaluation Periods" %}</h1>
+            <p class="text-muted mb-0">{% trans "Manage monthly, quarterly, and annual performance evaluation cycles" %}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'kpi:dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>{% trans "Dashboard" %}
+            </a>
+            {% if can_manage %}
+                <a href="{% url 'kpi:period_create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i>{% trans "Create Period" %}
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">{% trans "Period Name & Code" %}</th>
+                        <th>{% trans "Type" %}</th>
+                        <th>{% trans "Start Date" %}</th>
+                        <th>{% trans "End Date" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th class="pe-3 text-end">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in periods %}
+                        <tr>
+                            <td class="ps-3">
+                                <span class="fw-bold text-dark d-block">{{ p.name }}</span>
+                                <small class="text-muted font-monospace">{{ p.code }}</small>
+                            </td>
+                            <td><span class="badge bg-secondary-subtle text-secondary">{{ p.get_period_type_display }}</span></td>
+                            <td>{{ p.start_date|date:"d M Y" }}</td>
+                            <td>{{ p.end_date|date:"d M Y" }}</td>
+                            <td>
+                                {% if p.status == 'OPEN' %}
+                                    <span class="badge bg-success-subtle text-success">{% trans "Open / Active" %}</span>
+                                {% elif p.status == 'CLOSED' %}
+                                    <span class="badge bg-secondary-subtle text-secondary">{% trans "Closed" %}</span>
+                                {% else %}
+                                    <span class="badge bg-warning-subtle text-warning">{% trans "Draft" %}</span>
+                                {% endif %}
+                            </td>
+                            <td class="pe-3 text-end">
+                                {% if p.status == 'OPEN' and user.is_rector or user.is_superuser %}
+                                    <form action="{% url 'kpi:period_close' pk=p.pk %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmAction({title: '{% trans "Close KPI Period" %}', message: '{% trans "Close and finalize all KPI evaluations for period %(code)s?" %}' % {'code': '{{ p.code }}'}, confirmBtnText: '{% trans "Yes, Close Period" %}', form: this.closest('form')})">
+                                            <i class="bi bi-lock me-1"></i>{% trans "Close Period" %}
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-calendar-x display-6 d-block mb-2"></i>
+                                {% trans "No evaluation periods created yet." %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

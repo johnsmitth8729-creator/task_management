@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Cancel Task" %} &mdash; {{ task.task_number }} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">{% trans "Dashboard" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'task_list' %}">{% trans "Tasks" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'task_detail' pk=task.pk %}">{{ task.task_number }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{% trans "Cancel Task" %}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="content-panel border-danger">
+                <div class="d-flex align-items-center gap-2 text-danger mb-2">
+                    <i class="bi bi-exclamation-octagon-fill fs-4"></i>
+                    <h1 class="h4 fw-bold mb-0">{% trans "Cancel Task" %}</h1>
+                </div>
+                <p class="text-muted small mb-3">
+                    {% blocktrans with number=task.task_number title=task.title %}You are about to cancel task <strong>{{ number }}: {{ title }}</strong>. This action will stop active work and record the cancellation in the official audit trail.{% endblocktrans %}
+                </p>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger py-2 small mb-3">
+                            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-4">
+                        <label for="{{ form.cancellation_reason.id_for_label }}" class="form-label fw-semibold">
+                            {{ form.cancellation_reason.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.cancellation_reason }}
+                        <small class="text-muted d-block mt-1">{{ form.cancellation_reason.help_text }}</small>
+                        {% for error in form.cancellation_reason.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{% url 'task_detail' pk=task.pk %}" class="btn btn-outline-secondary">{% trans "Go Back" %}</a>
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="bi bi-x-circle me-1"></i>{% trans "Confirm Cancellation" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

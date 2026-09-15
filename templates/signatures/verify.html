@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}
+    {% if verification.is_valid %}
+        {% trans "Verified Electronic Signature" %} &mdash; {{ verification.verification_id }}
+    {% elif verification.status == 'REVOKED' %}
+        {% trans "Revoked Electronic Signature" %} &mdash; {{ verification.verification_id }}
+    {% else %}
+        {% trans "Invalid Signature Verification" %}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% include "signatures/verify_card.html" %}
+{% endblock %}
+
+{% block auth_content %}
+    {% include "signatures/verify_card.html" %}
+{% endblock %}

@@ -1,0 +1,105 @@
+{% load i18n %}
+<!-- Working Year Selector Modal -->
+<div class="modal fade" id="yearSelectModal" tabindex="-1" aria-labelledby="yearSelectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title d-flex align-items-center gap-2" id="yearSelectModalLabel">
+                    <i class="bi bi-calendar3 text-primary fs-5"></i>
+                    <span>{% trans "Select Working Year" %}</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex align-items-center justify-content-between p-3 rounded bg-body-tertiary mb-3 border">
+                    <div>
+                        <div class="text-muted small">{% trans "Current Active Year" %}</div>
+                        <div class="fs-4 fw-bold text-primary">{{ active_year }}</div>
+                    </div>
+                    {% if active_year == current_calendar_year %}
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                            <i class="bi bi-check-circle me-1"></i>{% trans "Current Year" %}
+                        </span>
+                    {% elif is_historical_year %}
+                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-2">
+                            <i class="bi bi-archive me-1"></i>{% trans "Archive Year" %}
+                        </span>
+                    {% else %}
+                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-3 py-2">
+                            <i class="bi bi-arrow-up-right-circle me-1"></i>{% trans "New Year" %}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <p class="text-muted small mb-3">
+                    <i class="bi bi-info-circle me-1 text-secondary"></i>
+                    {% trans "Each year's data starts fresh from scratch. All previous years' tasks, reports, and records remain securely preserved." %}
+                </p>
+
+                <div class="d-grid gap-2 mb-3">
+                    {% for item in available_years_info %}
+                        <form action="{% url 'set_active_year' %}" method="post" class="m-0">
+                            {% csrf_token %}
+                            <input type="hidden" name="year" value="{{ item.year }}">
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="btn w-100 p-3 text-start d-flex align-items-center justify-content-between {% if item.is_active %}btn-primary text-white shadow-sm{% else %}btn-outline-secondary text-body{% endif %}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="fs-4">
+                                        {% if item.is_current %}
+                                            <i class="bi bi-calendar-check"></i>
+                                        {% elif item.is_archive %}
+                                            <i class="bi bi-archive"></i>
+                                        {% else %}
+                                            <i class="bi bi-calendar-plus"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold fs-6">{{ item.year }}</div>
+                                        <div class="small {% if item.is_active %}text-white-50{% else %}text-muted{% endif %}">
+                                            {% if item.is_current %}
+                                                {% trans "Current calendar year" %}
+                                            {% elif item.is_archive %}
+                                                {% trans "Past year — preserved historical records" %}
+                                            {% else %}
+                                                {% trans "New year — starts fresh with new data" %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if item.is_active %}
+                                    <span class="badge bg-white text-primary fw-semibold px-2 py-1">
+                                        <i class="bi bi-check-lg"></i> {% trans "Active" %}
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted small">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </span>
+                                {% endif %}
+                            </button>
+                        </form>
+                    {% endfor %}
+                </div>
+
+                <!-- Custom Year Selection -->
+                <div class="border-top pt-3">
+                    <form action="{% url 'set_active_year' %}" method="post" class="row g-2 align-items-center">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <div class="col-8">
+                            <label for="customYearInput" class="visually-hidden">{% trans "Other year" %}</label>
+                            <input type="number" name="year" id="customYearInput" class="form-control form-control-sm" placeholder="{% trans 'Other year (e.g. 2028)' %}" min="2020" max="2035">
+                        </div>
+                        <div class="col-4">
+                            <button type="submit" class="btn btn-sm btn-secondary w-100">
+                                {% trans "Switch" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer border-top py-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">{% trans "Close" %}</button>
+            </div>
+        </div>
+    </div>
+</div>

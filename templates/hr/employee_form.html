@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}
+{% if is_create %}{% trans "Add Employee" %}{% else %}{% trans "Edit Employee" %}{% endif %} | {% trans "TASK MANAGEMENT" %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h1 class="h3 fw-bold text-dark mb-1">
+                        {% if is_create %}{% trans "Add New Employee" %}{% else %}{% trans "Edit Employee Profile" %}{% endif %}
+                    </h1>
+                    <p class="text-muted mb-0">{% trans "Set personal details, departmental placement, grade level, and reporting hierarchy" %}</p>
+                </div>
+                <a href="{% url 'hr:overview' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>{% trans "Back to Directory" %}
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger mb-4">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <!-- Basic Information -->
+                        <h5 class="fw-bold mb-3 text-dark border-bottom pb-2">
+                            <i class="bi bi-person me-2 text-primary"></i>{% trans "Personal & Contact Information" %}
+                        </h5>
+
+                        {% if is_create %}
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">{{ form.username.label }}</label>
+                                    {{ form.username }}
+                                    {% if form.username.errors %}<div class="text-danger small mt-1">{{ form.username.errors }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">{{ form.password.label }}</label>
+                                    {{ form.password }}
+                                    {% if form.password.errors %}<div class="text-danger small mt-1">{{ form.password.errors }}</div>{% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">{{ form.first_name.label }}</label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">{{ form.last_name.label }}</label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}<div class="text-danger small mt-1">{{ form.last_name.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">{{ form.email.label }}</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">{{ form.phone.label }}</label>
+                                {{ form.phone }}
+                                {% if form.phone.errors %}<div class="text-danger small mt-1">{{ form.phone.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Organizational Placement -->
+                        <h5 class="fw-bold mb-3 text-dark border-bottom pb-2">
+                            <i class="bi bi-building me-2 text-primary"></i>{% trans "Organizational Placement & Hierarchy" %}
+                        </h5>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">{{ form.department.label }}</label>
+                                {{ form.department }}
+                                {% if form.department.errors %}<div class="text-danger small mt-1">{{ form.department.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">{{ form.position.label }}</label>
+                                {{ form.position }}
+                                {% if form.position.errors %}<div class="text-danger small mt-1">{{ form.position.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">{{ form.grade.label }}</label>
+                                {{ form.grade }}
+                                {% if form.grade.errors %}<div class="text-danger small mt-1">{{ form.grade.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">{{ form.supervisor.label }}</label>
+                                {{ form.supervisor }}
+                                {% if form.supervisor.errors %}<div class="text-danger small mt-1">{{ form.supervisor.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">{{ form.employment_status.label }}</label>
+                                {{ form.employment_status }}
+                                {% if form.employment_status.errors %}<div class="text-danger small mt-1">{{ form.employment_status.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">{{ form.employment_start_date.label }}</label>
+                                {{ form.employment_start_date }}
+                                {% if form.employment_start_date.errors %}<div class="text-danger small mt-1">{{ form.employment_start_date.errors }}</div>{% endif %}
+                            </div>
+                            {% if not is_create and form.employment_end_date %}
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">{{ form.employment_end_date.label }}</label>
+                                    {{ form.employment_end_date }}
+                                    {% if form.employment_end_date.errors %}<div class="text-danger small mt-1">{{ form.employment_end_date.errors }}</div>{% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                            <a href="{% url 'hr:overview' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check-lg me-1"></i>{% trans "Save Employee" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const deptSelect = document.getElementById('id_department');
+    const posSelect = document.getElementById('id_position');
+    const supSelect = document.getElementById('id_supervisor');
+
+    if (!deptSelect || !posSelect || !supSelect) return;
+
+    const excludeUserId = "{% if employee %}{{ employee.id }}{% endif %}";
+
+    deptSelect.addEventListener('change', function () {
+        const deptId = this.value;
+        const currentPos = posSelect.value;
+        const currentSup = supSelect.value;
+
+        const url = `{% url 'hr:api_department_options' %}?department_id=${encodeURIComponent(deptId)}&exclude_user_id=${encodeURIComponent(excludeUserId)}`;
+
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.json())
+            .then(data => {
+                // Update Positions
+                const currentPosVal = posSelect.value;
+                posSelect.innerHTML = '<option value="">-- {% trans "Select Position" %} --</option>';
+                let posFound = false;
+                data.positions.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id;
+                    opt.textContent = p.name;
+                    if (p.id === currentPosVal) {
+                        opt.selected = true;
+                        posFound = true;
+                    }
+                    posSelect.appendChild(opt);
+                });
+                if (!posFound && currentPosVal) {
+                    posSelect.value = '';
+                }
+
+                // Update Supervisors
+                const currentSupVal = supSelect.value;
+                supSelect.innerHTML = '<option value="">-- {% trans "No Supervisor (Direct Leadership)" %} --</option>';
+                let supFound = false;
+                data.supervisors.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.textContent = s.label;
+                    if (s.id === currentSupVal) {
+                        opt.selected = true;
+                        supFound = true;
+                    }
+                    supSelect.appendChild(opt);
+                });
+                if (!supFound && currentSupVal) {
+                    supSelect.value = '';
+                }
+            })
+            .catch(err => console.error('Error fetching department options:', err));
+    });
+});
+</script>
+{% endblock %}
+

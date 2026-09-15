@@ -2,113 +2,44 @@
 
 TASK MANAGEMENT is a university-wide internal platform for task management, workflow monitoring, approvals, analytics, KPI, and configurable payroll/bonus calculation.
 
-This repository is currently in **Phase 2: Organization, Users & RBAC / Admin**. The organizational hierarchy, department and position management, user management, Vice Rector department responsibilities, Department Head assignments, object-level & department-scoped RBAC, audit logging, role-based navigation, and university-branded UI are fully implemented and verified.
+This repository is currently in **Phase 10: Advanced Analytics, Executive Monitoring & Reporting**. The platform features enterprise-grade aggregated analytics: real-time executive dashboards, department comparative matrices, workflow bottleneck duration detection, strict deadline compliance tracking, Report Center with saved report presets, multi-format streaming exports (ReportLab PDF, openpyxl Excel, RFC-compliant UTF-8 CSV), interactive Chart.js visualization, and subsystem health check diagnostics.
 
 ## Purpose
 
 The platform digitizes the university task lifecycle:
 
-Rector or Vice Rector creates a task -> Department receives it -> Department Head assigns employee(s) -> Employee accepts and works on it -> Employee submits result/report/files -> Department Head performs first approval -> Rector or responsible Vice Rector performs final approval -> Task contributes to monitoring, analytics, KPI, and later configurable bonus/salary calculation.
+Rector or Vice Rector creates a task -> Department receives it -> Department Head assigns employee(s) -> Employee accepts and works on it -> Employee submits result/report/files -> Department Head performs first approval -> Rector or responsible Vice Rector performs final approval -> Task is cryptographically signed with an Ed25519 electronic signature and QR verification seal -> Task contributes to monitoring, analytics, KPI, and configurable payroll/bonus calculation.
 
-## Technology Stack
-
-Backend:
-- Python (3.12+)
-- Django (6.1+)
-- Django ORM
-- Django REST Framework where API functionality is appropriate
-
-Frontend:
-- HTML5
-- CSS3
-- JavaScript
-- Bootstrap 5
-- Bootstrap Icons
-- Chart.js where required
-
-Database:
-- PostgreSQL
-
-Background processing:
-- Celery
-- Redis
-
-Production:
-- Gunicorn
-- Nginx
-
-Development:
-- Git
-- GitHub
-- Google Antigravity Pro
-- Antigravity IDE
-
-Node.js is not required.
+---
 
 ## Main Roles
 
-- Rector / Superadmin
-- Vice Rector / Admin
-- Department Head
-- Employee / User
+- **Technical Superadmin** (System administration, user roles, technical audit logs, security analytics, signature administrative authority)
+- **Rector** (Global operational authority, executive analytics, aggregated KPI & payroll metrics, final deliverable approvals, university-wide electronic signature authority)
+- **Vice Rector** (Scoped to assigned departments, sector analytics, aggregated department metrics, stage 2 approvals, scoped electronic signature authority)
+- **Department Head** (Scoped to own department, departmental analytics, first approvals, aggregated department metrics)
+- **Finance Officer** (Operational payroll execution, salary configurations, payroll analytics, adjustment approvals, disbursements)
+- **HR Manager** (Personnel management, grade and organizational assignments, workforce analytics)
+- **Employee** (Assigned tasks execution, self-service performance analytics, salary profile, payslips, and personal payroll records)
 
-Authorization must be enforced on the backend. Frontend visibility is only a usability feature and is never considered security.
+Authorization is enforced strictly on the backend. Frontend visibility is only a usability feature and is never considered security.
 
-## Main Workflow
-
-1. Rector or scoped Vice Rector creates and assigns a task to a department.
-2. Department Head receives the task and assigns one or more responsible employees.
-3. Employee accepts the task and works on it.
-4. Employee uploads result files and submits for first approval.
-5. Department Head approves or rejects with a reason.
-6. Approved work moves to second approval.
-7. Rector or responsible Vice Rector approves or rejects.
-8. Completed task data becomes available for analytics, KPI, and later payroll/bonus calculation.
-
-## Project Architecture
-
-The proposed Django domains are:
-
-- `core`: shared settings, base models, i18n utilities, audit helpers.
-- `accounts`: users, roles, authentication-facing profile data.
-- `organization`: university hierarchy, departments, positions, Vice Rector scopes.
-- `tasks`: task records, assignments, submissions, comments, deadlines, attachments.
-- `workflow`: task state transitions and approval policy services.
-- `notifications`: notification models and dispatch architecture.
-- `files`: secure file validation, storage metadata, permission-controlled downloads.
-- `analytics`: query/read-model architecture for dashboards and reports.
-- `kpi`: configurable KPI rules, snapshots, and scoring inputs.
-- `payroll`: payroll configuration and restricted salary/bonus records.
-- `reports`: PDF, DOCX, Excel, and CSV report generation architecture.
-
-See `docs/ARCHITECTURE.md` for details.
-
-## Languages
-
-The application supports:
-
-- Uzbek (`uz`)
-- English (`en`)
-- Russian (`ru`)
-
-Django internationalization is used across views, forms, and templates with language switcher support.
+---
 
 ## Development Phases
-
-The roadmap is frozen:
 
 - [x] **Phase 0: Blueprint & Architecture**
 - [x] **Phase 1: Foundation & Authentication**
 - [x] **Phase 2: Organization, Users & RBAC / Admin**
-- [ ] Phase 3: Complete Task Engine
-- [ ] Phase 4: Employee & Department Workflow
-- [ ] Phase 5: Approval, Rejection & Completion
-- [ ] Phase 6: Notifications, Deadlines & Escalation
-- [ ] Phase 7: Files, Notes, History, Search & Reports
-- [ ] Phase 8: Analytics, Workload & Performance
-- [ ] Phase 9: KPI, Payroll & Final Production
+- [x] **Phase 3: Complete Task Engine**
+- [x] **Phase 4: Employee & Department Workflow**
+- [x] **Phase 5: Approval, Rejection & Completion**
+- [x] **Phase 6: Files, Reports, Documents & Submission System**
+- [x] **Phase 7: HR Hierarchy, Organizational Structure & Granular Delegation**
+- [x] **Phase 8: Payroll & Compensation Engine with Strict Role Governance & Privacy**
+- [x] **Phase 9: Electronic Signature, QR Verification & Cryptographic Task Signing**
+- [x] **Phase 10: Advanced Analytics, Executive Monitoring & Reporting**
 
-Future development proceeds phase by phase.
 
 ---
 
@@ -169,7 +100,7 @@ python manage.py migrate
 
 ### 5. Seed Development Data
 
-Populate initial test roles, departments, positions, responsibilities, and accounts:
+Populate initial test roles, departments, positions, responsibilities, accounts, task types, templates, and tasks:
 
 ```bash
 python manage.py seed_dev
@@ -199,4 +130,15 @@ python manage.py runserver
 ```
 
 Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser.
+
+### 8. Analytics & Report Center Routes (Phase 10)
+
+- **Executive Monitoring**: `http://127.0.0.1:8000/analytics/executive/` (or `/analytics/` redirect)
+- **Department Analytics**: `http://127.0.0.1:8000/analytics/departments/`
+- **Personal Performance**: `http://127.0.0.1:8000/analytics/personal/`
+- **HR Workforce Analytics**: `http://127.0.0.1:8000/analytics/hr/`
+- **Payroll Financial Analytics**: `http://127.0.0.1:8000/analytics/payroll/`
+- **Signature Analytics**: `http://127.0.0.1:8000/analytics/signatures/`
+- **Security Audit Analytics**: `http://127.0.0.1:8000/analytics/audit/`
+- **Report Center**: `http://127.0.0.1:8000/analytics/reports/`
 

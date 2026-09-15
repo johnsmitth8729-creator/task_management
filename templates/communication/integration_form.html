@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Configure Integration" %} | University Task Management{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 800px;">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="h3 fw-bold mb-1"><i class="bi bi-hdd-network text-primary me-2"></i>{% if form.instance.pk %}{% trans "Edit Integration" %}{% else %}{% trans "New Integration" %}{% endif %}</h2>
+            <p class="text-muted mb-0">{% trans "Configure API connector endpoint and security credentials." %}</p>
+        </div>
+        <a href="{% url 'communication:integration_hub' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>{% trans "Back to Integrations Hub" %}
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label fw-semibold">{% trans "Integration Name" %} <span class="text-danger">*</span></label>
+                        {{ form.name }}
+                        {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">{% trans "Service Type" %} <span class="text-danger">*</span></label>
+                        {{ form.service_type }}
+                        {% if form.service_type.errors %}<div class="text-danger small">{{ form.service_type.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">{% trans "API Base Endpoint URL" %} <span class="text-danger">*</span></label>
+                        {{ form.api_endpoint }}
+                        {% if form.api_endpoint.errors %}<div class="text-danger small">{{ form.api_endpoint.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">{% trans "Auth Header Name" %}</label>
+                        {{ form.auth_header_name }}
+                        {% if form.auth_header_name.errors %}<div class="text-danger small">{{ form.auth_header_name.errors }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label fw-semibold">{% trans "Authentication Token / Secret" %}</label>
+                        {{ form.auth_token }}
+                        {% if form.auth_token.errors %}<div class="text-danger small">{{ form.auth_token.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-check form-switch mt-2">
+                            {{ form.is_active }}
+                            <label class="form-check-label fw-semibold ms-2" for="{{ form.is_active.id_for_label }}">
+                                {% trans "Enable Active Synchronization" %}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'communication:integration_hub' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-check2 me-1"></i>{% trans "Save Integration" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

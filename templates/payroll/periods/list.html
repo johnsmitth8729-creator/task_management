@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Payroll Periods" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">
+                <i class="bi bi-calendar3 text-primary me-2"></i>{% trans "Payroll Periods" %}
+            </h1>
+            <p class="text-muted small mb-0">{% trans "Cycle management, calculation triggers, and audit status of university payroll runs." %}</p>
+        </div>
+        {% if can_manage_payroll %}
+            <div>
+                <a href="{% url 'payroll:period_create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i>{% trans "Create Period" %}
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Periods Table -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small text-uppercase">
+                    <tr>
+                        <th>{% trans "Period Name" %}</th>
+                        <th>{% trans "Code" %}</th>
+                        <th>{% trans "Cycle" %}</th>
+                        <th>{% trans "Date Range" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Employees / Records" %}</th>
+                        <th class="text-end">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in periods %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'payroll:period_detail' pk=p.pk %}" class="fw-bold text-dark text-decoration-none">
+                                    {{ p.name }}
+                                </a>
+                            </td>
+                            <td><span class="badge bg-light text-dark border">{{ p.code }}</span></td>
+                            <td>{{ p.get_period_type_display }}</td>
+                            <td>{{ p.start_date|date:"Y-m-d" }} &rarr; {{ p.end_date|date:"Y-m-d" }}</td>
+                            <td>
+                                <span class="badge {% if p.status == 'APPROVED' %}bg-success{% elif p.status == 'OPEN' %}bg-primary{% elif p.status == 'CLOSED' %}bg-secondary{% else %}bg-warning-subtle text-warning-emphasis{% endif %}">
+                                    {{ p.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="fw-semibold">{{ p.records.count }}</span> {% trans "records" %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'payroll:period_detail' pk=p.pk %}" class="btn btn-sm btn-light" title="{% trans 'View Period' %}">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'payroll:period_export_excel' pk=p.pk %}" class="btn btn-sm btn-outline-success" title="{% trans 'Export Excel' %}">
+                                    <i class="bi bi-file-earmark-excel"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-calendar-x display-6 d-block mb-2"></i>
+                                {% trans "No payroll periods created yet." %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+            <div class="card-footer bg-white border-top py-3">
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+                    {% endif %}
+                    <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

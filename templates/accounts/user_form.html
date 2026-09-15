@@ -92,6 +92,45 @@
 
                     <div class="row g-3 mb-3">
                         <div class="col-12 col-md-6">
+                            <label for="{{ form.employment_start_date.id_for_label }}" class="form-label fw-semibold">{{ form.employment_start_date.label }}</label>
+                            {{ form.employment_start_date }}
+                            {% for error in form.employment_start_date.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.work_presence.id_for_label }}" class="form-label fw-semibold">{{ form.work_presence.label }}</label>
+                            {{ form.work_presence }}
+                            {% for error in form.work_presence.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.leave_status.id_for_label }}" class="form-label fw-semibold">{{ form.leave_status.label }}</label>
+                            {{ form.leave_status }}
+                            {% for error in form.leave_status.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.leave_notes.id_for_label }}" class="form-label fw-semibold">{{ form.leave_notes.label }}</label>
+                            {{ form.leave_notes }}
+                            {% for error in form.leave_notes.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.cv_file.id_for_label }}" class="form-label fw-semibold d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-file-earmark-pdf text-danger me-1"></i>{{ form.cv_file.label }}</span>
+                                {% if object and object.cv_file %}
+                                    <a href="{{ object.cv_file.url }}" target="_blank" class="small text-danger text-decoration-none">
+                                        <i class="bi bi-eye me-1"></i>{% trans "View current CV" %}
+                                    </a>
+                                {% endif %}
+                            </label>
+                            {{ form.cv_file }}
+                            <div class="form-text small text-muted">{% trans "Upload PDF CV (max 10MB)" %}</div>
+                            {% for error in form.cv_file.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
                             <label for="{{ form.preferred_language.id_for_label }}" class="form-label fw-semibold">{{ form.preferred_language.label }}</label>
                             {{ form.preferred_language }}
                             {% for error in form.preferred_language.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}

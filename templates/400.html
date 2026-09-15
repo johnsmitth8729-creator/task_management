@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}400 — {% trans "Bad Request" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container py-5 my-auto">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 text-center">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+                <div class="mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-secondary-subtle text-secondary p-4 mb-2" style="width: 100px; height: 100px;">
+                        <i class="bi bi-exclamation-circle-fill fs-1"></i>
+                    </div>
+                    <div class="display-3 fw-bold font-monospace text-secondary mt-2">400</div>
+                    <h2 class="h4 fw-bold text-dark mb-2">{% trans "Bad Request" %}</h2>
+                    <p class="text-muted mb-0">
+                        {% trans "The server could not understand the request due to invalid syntax or parameters." %}
+                    </p>
+                    {% if exception %}
+                        <div class="alert alert-secondary-subtle text-secondary small mt-3 mb-0 text-start">
+                            <i class="bi bi-info-circle me-1"></i>{{ exception }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="d-flex flex-column flex-sm-row justify-content-center gap-2 pt-3 border-top">
+                    <button type="button" onclick="window.history.back()" class="btn btn-outline-secondary px-4">
+                        <i class="bi bi-arrow-left me-1"></i>{% trans "Go Back" %}
+                    </button>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary px-4">
+                            <i class="bi bi-speedometer2 me-1"></i>{% trans "Dashboard" %}
+                        </a>
+                    {% else %}
+                        <a href="{% url 'home' %}" class="btn btn-primary px-4">
+                            <i class="bi bi-house me-1"></i>{% trans "Home" %}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="text-muted small mt-4">
+                &copy; {% now "Y" %} {% trans "Al-Khwarizmi University. All rights reserved." %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block auth_content %}
+<div class="container py-5 my-auto">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 text-center">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+                <div class="mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-secondary-subtle text-secondary p-4 mb-2" style="width: 100px; height: 100px;">
+                        <i class="bi bi-exclamation-circle-fill fs-1"></i>
+                    </div>
+                    <div class="display-3 fw-bold font-monospace text-secondary mt-2">400</div>
+                    <h2 class="h4 fw-bold text-dark mb-2">{% trans "Bad Request" %}</h2>
+                    <p class="text-muted mb-0">
+                        {% trans "The server could not understand the request due to invalid syntax or parameters." %}
+                    </p>
+                    {% if exception %}
+                        <div class="alert alert-secondary-subtle text-secondary small mt-3 mb-0 text-start">
+                            <i class="bi bi-info-circle me-1"></i>{{ exception }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="d-flex flex-column flex-sm-row justify-content-center gap-2 pt-3 border-top">
+                    <button type="button" onclick="window.history.back()" class="btn btn-outline-secondary px-4">
+                        <i class="bi bi-arrow-left me-1"></i>{% trans "Go Back" %}
+                    </button>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary px-4">
+                            <i class="bi bi-speedometer2 me-1"></i>{% trans "Dashboard" %}
+                        </a>
+                    {% else %}
+                        <a href="{% url 'home' %}" class="btn btn-primary px-4">
+                            <i class="bi bi-house me-1"></i>{% trans "Home" %}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="text-muted small mt-4">
+                &copy; {% now "Y" %} {% trans "Al-Khwarizmi University. All rights reserved." %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

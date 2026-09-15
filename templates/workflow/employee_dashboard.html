@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "My Workflow" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/workflow.css' %}?v=4" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-3 px-lg-4">
+
+    <!-- Page header -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="stat-icon" style="background:var(--app-primary-subtle);color:var(--app-primary);font-size:1.5rem;">
+            <i class="bi bi-person-check-fill"></i>
+        </div>
+        <div>
+            <h1 class="h4 fw-bold mb-0">{% trans "My Workflow" %}</h1>
+            <p class="text-muted small mb-0">{{ user.display_name }}
+                {% if user.position %} — {{ user.position.name }}{% endif %}
+                {% if user.department %} · {{ user.department.name }}{% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- 4 workflow cards -->
+    <div class="workflow-cards-grid mb-5">
+
+        <!-- Incoming Tasks -->
+        <a href="{% url 'employee_incoming' %}" class="workflow-card card-incoming">
+            <div class="wf-icon"><i class="bi bi-inbox-fill"></i></div>
+            <div class="wf-count text-primary">{{ incoming_count }}</div>
+            <div class="wf-label">{% trans "Incoming Tasks" %}</div>
+        </a>
+
+        <!-- In Progress -->
+        <a href="{% url 'employee_inprogress' %}" class="workflow-card card-inprogress">
+            <div class="wf-icon"><i class="bi bi-play-circle-fill"></i></div>
+            <div class="wf-count" style="color:#d97706;">{{ in_progress_count }}</div>
+            <div class="wf-label">{% trans "In Progress" %}</div>
+        </a>
+
+        <!-- First Approval -->
+        <a href="{% url 'employee_first_approval' %}" class="workflow-card card-approval1">
+            <div class="wf-icon"><i class="bi bi-send-check-fill"></i></div>
+            <div class="wf-count" style="color:#059669;">{{ first_approval_count }}</div>
+            <div class="wf-label">{% trans "First Approval" %}</div>
+        </a>
+
+        <!-- Second Approval / Awaiting Final Approval -->
+        <a href="{% url 'employee_second_approval' %}" class="workflow-card card-approval2">
+            <div class="wf-icon"><i class="bi bi-shield-check"></i></div>
+            <div class="wf-count" style="color:#7c3aed;">{{ second_approval_count }}</div>
+            <div class="wf-label">{% trans "Awaiting Final Approval" %}</div>
+        </a>
+
+    </div>
+
+    <!-- Quick nav row -->
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="content-panel h-100">
+                <h6 class="fw-bold mb-3"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>{% trans "Quick Actions" %}</h6>
+                <div class="d-flex flex-column gap-2">
+                    <a href="{% url 'employee_incoming' %}" class="btn btn-outline-primary btn-sm text-start">
+                        <i class="bi bi-inbox me-2"></i>{% trans "View Incoming Tasks" %}
+                        {% if incoming_count > 0 %}<span class="badge bg-primary ms-auto">{{ incoming_count }}</span>{% endif %}
+                    </a>
+                    <a href="{% url 'employee_inprogress' %}" class="btn btn-outline-warning btn-sm text-start">
+                        <i class="bi bi-play-circle me-2"></i>{% trans "My In-Progress Tasks" %}
+                        {% if in_progress_count > 0 %}<span class="badge bg-warning text-dark ms-auto">{{ in_progress_count }}</span>{% endif %}
+                    </a>
+                    <a href="{% url 'employee_first_approval' %}" class="btn btn-outline-success btn-sm text-start">
+                        <i class="bi bi-send-check me-2"></i>{% trans "Submitted Tasks" %}
+                        {% if first_approval_count > 0 %}<span class="badge bg-success ms-auto">{{ first_approval_count }}</span>{% endif %}
+                    </a>
+                    <a href="{% url 'task_list' %}" class="btn btn-outline-secondary btn-sm text-start">
+                        <i class="bi bi-list-check me-2"></i>{% trans "All My Tasks" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="content-panel h-100">
+                <h6 class="fw-bold mb-3"><i class="bi bi-info-circle-fill text-info me-2"></i>{% trans "Workflow Status" %}</h6>
+                <ul class="list-unstyled mb-0" style="font-size:.9rem;">
+                    <li class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted">{% trans "Incoming Tasks" %}</span>
+                        <strong>{{ incoming_count }}</strong>
+                    </li>
+                    <li class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted">{% trans "In Progress" %}</span>
+                        <strong>{{ in_progress_count }}</strong>
+                    </li>
+                    <li class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted">{% trans "Awaiting First Approval" %}</span>
+                        <strong>{{ first_approval_count }}</strong>
+                    </li>
+                    <li class="d-flex justify-content-between py-2">
+                        <span class="text-muted">{% trans "Awaiting Final Approval" %}</span>
+                        <strong>{{ second_approval_count }}</strong>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

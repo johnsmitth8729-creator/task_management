@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Incoming Tasks" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/workflow.css' %}?v=4" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-3 px-lg-4">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+        <div class="stat-icon" style="background:#eff6ff;color:#3b82f6;font-size:1.4rem;">
+            <i class="bi bi-inbox-fill"></i>
+        </div>
+        <div>
+            <h1 class="h4 fw-bold mb-0">{% trans "Incoming Tasks" %}</h1>
+            <p class="text-muted small mb-0">{% trans "Tasks assigned to you that need acceptance" %}</p>
+        </div>
+        <div class="ms-auto">
+            <span class="badge bg-primary fs-6 px-3 py-2">{{ page_obj.paginator.count }} {% trans "tasks" %}</span>
+        </div>
+    </div>
+
+    {% if assignments %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+            {% for assignment in assignments %}
+            <div class="col">
+                {% include "includes/workflow/assignment_card.html" %}
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+        <nav class="mt-4 d-flex justify-content-center" aria-label="{% trans 'Pagination' %}">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}"><i class="bi bi-chevron-left"></i></a></li>
+                {% endif %}
+                {% for i in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == i %}active{% endif %}">
+                        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                    </li>
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}"><i class="bi bi-chevron-right"></i></a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+    {% else %}
+        <div class="empty-state text-center py-5">
+            <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
+            <h5 class="fw-bold">{% trans "No Incoming Tasks" %}</h5>
+            <p class="text-muted">{% trans "You have no tasks waiting for acceptance." %}</p>
+            <a href="{% url 'task_list' %}" class="btn btn-primary">{% trans "View All Tasks" %}</a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

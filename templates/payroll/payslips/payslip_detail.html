@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Payslip" %} — {{ record.period.name }} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-9">
+
+            <!-- Top Actions -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <a href="{% url 'payroll:my_payslips' %}" class="btn btn-sm btn-outline-secondary">
+                    &larr; {% trans "Back to My Payslips" %}
+                </a>
+                <a href="{% url 'payroll:record_pdf' pk=record.pk %}" class="btn btn-sm btn-danger">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>{% trans "Download Official PDF" %}
+                </a>
+            </div>
+
+            <!-- Official Institutional Payslip Card -->
+            <div class="card border-0 shadow-sm rounded-3 p-4 p-lg-5">
+
+                <!-- Header -->
+                <div class="text-center border-bottom pb-4 mb-4">
+                    <h5 class="text-primary text-uppercase fw-bold tracking-wide mb-1">{% trans "Al-Khwarizmi University" %}</h5>
+                    <h3 class="fw-bold text-dark mb-1">{% trans "OFFICIAL SALARY & COMPENSATION PAYSLIP" %}</h3>
+                    <p class="text-muted small mb-0">{{ record.period.name }} ({{ record.period.code }})</p>
+                </div>
+
+                <!-- Metadata Grid -->
+                <div class="row g-3 p-3 bg-light rounded-3 mb-4 small">
+                    <div class="col-6 col-md-3">
+                        <span class="text-muted d-block">{% trans "Employee" %}:</span>
+                        <strong>{{ record.employee_name_snapshot }}</strong>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <span class="text-muted d-block">{% trans "Department" %}:</span>
+                        <strong>{{ record.department_snapshot|default:"-" }}</strong>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <span class="text-muted d-block">{% trans "Position" %}:</span>
+                        <strong>{{ record.position_snapshot|default:"-" }}</strong>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <span class="text-muted d-block">{% trans "Grade / Level" %}:</span>
+                        <strong>{{ record.grade_snapshot|default:"-" }}</strong>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <span class="text-muted d-block">{% trans "Disbursement Status" %}:</span>
+                        <span class="badge {% if record.payment_status == 'PAID' %}bg-success text-white{% else %}bg-primary text-white{% endif %}">
+                            {{ record.get_payment_status_display }}
+                        </span>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <span class="text-muted d-block">{% trans "Payment Date" %}:</span>
+                        <strong>{{ record.paid_at|date:"Y-m-d"|default:"-" }}</strong>
+                    </div>
+                    <div class="col-6 col-md-6">
+                        <span class="text-muted d-block">{% trans "Payment Reference" %}:</span>
+                        <strong>{{ record.payment_reference|default:_("Pending Disbursement") }}</strong>
+                    </div>
+                </div>
+
+                <!-- Breakdown Table -->
+                <h5 class="fw-bold text-dark mb-3">{% trans "Earnings & Allowances" %}</h5>
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered align-middle mb-0">
+                        <thead class="table-light text-muted small text-uppercase">
+                            <tr>
+                                <th>{% trans "Item Description" %}</th>
+                                <th>{% trans "Type" %}</th>
+                                <th>{% trans "Rate / Basis" %}</th>
+                                <th class="text-end">{% trans "Amount" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for line in lines %}
+                                <tr>
+                                    <td class="fw-semibold">{{ line.name_snapshot }}</td>
+                                    <td>
+                                        {% if line.component_type == 'ALLOWANCE' %}
+                                            <span class="badge bg-primary-subtle text-primary">{% trans "Allowance" %}</span>
+                                        {% elif line.component_type == 'BONUS' %}
+                                            <span class="badge bg-warning-subtle text-warning-emphasis">{% trans "Bonus" %}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger-subtle text-danger">{% trans "Deduction" %}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if line.rate_or_value %}
+                                            {{ line.rate_or_value|floatformat:2 }}
+                                            {% if line.calculation_type == 'PERCENTAGE' %}%{% endif %}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end fw-bold {% if line.component_type == 'DEDUCTION' %}text-danger{% else %}text-dark{% endif %}">
+                                        {% if line.component_type == 'DEDUCTION' %}-{% else %}+{% endif %}
+                                        {{ line.amount|floatformat:2 }} UZS
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Totals Box -->
+                <div class="border rounded-3 p-4 bg-light mb-4">
+                    <div class="d-flex justify-content-between py-1">
+                        <span class="text-muted">{% trans "Base Salary" %}:</span>
+                        <span class="fw-semibold">{{ record.base_salary|floatformat:2 }} UZS</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-1">
+                        <span class="text-muted">{% trans "Total Allowances" %}:</span>
+                        <span>{{ record.total_allowances|floatformat:2 }} UZS</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-1">
+                        <span class="text-muted">{% trans "Total Bonuses & KPI Incentives" %}:</span>
+                        <span class="text-warning-emphasis fw-semibold">+{{ record.total_bonuses|add:record.kpi_bonus|floatformat:2 }} UZS</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-top border-bottom my-2">
+                        <span class="fw-bold text-dark">{% trans "Gross Salary" %}:</span>
+                        <span class="fw-bold text-dark fs-5">{{ record.gross_salary|floatformat:2 }} UZS</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 text-danger">
+                        <span>{% trans "Taxes Deducted" %}:</span>
+                        <span>-{{ record.tax_total|floatformat:2 }} UZS</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 text-danger">
+                        <span>{% trans "Other Deductions" %}:</span>
+                        <span>-{{ record.total_deductions|floatformat:2 }} UZS</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-3 border-top mt-2 bg-white rounded-2 px-3 shadow-sm">
+                        <span class="fw-bold text-success fs-5">{% trans "NET SALARY PAYABLE" %}:</span>
+                        <span class="fw-bold text-success fs-4">{{ record.net_salary|floatformat:2 }} {{ record.currency }}</span>
+                    </div>
+                </div>
+
+                <!-- Footer Note -->
+                <div class="text-center text-muted small pt-2">
+                    <i class="bi bi-shield-check text-success me-1"></i>
+                    {% trans "This payslip is an official institutional record generated by the Task Management University Payroll System." %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

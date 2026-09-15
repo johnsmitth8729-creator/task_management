@@ -1,14 +1,39 @@
 {% load i18n %}
-<form action="{% url 'set_language' %}" method="post" class="language-switcher">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ request.get_full_path }}">
-    <div class="btn-group btn-group-sm" role="group" aria-label="{% trans 'Language' %}">
-        {% get_current_language as CURRENT_LANGUAGE %}
-        {% for code, name in LANGUAGES %}
-            <button type="submit" name="language" value="{{ code }}" class="btn {% if code == CURRENT_LANGUAGE %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                {{ code|upper }}
-            </button>
+{% get_current_language as CURRENT_LANGUAGE %}
+{% get_available_languages as LANGUAGES_LIST %}
+<div class="dropdown">
+    <button class="lang-switcher-btn"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            aria-label="{% trans 'Switch language' %}"
+            title="{% trans 'Language' %}">
+        <i class="bi bi-globe2 fs-5"></i>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end lang-dropdown-menu shadow-sm">
+        <li class="px-3 py-1 border-bottom">
+            <small class="text-muted fw-semibold text-uppercase" style="font-size:.7rem;letter-spacing:.05em;">
+                {% trans "Language" %}
+            </small>
+        </li>
+        {% for lang_code, lang_name in LANGUAGES_LIST %}
+            <li>
+                <form action="{% url 'set_language' %}" method="post" class="m-0">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <input type="hidden" name="language" value="{{ lang_code }}">
+                    <button type="submit" class="dropdown-item{% if lang_code == CURRENT_LANGUAGE %} active{% endif %}">
+                        <i class="bi bi-check2 lang-check-icon {% if lang_code != CURRENT_LANGUAGE %}invisible{% endif %}"></i>
+                        {% if lang_code == 'en' %}
+                            🇬🇧 English
+                        {% elif lang_code == 'uz' %}
+                            🇺🇿 O'zbekcha
+                        {% else %}
+                            {{ lang_name }}
+                        {% endif %}
+                    </button>
+                </form>
+            </li>
         {% endfor %}
-    </div>
-</form>
-
+    </ul>
+</div>

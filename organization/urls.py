@@ -15,10 +15,14 @@ from .views import (
     ViceRectorResponsibilityCreateView,
     ViceRectorResponsibilityDeleteView,
     ViceRectorResponsibilityListView,
+    ActingRectorAssignView,
+    ActingRectorRevokeView,
 )
 
 urlpatterns = [
     path('organization/', OrganizationOverviewView.as_view(), name='organization_overview'),
+    path('organization/assign-acting-rector/', ActingRectorAssignView.as_view(), name='acting_rector_assign'),
+    path('organization/delegations/<uuid:pk>/revoke/', ActingRectorRevokeView.as_view(), name='acting_rector_revoke'),
     # Departments
     path('departments/', DepartmentListView.as_view(), name='department_list'),
     path('departments/create/', DepartmentCreateView.as_view(), name='department_create'),

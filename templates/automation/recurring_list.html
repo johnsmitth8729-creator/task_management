@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Recurring Tasks" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-gradient mb-1">
+                <i class="bi bi-calendar-check me-2 text-primary"></i>{% trans "Scheduled Recurring Tasks" %}
+            </h1>
+            <p class="text-muted small mb-0">{% trans "Automated creation of routine daily, weekly, monthly, and quarterly deliverables." %}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'automation:dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>{% trans "Dashboard" %}
+            </a>
+            {% if user.is_superuser or user.is_rector %}
+                <a href="{% url 'automation:recurring_create' %}" class="btn btn-success btn-sm">
+                    <i class="bi bi-calendar-plus me-1"></i>{% trans "New Recurring Task" %}
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>{% trans "Task Title" %}</th>
+                            <th>{% trans "Department" %}</th>
+                            <th>{% trans "Priority" %}</th>
+                            <th>{% trans "Recurrence" %}</th>
+                            <th>{% trans "Generation Time" %}</th>
+                            <th>{% trans "Last Executed" %}</th>
+                            <th>{% trans "Status" %}</th>
+                            {% if user.is_superuser or user.is_rector %}<th class="text-end">{% trans "Actions" %}</th>{% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">{{ task.title }}</div>
+                                    {% if task.description %}<small class="text-muted">{{ task.description|truncatechars:50 }}</small>{% endif %}
+                                </td>
+                                <td><span class="badge bg-secondary">{{ task.responsible_department.name }}</span></td>
+                                <td>
+                                    <span class="badge {% if task.priority == 'CRITICAL' %}bg-danger{% elif task.priority == 'HIGH' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %}">
+                                        {{ task.get_priority_display }}
+                                    </span>
+                                </td>
+                                <td><span class="badge bg-primary bg-opacity-10 text-primary">{{ task.get_recurrence_type_display }}</span></td>
+                                <td class="small">{{ task.time_of_day }} (+{{ task.deadline_offset_days }}d deadline)</td>
+                                <td class="small text-muted">{{ task.last_run_at|date:"Y-m-d H:i"|default:"Never" }}</td>
+                                <td>
+                                    {% if task.is_active %}
+                                        <span class="badge bg-success">{% trans "Active" %}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{% trans "Inactive" %}</span>
+                                    {% endif %}
+                                </td>
+                                {% if user.is_superuser or user.is_rector %}
+                                    <td class="text-end">
+                                        <a href="{% url 'automation:recurring_edit' task.pk %}" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">{% trans "No recurring tasks scheduled." %}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "In Progress" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/workflow.css' %}?v=4" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-3 px-lg-4">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+        <div class="stat-icon" style="background:#fffbeb;color:#d97706;font-size:1.4rem;">
+            <i class="bi bi-play-circle-fill"></i>
+        </div>
+        <div>
+            <h1 class="h4 fw-bold mb-0">{% trans "In Progress" %}</h1>
+            <p class="text-muted small mb-0">{% trans "Tasks you are currently working on" %}</p>
+        </div>
+        <div class="ms-auto">
+            <span class="badge bg-warning text-dark fs-6 px-3 py-2">{{ page_obj.paginator.count }} {% trans "tasks" %}</span>
+        </div>
+    </div>
+
+    {% if assignments %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+            {% for assignment in assignments %}
+            <div class="col">
+                {% include "includes/workflow/assignment_card.html" %}
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+        <nav class="mt-4 d-flex justify-content-center">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}"><i class="bi bi-chevron-left"></i></a></li>{% endif %}
+                {% for i in page_obj.paginator.page_range %}<li class="page-item {% if page_obj.number == i %}active{% endif %}"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>{% endfor %}
+                {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}"><i class="bi bi-chevron-right"></i></a></li>{% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+    {% else %}
+        <div class="empty-state text-center py-5">
+            <i class="bi bi-play-circle fs-1 text-muted mb-3 d-block"></i>
+            <h5 class="fw-bold">{% trans "No Tasks In Progress" %}</h5>
+            <p class="text-muted">{% trans "Accept incoming tasks to start working." %}</p>
+            <a href="{% url 'employee_incoming' %}" class="btn btn-primary">{% trans "View Incoming Tasks" %}</a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-09-04T12:28:52.267267",
+  "backup_filename": "backup_20260904_122851_dev_test.json",
+  "tag": "dev_test",
+  "sha256_checksum": "f0fdd69357ac6f27e310333528a682dd2ff936bb5f232843812897b71a8c437a",
+  "file_size_bytes": 500913,
+  "file_size_human": "489.17 KB",
+  "db_engine": "django.db.backends.postgresql",
+  "excluded_models": [
+    "contenttypes",
+    "auth.Permission",
+    "sessions.Session"
+  ]
+}

@@ -1,0 +1,17 @@
+{% load i18n %}
+{% comment %}Reusable deadline display pill{% endcomment %}
+{% with days=assignment.task.days_until_deadline %}
+{% if assignment.task.is_overdue %}
+    <span class="deadline-pill overdue"><i class="bi bi-exclamation-circle-fill"></i> {% trans "Overdue" %}</span>
+{% elif days == 0 %}
+    <span class="deadline-pill today"><i class="bi bi-clock-fill"></i> {% trans "Due today" %}</span>
+{% elif days == 1 %}
+    <span class="deadline-pill today"><i class="bi bi-clock"></i> {% trans "Due tomorrow" %}</span>
+{% elif days <= 7 %}
+    <span class="deadline-pill soon"><i class="bi bi-calendar-event"></i> {{ days }} {% trans "days left" %}</span>
+{% elif days is not None %}
+    <span class="deadline-pill normal"><i class="bi bi-calendar3"></i> {{ days }} {% trans "days left" %}</span>
+{% else %}
+    <span class="deadline-pill normal"><i class="bi bi-calendar3"></i> {% trans "No deadline" %}</span>
+{% endif %}
+{% endwith %}

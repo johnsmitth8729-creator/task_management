@@ -1,0 +1,30 @@
+{% load i18n %}
+{% if active_navigation_section and contextual_navigation_items and contextual_navigation_items|length > 1 %}
+<nav class="contextual-nav-bar" aria-label="{{ active_navigation_section.label }}">
+    <div class="contextual-nav-container">
+        <div class="contextual-nav-header d-none d-md-flex">
+            <i class="{{ active_navigation_section.icon }} contextual-nav-icon"></i>
+            <span class="contextual-nav-title">{{ active_navigation_section.label }}</span>
+        </div>
+        <div class="contextual-nav-scroll-wrap">
+            <ul class="nav contextual-nav-list" role="tablist">
+                {% for item in contextual_navigation_items %}
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link contextual-nav-link {% if item.is_active %}active{% endif %}"
+                       href="{{ item.url }}"
+                       title="{{ item.title|default:item.label }}">
+                        {% if item.icon %}
+                            <i class="{{ item.icon }} contextual-item-icon"></i>
+                        {% endif %}
+                        <span class="contextual-item-text">{{ item.label }}</span>
+                        {% if item.badge %}
+                            <span class="badge rounded-pill {{ item.badge.css_class }} ms-1 font-monospace">{{ item.badge.count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</nav>
+{% endif %}

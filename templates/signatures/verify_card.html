@@ -1,0 +1,377 @@
+{% load i18n static %}
+
+<style>
+/* ==========================================================================
+   High-Contrast Adaptive Verification Certificate Card
+   Supports both Light Mode & Dark Mode with perfect contrast and readability.
+   ========================================================================== */
+
+:root {
+    --v-card-bg: #ffffff;
+    --v-card-border: #cbd5e1;
+    --v-card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --v-header-bg: #ffffff;
+    --v-title-text: #0f172a;
+    --v-muted-text: #64748b;
+    --v-section-title: #1e40af;
+    --v-label-text: #475569;
+    --v-value-text: #0f172a;
+    --v-primary-text: #2563eb;
+    --v-crypto-bg: #f8fafc;
+    --v-crypto-border: #e2e8f0;
+    --v-hash-bg: #eff6ff;
+    --v-hash-border: #bfdbfe;
+    --v-hash-text: #1e40af;
+    --v-footer-bg: #f8fafc;
+    --v-footer-border: #e2e8f0;
+    --v-footer-text: #64748b;
+    --v-qr-bg: #ffffff;
+    --v-qr-border: #cbd5e1;
+    --v-btn-bg: #f8fafc;
+    --v-btn-border: #cbd5e1;
+    --v-btn-text: #334155;
+    --v-badge-bg: #ecfdf5;
+    --v-badge-border: #a7f3d0;
+    --v-badge-text: #047857;
+}
+
+[data-theme="dark"] {
+    --v-card-bg: #1e293b;
+    --v-card-border: #334155;
+    --v-card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    --v-header-bg: #1e293b;
+    --v-title-text: #f8fafc;
+    --v-muted-text: #94a3b8;
+    --v-section-title: #60a5fa;
+    --v-label-text: #94a3b8;
+    --v-value-text: #f8fafc;
+    --v-primary-text: #38bdf8;
+    --v-crypto-bg: #0f172a;
+    --v-crypto-border: #334155;
+    --v-hash-bg: rgba(56, 189, 248, 0.12);
+    --v-hash-border: rgba(56, 189, 248, 0.35);
+    --v-hash-text: #38bdf8;
+    --v-footer-bg: #0f172a;
+    --v-footer-border: #334155;
+    --v-footer-text: #94a3b8;
+    --v-qr-bg: #ffffff;
+    --v-qr-border: #475569;
+    --v-btn-bg: #0f172a;
+    --v-btn-border: #475569;
+    --v-btn-text: #f8fafc;
+    --v-badge-bg: rgba(16, 185, 129, 0.18);
+    --v-badge-border: rgba(16, 185, 129, 0.4);
+    --v-badge-text: #34d399;
+}
+
+.verification-card {
+    background-color: var(--v-card-bg) !important;
+    border: 1px solid var(--v-card-border) !important;
+    box-shadow: var(--v-card-shadow) !important;
+}
+
+.verification-header {
+    background-color: var(--v-header-bg) !important;
+    border-bottom: 1px solid var(--v-card-border) !important;
+}
+.verification-header .verification-title {
+    color: var(--v-title-text) !important;
+}
+.verification-header .verification-sub {
+    color: var(--v-muted-text) !important;
+}
+
+.verification-body {
+    background-color: var(--v-card-bg) !important;
+}
+
+.verification-section-title {
+    color: var(--v-section-title) !important;
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+}
+
+.verification-table {
+    margin-bottom: 0 !important;
+}
+
+.verification-table th {
+    color: var(--v-label-text) !important;
+    font-weight: 500 !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 7px 0 !important;
+    vertical-align: top;
+    font-size: 0.9rem;
+}
+
+.verification-table td {
+    color: var(--v-value-text) !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 7px 0 7px 12px !important;
+    vertical-align: top;
+    font-size: 0.9rem;
+}
+
+.verification-id-highlight {
+    color: var(--v-primary-text) !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.verification-qr-wrapper {
+    background-color: var(--v-qr-bg) !important;
+    border: 1px solid var(--v-qr-border) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    padding: 12px;
+    border-radius: 12px;
+    display: inline-block;
+}
+
+.verification-qr-caption {
+    color: var(--v-muted-text) !important;
+    font-size: 0.8rem;
+}
+
+.verification-dl-btn {
+    border: 1px solid var(--v-btn-border) !important;
+    background-color: var(--v-btn-bg) !important;
+    color: var(--v-btn-text) !important;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+.verification-dl-btn:hover {
+    background-color: var(--v-primary-text) !important;
+    color: #ffffff !important;
+    border-color: var(--v-primary-text) !important;
+}
+
+.verification-crypto-box {
+    background-color: var(--v-crypto-bg) !important;
+    border: 1px solid var(--v-crypto-border) !important;
+}
+.verification-crypto-title {
+    color: var(--v-title-text) !important;
+    font-size: 0.85rem;
+}
+.verification-crypto-box .crypto-label {
+    color: var(--v-label-text) !important;
+    font-size: 0.82rem;
+}
+.verification-crypto-box .crypto-val {
+    color: var(--v-value-text) !important;
+    font-size: 0.85rem;
+}
+.verification-crypto-box .crypto-hash {
+    background-color: var(--v-hash-bg) !important;
+    border: 1px solid var(--v-hash-border) !important;
+    color: var(--v-hash-text) !important;
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    word-break: break-all;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.verification-badge {
+    background-color: var(--v-badge-bg) !important;
+    border: 1px solid var(--v-badge-border) !important;
+    color: var(--v-badge-text) !important;
+    font-weight: 600 !important;
+    padding: 5px 12px !important;
+    border-radius: 9999px !important;
+    font-size: 0.8rem !important;
+}
+
+.verification-footer {
+    background-color: var(--v-footer-bg) !important;
+    border-top: 1px solid var(--v-footer-border) !important;
+    color: var(--v-footer-text) !important;
+    font-size: 0.8rem;
+}
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-7">
+
+            <!-- Official University Card -->
+            <div class="card border-0 rounded-4 overflow-hidden verification-card">
+
+                <!-- Header Brand & Security Ribbon -->
+                <div class="p-4 text-center verification-header">
+                    <div class="mb-3 d-flex justify-content-center align-items-center">
+                        <img src="{% static 'images/logo-dark.png' %}" alt="Al-Khwarizmi University" class="logo-dark-variant" style="max-height: 52px; width: auto; object-fit: contain;">
+                        <img src="{% static 'images/logo-light.png' %}" alt="Al-Khwarizmi University" class="logo-light-variant" style="max-height: 52px; width: auto; object-fit: contain;">
+                    </div>
+                    <h1 class="h4 fw-bold mb-1 verification-title">{% trans "Electronic Signature Verification" %}</h1>
+                    <p class="verification-sub mb-0">{% trans "Official University Public Verification Service" %} &bull; Al-Khwarizmi University</p>
+                </div>
+
+                <!-- Status Banner -->
+                {% if verification.is_valid %}
+                    <div class="p-4 text-center text-white" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%);">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-white text-success rounded-circle mb-2 shadow-sm" style="width: 56px; height: 56px;">
+                            <i class="bi bi-patch-check-fill fs-2"></i>
+                        </div>
+                        <h2 class="h3 fw-bold mb-1 text-white">{% trans "VALID SIGNATURE" %}</h2>
+                        <p class="mb-0 small text-white-50">
+                            <i class="bi bi-shield-check me-1"></i>{% trans "Document Integrity Verified & Authentic" %}
+                        </p>
+                    </div>
+                {% elif verification.status == 'REVOKED' %}
+                    <div class="p-4 text-center text-white" style="background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-white text-warning rounded-circle mb-2 shadow-sm" style="width: 56px; height: 56px;">
+                            <i class="bi bi-exclamation-triangle-fill fs-2"></i>
+                        </div>
+                        <h2 class="h3 fw-bold mb-1 text-white">{% trans "SIGNATURE REVOKED" %}</h2>
+                        <p class="mb-0 small text-white-50">
+                            {% trans "This electronic signature has been officially revoked." %}
+                        </p>
+                    </div>
+                {% else %}
+                    <div class="p-4 text-center text-white" style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-white text-danger rounded-circle mb-2 shadow-sm" style="width: 56px; height: 56px;">
+                            <i class="bi bi-x-circle-fill fs-2"></i>
+                        </div>
+                        <h2 class="h3 fw-bold mb-1 text-white">{% trans "INVALID SIGNATURE" %}</h2>
+                        <p class="mb-0 small text-white-50">
+                            {{ verification.error_message|default:_("The signature could not be verified or record was tampered with.") }}
+                        </p>
+                    </div>
+                {% endif %}
+
+                <!-- Verification Body -->
+                <div class="card-body p-4 p-md-5 verification-body">
+
+                    {% if verification.status == 'NOT_FOUND' %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-search fs-1 text-muted d-block mb-3"></i>
+                            <h3 class="h5 fw-bold text-danger">{% trans "Verification Identifier Not Found" %}</h3>
+                            <p class="verification-sub">
+                                {% trans "No electronic signature corresponds to the provided ID:" %} <code class="verification-id-highlight">{{ verification_id }}</code>
+                            </p>
+                        </div>
+                    {% else %}
+
+                        <!-- Main Verification Details Grid -->
+                        <div class="row g-4 mb-4 align-items-start">
+
+                            <!-- Left: Verified Data -->
+                            <div class="col-12 col-md-8">
+                                <h3 class="verification-section-title text-uppercase fw-bold mb-3">
+                                    <i class="bi bi-file-earmark-check me-1"></i>{% trans "Signed Task Information" %}
+                                </h3>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-borderless align-middle verification-table">
+                                        <tbody>
+                                            <tr>
+                                                <th style="width: 40%;">{% trans "Verification ID" %}:</th>
+                                                <td class="fw-bold verification-id-highlight font-monospace">{{ verification.verification_id }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>{% trans "Task Number" %}:</th>
+                                                <td class="fw-bold font-monospace">{{ verification.task_number }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>{% trans "Task Title" %}:</th>
+                                                <td class="fw-semibold">{{ verification.task_title }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>{% trans "Responsible Department" %}:</th>
+                                                <td class="fw-medium">{{ verification.department_name|default:"—" }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>{% trans "Signed By" %}:</th>
+                                                <td class="fw-bold">
+                                                    {{ verification.signer_name }}
+                                                    {% if verification.signer_position %}
+                                                        <span class="d-block small fw-normal mt-1" style="color: var(--v-muted-text);">({{ verification.signer_position }})</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>{% trans "Signing Timestamp" %}:</th>
+                                                <td>{{ verification.signed_at|date:"d F Y, H:i (e)" }}</td>
+                                            </tr>
+                                            {% if verification.final_approval_date %}
+                                            <tr>
+                                                <th>{% trans "Final Approval Date" %}:</th>
+                                                <td>{{ verification.final_approval_date }}</td>
+                                            </tr>
+                                            {% endif %}
+                                            {% if verification.status == 'REVOKED' %}
+                                            <tr>
+                                                <th class="text-danger fw-bold">{% trans "Revoked Date" %}:</th>
+                                                <td class="text-danger fw-semibold">{{ verification.revoked_at|date:"d F Y, H:i" }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-danger fw-bold">{% trans "Revocation Reason" %}:</th>
+                                                <td class="text-danger small">{{ verification.revocation_reason }}</td>
+                                            </tr>
+                                            {% endif %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Right: QR Code & Verification Action -->
+                            <div class="col-12 col-md-4 text-center">
+                                <div class="verification-qr-wrapper mb-2">
+                                    <img src="{% url 'signature_qr' verification_id=verification.verification_id %}"
+                                         alt="{% trans 'QR code for electronic signature verification' %}"
+                                         class="img-fluid d-block mx-auto"
+                                         style="width: 140px; height: 140px; object-fit: contain;">
+                                </div>
+                                <div class="verification-qr-caption mb-2">
+                                    <i class="bi bi-qr-code-scan me-1"></i>{% trans "Scan to verify" %}
+                                </div>
+                                <a href="{% url 'signature_qr' verification_id=verification.verification_id %}?download=1" class="btn btn-sm verification-dl-btn w-100">
+                                    <i class="bi bi-download me-1"></i>{% trans "Download QR" %}
+                                </a>
+                            </div>
+
+                        </div>
+
+                        <!-- Cryptographic Integrity Panel -->
+                        <div class="p-3 rounded-3 verification-crypto-box">
+                            <h4 class="verification-crypto-title fw-bold mb-2">
+                                <i class="bi bi-shield-lock me-1 text-primary"></i>{% trans "Cryptographic Integrity Profile" %}
+                            </h4>
+                            <div class="row g-2">
+                                <div class="col-sm-6">
+                                    <span class="crypto-label">{% trans "Algorithm" %}:</span>
+                                    <strong class="crypto-val ms-1">{{ verification.algorithm|default:"Ed25519" }}</strong>
+                                </div>
+                                <div class="col-sm-6">
+                                    <span class="crypto-label">{% trans "Key Version" %}:</span>
+                                    <strong class="crypto-val ms-1">{{ verification.key_version|default:"v1" }}</strong>
+                                </div>
+                                <div class="col-12 mt-2">
+                                    <span class="crypto-label d-block mb-1">{% trans "Signed Payload Hash (SHA-256)" %}:</span>
+                                    <code class="crypto-hash d-block">{{ verification.payload_hash }}</code>
+                                </div>
+                                <div class="col-12 mt-2">
+                                    <span class="verification-badge d-inline-flex align-items-center">
+                                        <i class="bi bi-check2-circle me-1"></i>{{ verification.integrity_status|default:_("Immutable Cryptographic Match") }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+                <!-- Footer Legal & Public Notice -->
+                <div class="card-footer p-3 text-center verification-footer">
+                    <i class="bi bi-shield-check me-1"></i>
+                    {% trans "Official University Task Management System &bull; Electronic Signature Verification Service" %}
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>

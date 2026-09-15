@@ -1,33 +1,98 @@
 {% load i18n static %}
 <nav class="navbar navbar-expand-lg app-navbar sticky-top">
     <div class="container-fluid px-3 px-lg-4">
-        <button class="btn btn-outline-secondary d-lg-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" aria-label="{% trans 'Open menu' %}">
+        <!-- Mobile Sidebar Drawer Toggle -->
+        <button class="btn btn-outline-secondary d-lg-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" aria-label="{% trans 'Open menu' %}" title="{% trans 'Open menu' %}">
             <i class="bi bi-list fs-5"></i>
         </button>
 
+        <!-- Desktop Sidebar Collapse Toggle -->
+        <button class="btn btn-outline-secondary d-none d-lg-inline-flex align-items-center justify-content-center me-2 sidebar-toggle-btn"
+                type="button"
+                id="sidebarCollapseToggle"
+                onclick="toggleSidebarCollapse()"
+                aria-label="{% trans 'Toggle sidebar collapse' %}"
+                title="{% trans 'Toggle sidebar' %}">
+            <i class="bi bi-layout-sidebar-inset fs-5"></i>
+        </button>
+
         <a class="navbar-brand d-flex align-items-center gap-2 py-0" href="{% url 'dashboard' %}">
-            <img src="{% static 'images/logo-dark.png' %}" alt="University Logo" class="brand-logo-img">
-            <span class="fw-bold d-none d-sm-inline text-dark">{% trans "TASK MANAGEMENT" %}</span>
+            <img src="{% static 'images/logo-dark.png' %}" alt="Al-Xorazmiy Universiteti" class="brand-logo-img logo-dark-variant">
+            <img src="{% static 'images/logo-light.png' %}" alt="Al-Xorazmiy Universiteti" class="brand-logo-img logo-light-variant">
+            <span class="fw-bold d-none d-sm-inline navbar-brand-text">{% trans "Al-Khwarizmi University" %}</span>
         </a>
 
-        <div class="ms-auto d-flex align-items-center gap-3">
+        {% if user.is_authenticated %}
+        <!-- Universal Global Search Bar -->
+        <form class="d-none d-md-flex ms-4 me-auto align-items-center position-relative" action="{% url 'global_search' %}" method="get" style="max-width: 380px; width: 100%;">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="search" name="q" class="form-control bg-light border-start-0 ps-0" placeholder="{% trans 'Search tasks, documents, requests, staff...' %}" value="{{ request.GET.q|default:'' }}" aria-label="{% trans 'Search' %}" style="font-size: 0.85rem;">
+                <button class="btn btn-outline-secondary btn-sm" type="submit">{% trans 'Search' %}</button>
+            </div>
+        </form>
+        {% endif %}
+
+        <div class="ms-auto d-flex align-items-center gap-2 gap-sm-3">
+            <!-- Language Switcher -->
             {% include "includes/language_switcher.html" %}
+
+            <!-- Notifications Dropdown -->
+            <div class="dropdown">
+                <a class="btn btn-icon position-relative p-2 text-muted" href="{% url 'notifications' %}" id="notifDropdown" role="button" aria-expanded="false" title="{% trans 'Notifications' %}">
+                    <i class="bi bi-bell-fill fs-5"></i>
+                    {% if unread_notifications_count > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:.65rem;">
+                        {{ unread_notifications_count }}
+                        <span class="visually-hidden">{% trans "unread notifications" %}</span>
+                    </span>
+                    {% endif %}
+                </a>
+            </div>
+
+            <!-- Theme Toggle -->
+            <button class="theme-toggle-btn"
+                    type="button"
+                    id="themeToggleBtn"
+                    onclick="toggleAppTheme()"
+                    aria-label="{% trans 'Toggle theme' %}"
+                    title="{% trans 'Toggle theme' %}">
+                <i class="bi bi-moon-stars-fill fs-5"></i>
+            </button>
+
+            <!-- Working Year Quick Indicator / Switcher -->
+            <button class="btn btn-sm btn-light border d-flex align-items-center gap-1 px-2 py-1 rounded-pill shadow-xs"
+                    type="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#yearSelectModal"
+                    title="{% trans 'Working Year' %}: {{ active_year }}">
+                <i class="bi bi-calendar3 {% if is_historical_year %}text-warning{% else %}text-primary{% endif %}"></i>
+                <span class="fw-semibold small">{{ active_year }}</span>
+                {% if is_historical_year %}
+                    <span class="badge bg-warning text-dark p-1 rounded-circle" style="width: 8px; height: 8px;" title="{% trans 'Archived Year' %}"></span>
+                {% endif %}
+            </button>
 
             <!-- User dropdown -->
             <div class="dropdown">
-                <button class="btn btn-light d-flex align-items-center gap-2 border-0 bg-transparent py-1 px-2 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <button class="btn navbar-user-btn d-flex align-items-center gap-2 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     {% if user.photo %}
                         <img src="{{ user.photo.url }}" alt="{{ user.display_name }}" class="avatar-circle avatar-circle-sm">
                     {% else %}
                         <span class="avatar-circle avatar-circle-sm bg-primary text-white">{{ user.initials }}</span>
                     {% endif %}
-                    <span class="d-none d-md-inline fw-semibold text-dark">{{ user.display_name }}</span>
+                    <span class="d-none d-md-inline fw-semibold user-display-name">{{ user.display_name }}</span>
+                    {% if user.is_acting_rector %}
+                        <span class="badge bg-warning text-dark d-none d-lg-inline-block small">{% trans "Acting Rector" %}</span>
+                    {% endif %}
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border">
                     <li class="px-3 py-2 border-bottom">
-                        <div class="fw-bold text-dark">{{ user.display_name }}</div>
+                        <div class="fw-bold">{{ user.display_name }}</div>
                         <small class="text-muted d-block text-truncate" style="max-width: 180px;">{{ user.email }}</small>
-                        {% if user.primary_role %}
+                        {% if user.is_acting_rector %}
+                            <span class="badge bg-warning text-dark mt-1">{% trans "Acting Rector (Rektor v.b.)" %}</span>
+                        {% elif user.primary_role %}
                             <span class="badge bg-primary-subtle text-primary mt-1">{{ user.primary_role.name }}</span>
                         {% endif %}
                     </li>
@@ -36,7 +101,22 @@
                             <i class="bi bi-person me-2 text-muted"></i>{% trans "My Profile" %}
                         </a>
                     </li>
-                    {% if user.is_staff or user.is_superuser %}
+                    <li>
+                        <button type="button" class="dropdown-item py-2 d-flex align-items-center justify-content-between" data-bs-toggle="modal" data-bs-target="#yearSelectModal">
+                            <span class="d-flex align-items-center">
+                                <i class="bi bi-calendar3 me-2 text-primary"></i>
+                                <span>{% trans "Working Year" %}: <strong>{{ active_year }}</strong></span>
+                            </span>
+                            {% if is_historical_year %}
+                                <span class="badge bg-warning-subtle text-warning-emphasis ms-2 small">{% trans "Archive" %}</span>
+                            {% elif is_future_year %}
+                                <span class="badge bg-info-subtle text-info-emphasis ms-2 small">{% trans "New" %}</span>
+                            {% else %}
+                                <span class="badge bg-primary-subtle text-primary ms-2 small">{% trans "Change" %}</span>
+                            {% endif %}
+                        </button>
+                    </li>
+                    {% if user.is_superuser %}
                         <li>
                             <a class="dropdown-item py-2" href="{% url 'admin:index' %}">
                                 <i class="bi bi-shield-lock me-2 text-muted"></i>{% trans "Django Admin" %}

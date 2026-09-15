@@ -10,8 +10,11 @@
             <h1 class="h3 fw-bold text-dark mb-1">{% trans "Organizational Structure" %}</h1>
             <p class="text-muted mb-0">{% trans "University leadership, executive scopes, and operational departments" %}</p>
         </div>
-        {% if user.is_rector %}
+        {% if user.is_rector or user.is_superuser %}
             <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#actingRectorModal">
+                    <i class="bi bi-person-badge me-1"></i>{% trans "Assign Acting Rector" %}
+                </button>
                 <a href="{% url 'department_create' %}" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-lg me-1"></i>{% trans "Add Department" %}
                 </a>
@@ -44,9 +47,12 @@
                                 <div class="avatar-circle bg-primary text-white">{{ rector.initials }}</div>
                             {% endif %}
                             <div>
-                                <a href="{% url 'user_detail' pk=rector.pk %}" class="fw-bold text-dark text-decoration-none">
-                                    {{ rector.display_name }}
-                                </a>
+                                <div class="badge bg-primary-subtle text-primary mb-1">{% trans "Rector" %}</div>
+                                <div>
+                                    <a href="{% url 'user_detail' pk=rector.pk %}" class="fw-bold text-dark text-decoration-none">
+                                        {{ rector.display_name }}
+                                    </a>
+                                </div>
                                 <div class="small text-muted">{{ rector.email }}</div>
                             </div>
                         </div>
@@ -54,6 +60,40 @@
                 {% empty %}
                     <div class="col-12 text-muted">{% trans "No rector account assigned." %}</div>
                 {% endfor %}
+
+                {% if active_delegation %}
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="p-3 bg-warning-subtle border border-warning rounded-3 d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                {% if active_delegation.acting_rector.photo %}
+                                    <img src="{{ active_delegation.acting_rector.photo.url }}" class="avatar-circle">
+                                {% else %}
+                                    <div class="avatar-circle bg-warning text-dark">{{ active_delegation.acting_rector.initials }}</div>
+                                {% endif %}
+                                <div>
+                                    <span class="badge bg-warning text-dark mb-1">{% trans "Acting Rector (Rektor v.b.)" %}</span>
+                                    <div>
+                                        <a href="{% url 'user_detail' pk=active_delegation.acting_rector.pk %}" class="fw-bold text-dark text-decoration-none">
+                                            {{ active_delegation.acting_rector.display_name }}
+                                        </a>
+                                    </div>
+                                    <div class="small text-muted">{{ active_delegation.start_date }} &mdash; {{ active_delegation.end_date|default:_("Indefinite") }}</div>
+                                    {% if active_delegation.reason %}
+                                        <div class="small text-muted fst-italic">{{ active_delegation.reason }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if user.is_rector or user.is_superuser %}
+                                <form action="{% url 'acting_rector_revoke' pk=active_delegation.pk %}" method="post" class="ms-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="{% trans 'Revoke Delegation' %}">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
 
@@ -178,4 +218,51 @@
         </div>
     </div>
 </div>
+
+{% if delegation_form %}
+<div class="modal fade" id="actingRectorModal" tabindex="-1" aria-labelledby="actingRectorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{% url 'acting_rector_assign' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="actingRectorModalLabel">
+                        <i class="bi bi-person-badge me-2 text-primary"></i>{% trans "Assign Acting Rector (Rektor v.b.)" %}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3">
+                        {% trans "Designate a Vice Rector to assume Rector duties, signature authority, and university-wide operational oversight during the Rector's absence." %}
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ delegation_form.acting_rector.label }}</label>
+                        {{ delegation_form.acting_rector }}
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">{{ delegation_form.start_date.label }}</label>
+                            {{ delegation_form.start_date }}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">{{ delegation_form.end_date.label }}</label>
+                            {{ delegation_form.end_date }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ delegation_form.reason.label }}</label>
+                        {{ delegation_form.reason }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check2-circle me-1"></i>{% trans "Confirm Delegation" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ target_user.display_name }} — {% trans "Compensation" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+
+    <!-- Header Breadcrumb & Actions -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="small text-muted mb-1">
+                <a href="{% url 'payroll:employee_list' %}" class="text-decoration-none text-muted">&larr; {% trans "All Employees" %}</a>
+            </div>
+            <h1 class="h3 fw-bold text-dark mb-0">
+                {{ target_user.display_name }}
+                <span class="badge {% if target_user.is_active %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %} fs-6 fw-normal ms-2">
+                    {{ target_user.get_employment_status_display }}
+                </span>
+            </h1>
+            <p class="text-muted small mb-0">
+                @{{ target_user.username }} &bull; {{ target_user.department.name|default:_("No Department") }} &bull; {{ target_user.position.name|default:_("No Position") }}
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            {% if can_create_adjustment %}
+                <a href="{% url 'payroll:adjustment_create' %}?employee={{ target_user.id }}" class="btn btn-sm btn-outline-warning">
+                    <i class="bi bi-plus-circle me-1"></i>{% trans "Add Adjustment" %}
+                </a>
+            {% endif %}
+            {% if can_manage_salary %}
+                <a href="{% url 'payroll:salary_create' user_id=target_user.pk %}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-pencil-square me-1"></i>{% trans "Update Base Salary" %}
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Active Profile & Institutional Identity -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 p-4 h-100">
+                <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                    <i class="bi bi-wallet2 text-primary me-2"></i>{% trans "Active Compensation" %}
+                </h5>
+                {% if active_profile %}
+                    <div class="mb-3">
+                        <span class="text-muted small">{% trans "Current Base Salary" %}</span>
+                        <h2 class="display-6 fw-bold text-success mb-0">
+                            {{ active_profile.base_salary|floatformat:2 }} <span class="fs-6 text-muted">{{ active_profile.currency }}</span>
+                        </h2>
+                    </div>
+                    <dl class="row mb-0 small">
+                        <dt class="col-5 text-muted">{% trans "Salary Type" %}:</dt>
+                        <dd class="col-7 fw-semibold">{{ active_profile.get_salary_type_display }}</dd>
+
+                        <dt class="col-5 text-muted">{% trans "Effective From" %}:</dt>
+                        <dd class="col-7">{{ active_profile.effective_from|date:"Y-m-d" }}</dd>
+
+                        <dt class="col-5 text-muted">{% trans "Status" %}:</dt>
+                        <dd class="col-7"><span class="badge bg-success-subtle text-success">{{ active_profile.get_status_display }}</span></dd>
+
+                        {% if active_profile.notes %}
+                            <dt class="col-5 text-muted">{% trans "Reason / Notes" %}:</dt>
+                            <dd class="col-7 text-muted">{{ active_profile.notes }}</dd>
+                        {% endif %}
+                    </dl>
+                {% else %}
+                    <p class="text-muted small py-4 text-center">{% trans "No active salary profile assigned." %}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3 p-4 h-100">
+                <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                    <i class="bi bi-clock-history text-primary me-2"></i>{% trans "Salary Adjustment History" %}
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle mb-0">
+                        <thead class="table-light text-muted small text-uppercase">
+                            <tr>
+                                <th>{% trans "Effective Date" %}</th>
+                                <th>{% trans "Previous" %}</th>
+                                <th>{% trans "New Salary" %}</th>
+                                <th>{% trans "Adjustment" %}</th>
+                                <th>{% trans "Reason / Authorized By" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sh in salary_histories %}
+                                <tr>
+                                    <td>{{ sh.effective_from|date:"Y-m-d" }}</td>
+                                    <td>
+                                        {% if sh.previous_salary %}
+                                            {{ sh.previous_salary|floatformat:2 }}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="fw-bold text-dark">{{ sh.new_salary|floatformat:2 }} {{ sh.currency }}</td>
+                                    <td>
+                                        {% if sh.previous_salary %}
+                                            {% if sh.new_salary > sh.previous_salary %}
+                                                <span class="badge bg-success-subtle text-success">+{{ sh.new_salary|add:"-sh.previous_salary"|floatformat:2 }}</span>
+                                            {% else %}
+                                                <span class="badge bg-danger-subtle text-danger">-{{ sh.previous_salary|add:"-sh.new_salary"|floatformat:2 }}</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-primary-subtle text-primary">{% trans "Initial" %}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="small fw-semibold">{{ sh.reason }}</div>
+                                        <div class="text-muted small">{{ sh.changed_by.display_name|default:_("System") }} &bull; {{ sh.created_at|date:"Y-m-d H:i" }}</div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted small">
+                                        {% trans "No historical adjustments on record." %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Past Approved Payroll Records -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-header bg-white border-bottom py-3">
+            <h5 class="fw-bold text-dark mb-0">
+                <i class="bi bi-receipt text-primary me-2"></i>{% trans "Payroll Archive & Verified Payslips" %}
+            </h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small text-uppercase">
+                    <tr>
+                        <th>{% trans "Period" %}</th>
+                        <th>{% trans "Base Salary" %}</th>
+                        <th>{% trans "KPI Bonus" %}</th>
+                        <th>{% trans "Gross" %}</th>
+                        <th>{% trans "Tax" %}</th>
+                        <th>{% trans "Net Pay" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Disbursement" %}</th>
+                        <th class="text-end">{% trans "Payslip" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in past_payrolls %}
+                        <tr>
+                            <td class="fw-semibold">{{ p.period.name }}</td>
+                            <td>{{ p.base_salary|floatformat:2 }}</td>
+                            <td>
+                                {% if p.kpi_bonus > 0 %}
+                                    <span class="badge bg-warning-subtle text-warning-emphasis">+{{ p.kpi_bonus|floatformat:2 }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ p.gross_salary|floatformat:2 }}</td>
+                            <td class="text-danger">-{{ p.tax_total|floatformat:2 }}</td>
+                            <td class="fw-bold text-success">{{ p.net_salary|floatformat:2 }} {{ p.currency }}</td>
+                            <td>
+                                <span class="badge {% if p.status == 'APPROVED' %}bg-success{% elif p.status == 'CALCULATED' %}bg-primary{% else %}bg-secondary{% endif %}">
+                                    {{ p.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge {% if p.payment_status == 'PAID' %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning-emphasis{% endif %}">
+                                    {{ p.get_payment_status_display }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'payroll:record_detail' pk=p.pk %}" class="btn btn-sm btn-light">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'payroll:record_pdf' pk=p.pk %}" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-4 text-muted small">
+                                {% trans "No past payroll calculations available for this employee." %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

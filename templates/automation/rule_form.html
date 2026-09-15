@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% if form.instance.pk %}{% trans "Edit Rule" %}{% else %}{% trans "Create Rule" %}{% endif %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 800px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-gradient mb-1">
+                <i class="bi bi-gear-wide-connected me-2 text-primary"></i>
+                {% if form.instance.pk %}{% trans "Edit Automation Rule" %}{% else %}{% trans "Create Automation Rule" %}{% endif %}
+            </h1>
+        </div>
+        <a href="{% url 'automation:rule_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>{% trans "Cancel" %}
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{% trans "Rule Name" %} *</label>
+                    {{ form.name }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">{% trans "Description" %}</label>
+                    {{ form.description }}
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">{% trans "Trigger Event" %} *</label>
+                        {{ form.trigger_event }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">{% trans "Action Type" %} *</label>
+                        {{ form.action_type }}
+                    </div>
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">{% trans "Execution Priority Order" %}</label>
+                        {{ form.priority_order }}
+                        <small class="text-muted">{% trans "Lower numbers execute first (e.g., 10)." %}</small>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-center pt-4">
+                        <div class="form-check">
+                            {{ form.is_active }}
+                            <label class="form-check-label fw-bold" for="{{ form.is_active.id_for_label }}">
+                                {% trans "Rule is Active" %}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'automation:rule_list' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-save me-1"></i>{% trans "Save Rule" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

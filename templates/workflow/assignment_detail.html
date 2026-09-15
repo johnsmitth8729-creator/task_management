@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{{ assignment.task.task_number }} | {% trans "Assignment" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/workflow.css' %}?v=4" rel="stylesheet">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/workflow.js' %}?v=4" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-3 px-lg-4">
+
+    <!-- Back + Task number -->
+    <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+        <a href="{% url 'task_list' %}" class="btn btn-sm btn-outline-secondary" onclick="if (window.history.length > 1) { window.history.back(); return false; }" title="{% trans 'Back' %}">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="h4 fw-bold mb-0">{{ task.title }}</h1>
+            <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
+                <span class="task-number-pill">{{ task.task_number }}</span>
+                <span class="badge badge-status-{{ task.status|lower }}">{{ task.get_status_display }}</span>
+                <span class="badge badge-priority-{{ task.priority|lower }}">{{ task.get_priority_display }}</span>
+                <span class="badge badge-complexity-{{ task.complexity|lower }}">{{ task.get_complexity_display }}</span>
+                {% if task.is_overdue %}
+                    <span class="badge badge-overdue"><i class="bi bi-exclamation-circle-fill me-1"></i>{% trans "Overdue" %}</span>
+                {% endif %}
+            </div>
+        </div>
+        <!-- Actions & status badge -->
+        <div class="ms-auto d-flex align-items-center gap-2">
+            {% if can_manage_task %}
+                <a href="{% url 'task_detail' pk=task.pk %}?view=manage" class="btn btn-sm btn-outline-primary shadow-xs">
+                    <i class="bi bi-sliders me-1"></i>{% trans "Management View" %}
+                </a>
+            {% endif %}
+            {% if task.status == 'COMPLETED' or assignment.assignment_status == 'APPROVED' %}
+                <span class="badge bg-success fs-6 px-3 py-2"><i class="bi bi-check-circle me-1"></i>{% trans "Completed" %}</span>
+            {% elif assignment.assignment_status == 'REJECTED' %}
+                <span class="badge bg-danger fs-6 px-3 py-2"><i class="bi bi-arrow-repeat me-1"></i>{% trans "Rework Required" %}</span>
+            {% elif task.status == 'CANCELLED' %}
+                <span class="badge bg-secondary fs-6 px-3 py-2"><i class="bi bi-x-circle me-1"></i>{% trans "Cancelled" %}</span>
+            {% elif assignment.assignment_status == 'ASSIGNED' %}
+                <span class="badge bg-primary fs-6 px-3 py-2"><i class="bi bi-inbox me-1"></i>{% trans "Incoming" %}</span>
+            {% elif assignment.assignment_status == 'IN_PROGRESS' %}
+                <span class="badge bg-warning text-dark fs-6 px-3 py-2"><i class="bi bi-play-circle me-1"></i>{% trans "In Progress" %}</span>
+            {% elif assignment.assignment_status == 'SUBMITTED' %}
+                <span class="badge bg-success fs-6 px-3 py-2"><i class="bi bi-send-check me-1"></i>{% trans "Submitted" %}</span>
+            {% elif assignment.assignment_status == 'SECOND_APPROVAL' %}
+                <span class="badge bg-info text-dark fs-6 px-3 py-2"><i class="bi bi-shield-check me-1"></i>{% trans "Pending Second Approval" %}</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- LEFT: task detail & actions -->
+        <div class="col-lg-8">
+
+            <!-- Task description -->
+            <div class="work-area-panel mb-4">
+                <h6 class="fw-bold mb-3"><i class="bi bi-file-text-fill text-primary me-2"></i>{% trans "Task Description" %}</h6>
+                <p class="mb-0">{{ task.description|default:_("No description provided.") }}</p>
+                <hr class="my-3">
+                <div class="row g-3 small text-muted">
+                    {% if task.start_date %}<div class="col-6 col-md-3"><strong>{% trans "Start" %}</strong><br>{{ task.start_date|date:"d M Y" }}</div>{% endif %}
+                    {% if task.deadline %}<div class="col-6 col-md-3"><strong>{% trans "Deadline" %}</strong><br>{{ task.deadline|date:"d M Y" }}</div>{% endif %}
+                    {% if task.responsible_department %}<div class="col-6 col-md-3"><strong>{% trans "Department" %}</strong><br>{{ task.responsible_department.name }}</div>{% endif %}
+                    {% if task.task_type %}<div class="col-6 col-md-3"><strong>{% trans "Type" %}</strong><br>{{ task.task_type.name }}</div>{% endif %}
+                </div>
+            </div>
+
+            <!-- REJECTION ALERT & RESUME REWORK -->
+            {% if assignment.assignment_status == 'REJECTED' %}
+            <div class="work-area-panel mb-4" style="border-top:3px solid #ef4444;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <h6 class="fw-bold mb-0 text-danger"><i class="bi bi-exclamation-octagon-fill me-2"></i>{% trans "Submission Rejected — Rework Required" %}</h6>
+                </div>
+                {% if latest_rejection and latest_rejection.reason %}
+                    <p class="small text-muted mb-1 fw-bold">{% trans "Rejection Reason" %}:</p>
+                    <div class="p-3 mb-3 rounded border bg-light text-dark font-monospace small">
+                        {{ latest_rejection.reason }}
+                    </div>
+                {% endif %}
+                {% if can_start_rework %}
+                <p class="text-muted small mb-3">{% trans "Click below to resume working on this assignment. The assignment will return to In Progress so you can update progress, attach files, and submit a new version." %}</p>
+                <form id="reworkForm" method="post" action="{% url 'assignment_rework' pk=assignment.pk %}">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-warning text-dark fw-semibold"
+                        onclick="confirmAction({
+                            title: '{% trans "Resume Rework" %}',
+                            message: '{% trans "Are you sure you want to resume rework on this task? It will return to In Progress." %}',
+                            confirmText: '{% trans "Yes, Resume Rework" %}',
+                            formId: 'reworkForm'
+                        })">
+                        <i class="bi bi-arrow-repeat me-2"></i>{% trans "Start / Resume Rework" %}
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- ACCEPT -->
+            {% if can_accept %}
+            <div class="work-area-panel mb-4" style="border-top:3px solid #3b82f6;">
+                <h6 class="fw-bold mb-2"><i class="bi bi-hand-thumbs-up-fill text-primary me-2"></i>{% trans "Accept Task" %}</h6>
+                <p class="text-muted small mb-3">{% trans "By accepting this task, you confirm that you will start working on it. The task status will move to In Progress." %}</p>
+                <form id="acceptForm" method="post" action="{% url 'assignment_accept' pk=assignment.pk %}">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-primary"
+                        onclick="confirmAction({
+                            title: '{% trans "Accept Task" %}',
+                            message: '{% trans "Are you sure you want to accept this task? It will move to In Progress." %}',
+                            confirmText: '{% trans "Yes, Accept" %}',
+                            formId: 'acceptForm'
+                        })">
+                        <i class="bi bi-check-circle-fill me-2"></i>{% trans "Accept Task" %}
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+
+            <!-- PROGRESS UPDATE -->
+            {% if can_update_progress %}
+            <div class="work-area-panel mb-4" style="border-top:3px solid #f59e0b;">
+                <h6 class="fw-bold mb-3"><i class="bi bi-bar-chart-fill text-warning me-2"></i>{% trans "Update Progress" %}</h6>
+                <form method="post" action="{% url 'assignment_progress' pk=assignment.pk %}" id="progressForm">
+                    {% csrf_token %}
+                    <div class="progress-slider-wrap">
+                        <div class="progress-display" id="progressDisplay">{{ assignment.progress }}%</div>
+                        <input type="range" id="progressSlider" name="progress"
+                               min="0" max="100" value="{{ assignment.progress }}"
+                               class="form-range">
+                        <input type="hidden" id="progressValue" name="progress" value="{{ assignment.progress }}">
+                    </div>
+                    <div id="progressBarFill" class="wf-progress-bar-wrap mb-3">
+                        <div class="wf-progress-bar-fill {% if assignment.progress == 100 %}fill-complete{% elif assignment.progress >= 50 %}fill-warning{% endif %}"
+                             id="progressBarFill" style="width:{{ assignment.progress }}%"></div>
+                    </div>
+                    <button type="submit" class="btn btn-warning text-dark">
+                        <i class="bi bi-check2 me-2"></i>{% trans "Save Progress" %}
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+
+            <!-- WORK NOTES -->
+            {% if can_add_note %}
+            <div class="work-area-panel mb-4" style="border-top:3px solid #6366f1;">
+                <h6 class="fw-bold mb-3"><i class="bi bi-journal-text text-info me-2"></i>{% trans "Add Work Note" %}</h6>
+                <form method="post" action="{% url 'assignment_add_note' pk=assignment.pk %}">
+                    {% csrf_token %}
+                    <textarea name="content" class="form-control mb-2" rows="3"
+                              placeholder="{% trans 'Write a work note, update, or observation...' %}" required
+                              maxlength="5000"></textarea>
+                    <button type="submit" class="btn btn-info text-white">
+                        <i class="bi bi-plus-circle me-2"></i>{% trans "Add Note" %}
+                    </button>
+                </form>
+
+                {% if notes %}
+                <hr class="my-3">
+                <h6 class="fw-bold mb-2 text-muted">{% trans "Notes" %} ({{ notes|length }})</h6>
+                {% for note in notes %}
+                <div class="submission-card mb-3">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="avatar-sm">{{ note.author.display_name|first|upper }}</div>
+                        <div>
+                            <strong class="small">{{ note.author.display_name }}</strong>
+                            <div class="text-muted" style="font-size:.75rem;">{{ note.created_at|date:"d M Y H:i" }}</div>
+                        </div>
+                    </div>
+                    <p class="mb-0 small">{{ note.content|linebreaksbr }}</p>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- WORK EVIDENCE & DOCUMENTS -->
+            {% include "includes/files/work_evidence_panel.html" %}
+
+
+            <!-- SUBMIT -->
+            {% if can_submit %}
+            <div class="work-area-panel mb-4" style="border-top:3px solid #10b981;">
+                <h6 class="fw-bold mb-2"><i class="bi bi-send-check-fill text-success me-2"></i>{% trans "Submit for First Approval" %}</h6>
+                <p class="text-muted small mb-3">{% trans "Describe the work done. This will be reviewed by your department head. Your assignment progress will be locked after submission." %}</p>
+                <form method="post" action="{% url 'assignment_submit' pk=assignment.pk %}" id="submitForm">
+                    {% csrf_token %}
+                    <textarea name="submission_text" class="form-control mb-3" rows="5"
+                              placeholder="{% trans 'Describe the completed work, methods used, results achieved...' %}"
+                              required maxlength="10000"></textarea>
+                    <button type="button" class="btn btn-success"
+                        onclick="confirmAction({
+                            title: '{% trans "Submit for Approval" %}',
+                            message: '{% trans "Are you sure you want to submit this task for first approval? This action cannot be undone." %}',
+                            confirmText: '{% trans "Submit" %}',
+                            formId: 'submitForm'
+                        })">
+                        <i class="bi bi-send-fill me-2"></i>{% trans "Submit for Approval" %}
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+
+            <!-- Latest Submission -->
+            {% if latest_submission %}
+            <div class="work-area-panel mb-4" style="border-top:3px solid #10b981;">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-check2-square text-success me-2"></i>{% trans "Latest Submission" %}</h6>
+                    <span class="submission-version-badge">v{{ latest_submission.version }}</span>
+                    {% if latest_submission.status == 'PENDING_FIRST_APPROVAL' %}
+                        <span class="badge bg-warning text-dark ms-auto">{% trans "Pending First Approval" %}</span>
+                    {% elif latest_submission.status == 'FIRST_APPROVED' %}
+                        <span class="badge bg-info text-dark ms-auto">{% trans "First Approved" %}</span>
+                    {% elif latest_submission.status == 'FIRST_REJECTED' %}
+                        <span class="badge bg-danger ms-auto">{% trans "First Approval Rejected" %}</span>
+                    {% elif latest_submission.status == 'FINAL_APPROVED' %}
+                        <span class="badge bg-success ms-auto">{% trans "Final Approved" %}</span>
+                    {% elif latest_submission.status == 'FINAL_REJECTED' %}
+                        <span class="badge bg-danger ms-auto">{% trans "Final Rejection (Rework)" %}</span>
+                    {% else %}
+                        <span class="badge bg-secondary ms-auto">{{ latest_submission.get_status_display }}</span>
+                    {% endif %}
+                </div>
+                <p class="small mb-2 text-muted">{% trans "Submitted on" %}: <strong>{{ latest_submission.submitted_at|date:"d M Y H:i" }}</strong></p>
+                <div class="submission-card">
+                    {{ latest_submission.submission_text|linebreaksbr }}
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- RIGHT: sidebar info -->
+        <div class="col-lg-4">
+
+            <!-- Task assignments (multi-employee) -->
+            <div class="work-area-panel mb-4">
+                <h6 class="fw-bold mb-3"><i class="bi bi-people-fill me-2"></i>{% trans "All Assignees" %}</h6>
+                {% for a in all_assignments %}
+                <div class="d-flex align-items-center gap-2 py-2 {% if not forloop.last %}border-bottom{% endif %}">
+                    <div class="avatar-sm {% if a.is_primary %}avatar-primary{% endif %}">{{ a.user.display_name|first|upper }}</div>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold small">{{ a.user.display_name }}</div>
+                        <div class="text-muted" style="font-size:.75rem;">{{ a.user.position.name|default:"" }}</div>
+                    </div>
+                    <div>
+                        {% if a.assignment_status == 'ASSIGNED' %}<span class="badge bg-primary" style="font-size:.65rem;">{% trans "Assigned" %}</span>{% endif %}
+                        {% if a.assignment_status == 'IN_PROGRESS' %}<span class="badge bg-warning text-dark" style="font-size:.65rem;">{% trans "In Progress" %}</span>{% endif %}
+                        {% if a.assignment_status == 'SUBMITTED' %}<span class="badge bg-success" style="font-size:.65rem;">{% trans "Submitted" %}</span>{% endif %}
+                        {% if a.assignment_status == 'SECOND_APPROVAL' %}<span class="badge bg-info text-dark" style="font-size:.65rem;">{% trans "Second Approval" %}</span>{% endif %}
+                        {% if a.assignment_status == 'APPROVED' %}<span class="badge bg-success" style="font-size:.65rem;">{% trans "Approved" %}</span>{% endif %}
+                        {% if a.assignment_status == 'REJECTED' %}<span class="badge bg-danger" style="font-size:.65rem;">{% trans "Rework Required" %}</span>{% endif %}
+                        {% if a.is_primary %}<span class="badge bg-secondary ms-1" style="font-size:.6rem;">{% trans "Primary" %}</span>{% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                    <p class="text-muted small mb-0">{% trans "No assignees." %}</p>
+                {% endfor %}
+            </div>
+
+            <!-- Task subtasks -->
+            {% if task.subtasks.exists %}
+            <div class="work-area-panel mb-4">
+                <h6 class="fw-bold mb-3"><i class="bi bi-list-check me-2"></i>{% trans "Subtasks" %}</h6>
+                {% for st in task.subtasks.all %}
+                <div class="d-flex align-items-center gap-2 py-2 {% if not forloop.last %}border-bottom{% endif %}">
+                    {% if st.status == 'DONE' %}
+                        <i class="bi bi-check-circle-fill text-success"></i>
+                    {% elif st.status == 'IN_PROGRESS' %}
+                        <i class="bi bi-arrow-clockwise text-warning"></i>
+                    {% else %}
+                        <i class="bi bi-circle text-muted"></i>
+                    {% endif %}
+                    <div class="flex-grow-1">
+                        <div class="small {% if st.status == 'DONE' %}text-decoration-line-through text-muted{% endif %}">{{ st.title }}</div>
+                    </div>
+                    <div>{% with value=st.progress %}{% include "includes/workflow/progress_bar.html" %}{% endwith %}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Activity timeline -->
+            <div class="work-area-panel">
+                <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>{% trans "Recent Activity" %}</h6>
+                {% if history %}
+                <ul class="wf-timeline">
+                    {% for entry in history %}
+                    <li>
+                        <div class="tl-dot"></div>
+                        <div class="tl-event">{{ entry.get_event_type_display }}</div>
+                        <div class="tl-meta">
+                            {{ entry.actor.display_name|default:_("System") }} · {{ entry.created_at|date:"d M Y H:i" }}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted small">{% trans "No activity yet." %}</p>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

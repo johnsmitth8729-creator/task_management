@@ -23,6 +23,9 @@
                             {% empty %}
                                 <span class="badge bg-light text-secondary">{% trans "Employee" %}</span>
                             {% endfor %}
+                            <span class="badge {% if user.is_active %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %} ms-1">
+                                {{ user.get_employment_status_display }}
+                            </span>
                         </div>
                     </div>
                     <div>
@@ -33,12 +36,85 @@
                 </div>
 
                 <h2 class="h5 fw-bold text-dark mb-3">{% trans "Personal & Organizational Info" %}</h2>
-                <dl class="row mb-0">
+                <dl class="row mb-0 gy-2">
                     <dt class="col-sm-4 text-muted">{% trans "Department" %}</dt>
-                    <dd class="col-sm-8">{{ user.department.name|default:_("Not assigned") }}</dd>
+                    <dd class="col-sm-8 fw-semibold">{{ user.department.name|default:_("Not assigned") }}</dd>
 
                     <dt class="col-sm-4 text-muted">{% trans "Position" %}</dt>
                     <dd class="col-sm-8">{{ user.position.name|default:_("Not assigned") }}</dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Grade / Level" %}</dt>
+                    <dd class="col-sm-8">
+                        {% if user.grade %}
+                            <span class="badge bg-info-subtle text-info-emphasis">{{ user.grade.name }} ({{ user.grade.code }})</span>
+                        {% else %}
+                            <span class="text-muted">{% trans "Not assigned" %}</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Direct Supervisor" %}</dt>
+                    <dd class="col-sm-8">
+                        {% if user.supervisor %}
+                            <span class="fw-semibold">{{ user.supervisor.display_name }}</span>
+                            <span class="text-muted small">({{ user.supervisor.position.name|default:user.supervisor.primary_role.name }})</span>
+                        {% else %}
+                            <span class="text-muted">{% trans "Direct Leadership (No line supervisor)" %}</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Employment Status" %}</dt>
+                    <dd class="col-sm-8">{{ user.get_employment_status_display }}</dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Hire Date" %}</dt>
+                    <dd class="col-sm-8 fw-semibold">{{ user.employment_start_date|date:"Y-m-d"|default:"-" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Work Presence" %}</dt>
+                    <dd class="col-sm-8">
+                        {% if user.work_presence == 'PRESENT' %}
+                            <span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle me-1"></i>{{ user.get_work_presence_display }}</span>
+                        {% elif user.work_presence == 'REMOTE' %}
+                            <span class="badge bg-info-subtle text-info"><i class="bi bi-laptop me-1"></i>{{ user.get_work_presence_display }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary"><i class="bi bi-dash-circle me-1"></i>{{ user.get_work_presence_display }}</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Leave / Permission Status" %}</dt>
+                    <dd class="col-sm-8">
+                        {% if user.leave_status == 'NONE' %}
+                            <span class="badge bg-light text-muted">{{ user.get_leave_status_display }}</span>
+                        {% elif user.leave_status == 'PERMISSION' %}
+                            <span class="badge bg-warning-subtle text-warning-emphasis"><i class="bi bi-clock me-1"></i>{{ user.get_leave_status_display }}</span>
+                        {% elif user.leave_status == 'VACATION' %}
+                            <span class="badge bg-primary-subtle text-primary"><i class="bi bi-sun me-1"></i>{{ user.get_leave_status_display }}</span>
+                        {% elif user.leave_status == 'SICK_LEAVE' %}
+                            <span class="badge bg-danger-subtle text-danger"><i class="bi bi-bandaid me-1"></i>{{ user.get_leave_status_display }}</span>
+                        {% elif user.leave_status == 'BUSINESS_TRIP' %}
+                            <span class="badge bg-info-subtle text-info-emphasis"><i class="bi bi-airplane me-1"></i>{{ user.get_leave_status_display }}</span>
+                        {% else %}
+                            <span class="badge bg-warning-subtle text-warning-emphasis">{{ user.get_leave_status_display }}</span>
+                        {% endif %}
+                        {% if user.leave_notes %}
+                            <div class="small text-muted mt-1"><i class="bi bi-info-circle me-1"></i>{{ user.leave_notes }}</div>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "CV / Resume (PDF)" %}</dt>
+                    <dd class="col-sm-8">
+                        {% if user.cv_file %}
+                            <a href="{{ user.cv_file.url }}" target="_blank" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-file-earmark-pdf me-1"></i>{% trans "View / Download CV (PDF)" %}
+                            </a>
+                        {% else %}
+                            <span class="text-muted small">
+                                <i class="bi bi-file-earmark-x me-1"></i>{% trans "No CV uploaded" %} &bull; 
+                                <a href="{% url 'profile_edit' %}" class="fw-semibold text-primary">{% trans "Upload PDF CV" %}</a>
+                            </span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Email" %}</dt>
+                    <dd class="col-sm-8">{{ user.email|default:"-" }}</dd>
 
                     <dt class="col-sm-4 text-muted">{% trans "Phone" %}</dt>
                     <dd class="col-sm-8">{{ user.phone|default:"-" }}</dd>

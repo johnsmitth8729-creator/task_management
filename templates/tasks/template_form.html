@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Task Template" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">{% trans "Dashboard" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'task_template_list' %}">{% trans "Task Templates" %}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{% if form.instance.pk %}{% trans "Edit" %}{% else %}{% trans "Create" %}{% endif %}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8">
+            <div class="content-panel">
+                <h1 class="h4 fw-bold text-dark mb-4">
+                    {% if form.instance.pk %}{% trans "Edit Task Template" %}{% else %}{% trans "Create Task Template" %}{% endif %}
+                </h1>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger py-2 small mb-3">
+                            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold">{{ form.name.label }} <span class="text-danger">*</span></label>
+                        {{ form.name }}
+                        {% for error in form.name.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold">{{ form.description.label }}</label>
+                        {{ form.description }}
+                        {% for error in form.description.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.task_type.id_for_label }}" class="form-label fw-semibold">{{ form.task_type.label }}</label>
+                            {{ form.task_type }}
+                            {% for error in form.task_type.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.default_duration_days.id_for_label }}" class="form-label fw-semibold">{{ form.default_duration_days.label }}</label>
+                            {{ form.default_duration_days }}
+                            {% for error in form.default_duration_days.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.default_priority.id_for_label }}" class="form-label fw-semibold">{{ form.default_priority.label }}</label>
+                            {{ form.default_priority }}
+                            {% for error in form.default_priority.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="{{ form.default_complexity.id_for_label }}" class="form-label fw-semibold">{{ form.default_complexity.label }}</label>
+                            {{ form.default_complexity }}
+                            {% for error in form.default_complexity.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4 form-check">
+                        {{ form.is_active }}
+                        <label for="{{ form.is_active.id_for_label }}" class="form-check-label fw-semibold">{{ form.is_active.label }}</label>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{% url 'task_template_list' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+                        <button type="submit" class="btn btn-primary px-4">{% trans "Save Template" %}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

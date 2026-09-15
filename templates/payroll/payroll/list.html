@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Payroll Records" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">
+                <i class="bi bi-receipt text-primary me-2"></i>{% trans "Payroll Records Registry" %}
+            </h1>
+            <p class="text-muted small mb-0">{% trans "Comprehensive ledger of computed employee salaries, allowances, KPI incentives, and taxes." %}</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm rounded-3 p-3 mb-4">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-12 col-md-3">
+                <input type="text" name="q" value="{{ request.GET.q }}" class="form-control form-control-sm" placeholder="{% trans 'Search by employee...' %}">
+            </div>
+            <div class="col-6 col-md-3">
+                <select name="period" class="form-select form-select-sm">
+                    <option value="">{% trans "-- All Periods --" %}</option>
+                    {% for p in periods %}
+                        <option value="{{ p.id }}" {% if request.GET.period == p.id|stringformat:"s" %}selected{% endif %}>{{ p.name }} ({{ p.code }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <select name="department" class="form-select form-select-sm">
+                    <option value="">{% trans "-- Department --" %}</option>
+                    {% for d in departments %}
+                        <option value="{{ d.id }}" {% if request.GET.department == d.id|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">{% trans "-- Status --" %}</option>
+                    <option value="DRAFT" {% if request.GET.status == 'DRAFT' %}selected{% endif %}>{% trans "Draft" %}</option>
+                    <option value="CALCULATED" {% if request.GET.status == 'CALCULATED' %}selected{% endif %}>{% trans "Calculated" %}</option>
+                    <option value="APPROVED" {% if request.GET.status == 'APPROVED' %}selected{% endif %}>{% trans "Approved" %}</option>
+                    <option value="PAID" {% if request.GET.status == 'PAID' %}selected{% endif %}>{% trans "Paid" %}</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-primary w-100">
+                    <i class="bi bi-search me-1"></i>{% trans "Filter" %}
+                </button>
+                <a href="{% url 'payroll:record_list' %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small text-uppercase">
+                    <tr>
+                        <th>{% trans "Employee" %}</th>
+                        <th>{% trans "Period" %}</th>
+                        <th>{% trans "Department" %}</th>
+                        <th>{% trans "Gross Salary" %}</th>
+                        <th>{% trans "KPI Incentive" %}</th>
+                        <th>{% trans "Deductions / Tax" %}</th>
+                        <th>{% trans "Net Pay" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Disbursement" %}</th>
+                        <th class="text-end">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in records %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">{{ r.employee_name_snapshot }}</div>
+                                <div class="text-muted small">@{{ r.employee_username_snapshot }}</div>
+                            </td>
+                            <td><span class="badge bg-light text-dark border">{{ r.period.code }}</span></td>
+                            <td>{{ r.department_snapshot|default:"-" }}</td>
+                            <td class="fw-semibold">{{ r.gross_salary|floatformat:2 }}</td>
+                            <td>
+                                {% if r.kpi_bonus > 0 %}
+                                    <span class="badge bg-warning-subtle text-warning-emphasis">+{{ r.kpi_bonus|floatformat:2 }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-danger">-{{ r.tax_total|add:r.total_deductions|floatformat:2 }}</td>
+                            <td class="fw-bold text-success">{{ r.net_salary|floatformat:2 }} {{ r.currency }}</td>
+                            <td>
+                                <span class="badge {% if r.status == 'APPROVED' %}bg-success{% elif r.status == 'CALCULATED' %}bg-primary{% elif r.status == 'PAID' %}bg-info text-dark{% else %}bg-secondary{% endif %}">
+                                    {{ r.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge {% if r.payment_status == 'PAID' %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning-emphasis{% endif %}">
+                                    {{ r.get_payment_status_display }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'payroll:record_detail' pk=r.pk %}" class="btn btn-sm btn-light" title="{% trans 'View Record' %}">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'payroll:record_pdf' pk=r.pk %}" class="btn btn-sm btn-outline-danger" title="{% trans 'Download Payslip' %}">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="10" class="text-center py-5 text-muted">
+                                <i class="bi bi-receipt display-6 d-block mb-2"></i>
+                                {% trans "No payroll records found matching your filters." %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+            <div class="card-footer bg-white border-top py-3">
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+                    {% endif %}
+                    <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

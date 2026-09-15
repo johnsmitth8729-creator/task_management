@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "My Payslips" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">
+                <i class="bi bi-file-earmark-text text-primary me-2"></i>{% trans "My Official Payslips" %}
+            </h1>
+            <p class="text-muted small mb-0">{% trans "Review verified salary earnings, KPI bonuses, deductions, and download signed PDF payslips." %}</p>
+        </div>
+    </div>
+
+    <!-- Active Base Salary Banner -->
+    {% if active_profile %}
+        <div class="card border-0 shadow-sm rounded-3 p-3 p-lg-4 mb-4 bg-primary text-white">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                <div>
+                    <span class="small text-white-50 text-uppercase fw-semibold">{% trans "Current Active Base Salary" %}</span>
+                    <h2 class="display-6 fw-bold mb-0 text-white">
+                        {{ active_profile.base_salary|floatformat:2 }} <span class="fs-6 text-white-50">{{ active_profile.currency }}</span>
+                    </h2>
+                </div>
+                <div class="text-md-end">
+                    <span class="badge bg-white text-primary fw-semibold px-3 py-2">
+                        <i class="bi bi-shield-check me-1"></i>{% trans "Institutional Grade" %}: {{ user.grade.name|default:_("Standard") }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Payslip History -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small text-uppercase">
+                    <tr>
+                        <th>{% trans "Period" %}</th>
+                        <th>{% trans "Base Salary" %}</th>
+                        <th>{% trans "KPI Incentive" %}</th>
+                        <th>{% trans "Gross Salary" %}</th>
+                        <th>{% trans "Taxes & Deductions" %}</th>
+                        <th>{% trans "Net Salary Payable" %}</th>
+                        <th>{% trans "Payment Status" %}</th>
+                        <th class="text-end">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ps in payslips %}
+                        <tr>
+                            <td>
+                                <div class="fw-bold text-dark">{{ ps.period.name }}</div>
+                                <div class="text-muted small">{{ ps.period.code }}</div>
+                            </td>
+                            <td>{{ ps.base_salary|floatformat:2 }}</td>
+                            <td>
+                                {% if ps.kpi_bonus > 0 %}
+                                    <span class="badge bg-warning-subtle text-warning-emphasis">+{{ ps.kpi_bonus|floatformat:2 }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ ps.gross_salary|floatformat:2 }}</td>
+                            <td class="text-danger">-{{ ps.tax_total|add:ps.total_deductions|floatformat:2 }}</td>
+                            <td class="fw-bold text-success">{{ ps.net_salary|floatformat:2 }} {{ ps.currency }}</td>
+                            <td>
+                                <span class="badge {% if ps.payment_status == 'PAID' %}bg-success text-white{% else %}bg-primary-subtle text-primary{% endif %}">
+                                    {{ ps.get_payment_status_display }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'payroll:my_payslip_detail' pk=ps.pk %}" class="btn btn-sm btn-light" title="{% trans 'View Details' %}">
+                                    <i class="bi bi-eye me-1"></i>{% trans "Details" %}
+                                </a>
+                                <a href="{% url 'payroll:record_pdf' pk=ps.pk %}" class="btn btn-sm btn-outline-danger" title="{% trans 'Download PDF' %}">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="bi bi-file-earmark-x display-6 d-block mb-2"></i>
+                                {% trans "No finalized payslips available for your account yet." %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+            <div class="card-footer bg-white border-top py-3">
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+                    {% endif %}
+                    <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

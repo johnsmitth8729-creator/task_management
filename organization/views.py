@@ -11,16 +11,19 @@ from accounts.models import Role, User
 from accounts.permissions import RectorRequiredMixin, ScopedDepartmentAccessMixin
 from core.models import AuditLog, log_audit
 from organization.forms import (
+    ActingRectorDelegationForm,
     DepartmentForm,
     DepartmentHeadAssignForm,
     DepartmentResponsibilityForm,
     PositionForm,
 )
-from organization.models import Department, DepartmentResponsibility, Position
+from organization.models import ActingRectorDelegation, Department, DepartmentResponsibility, Position
 from organization.services import (
+    assign_acting_rector,
     assign_department_head,
     assign_vice_rector_responsibility,
     remove_vice_rector_responsibility,
+    revoke_acting_rector,
 )
 
 
@@ -30,23 +33,35 @@ class OrganizationOverviewView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
+        from django.utils import timezone
 
-        # Fetch Rector(s)
+        # Fetch Rector (strictly university leadership, exclude superadmin)
         rector_role = Role.objects.filter(code=Role.Codes.RECTOR).first()
         rectors = User.objects.filter(
-            Q(is_superuser=True) | Q(roles=rector_role),
+            roles=rector_role,
+            is_superuser=False,
             is_active=True,
         ).distinct()
 
-        # Fetch Vice Rectors with their active responsible departments
+        # Fetch Vice Rectors (strictly university leadership, exclude superadmin)
         vr_role = Role.objects.filter(code=Role.Codes.VICE_RECTOR).first()
         vice_rectors_qs = User.objects.filter(
             roles=vr_role,
+            is_superuser=False,
             is_active=True,
         ).distinct().prefetch_related(
             'department_responsibilities__department',
             'department_responsibilities__department__head',
         )
+
+        # Active Acting Rector delegation (if any)
+        today = timezone.now().date()
+        active_delegation = ActingRectorDelegation.objects.filter(
+            is_active=True,
+            start_date__lte=today,
+        ).filter(
+            Q(end_date__isnull=True) | Q(end_date__gte=today)
+        ).select_related('acting_rector', 'acting_rector__position', 'rector').first()
 
         # Scoped view for departments
         scoped_depts = user.get_scoped_departments().filter(is_active=True).select_related('head').prefetch_related('users')
@@ -54,6 +69,10 @@ class OrganizationOverviewView(LoginRequiredMixin, TemplateView):
         context['rectors'] = rectors
         context['vice_rectors'] = vice_rectors_qs
         context['scoped_departments'] = scoped_depts
+        context['active_delegation'] = active_delegation
+        context['delegation_form'] = (
+            ActingRectorDelegationForm() if (user.is_rector or user.is_superuser) else None
+        )
         return context
 
 
@@ -99,6 +118,8 @@ class DepartmentDetailView(ScopedDepartmentAccessMixin, DetailView):
         context = super().get_context_data(**kwargs)
         department = self.object
         employees = department.users.select_related('position').prefetch_related('roles').order_by('first_name', 'last_name')
+        if not self.request.user.is_superuser:
+            employees = employees.exclude(is_superuser=True)
         positions = department.positions.filter(is_active=True).order_by('name')
         active_responsibilities = department.vice_rector_responsibilities.filter(
             is_active=True,
@@ -107,7 +128,7 @@ class DepartmentDetailView(ScopedDepartmentAccessMixin, DetailView):
         context['employees'] = employees
         context['positions'] = positions
         context['active_responsibilities'] = active_responsibilities
-        context['head_form'] = DepartmentHeadAssignForm(department=department) if self.request.user.is_rector else None
+        context['head_form'] = DepartmentHeadAssignForm(department=department) if (self.request.user.is_rector or self.request.user.is_superuser) else None
         return context
 
 
@@ -331,3 +352,47 @@ class ViceRectorResponsibilityDeleteView(RectorRequiredMixin, View):
             },
         )
         return redirect('responsibility_list')
+
+
+class ActingRectorAssignView(RectorRequiredMixin, View):
+    """POST: Rector or Superadmin designates a Vice Rector as Acting Rector."""
+
+    def post(self, request):
+        form = ActingRectorDelegationForm(request.POST)
+        if form.is_valid():
+            acting_rector = form.cleaned_data['acting_rector']
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data.get('end_date')
+            reason = form.cleaned_data.get('reason', '')
+            try:
+                delegation = assign_acting_rector(
+                    rector=request.user,
+                    acting_rector=acting_rector,
+                    actor=request.user,
+                    start_date=start_date,
+                    end_date=end_date,
+                    reason=reason,
+                    request=request,
+                )
+                messages.success(
+                    request,
+                    _('Successfully assigned %(vr)s as Acting Rector.') % {'vr': acting_rector.display_name},
+                )
+            except ValidationError as e:
+                messages.error(request, str(e.message if hasattr(e, 'message') else e))
+        else:
+            messages.error(request, _('Please correct the errors in the delegation form.'))
+        return redirect('organization_overview')
+
+
+class ActingRectorRevokeView(RectorRequiredMixin, View):
+    """POST: Rector or Superadmin revokes an active Acting Rector delegation."""
+
+    def post(self, request, pk):
+        delegation = get_object_or_404(ActingRectorDelegation, pk=pk)
+        revoke_acting_rector(delegation, actor=request.user, request=request)
+        messages.info(
+            request,
+            _('Revoked Acting Rector duties from %(vr)s.') % {'vr': delegation.acting_rector.display_name},
+        )
+        return redirect('organization_overview')

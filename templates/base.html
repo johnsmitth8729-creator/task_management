@@ -1,13 +1,25 @@
 {% load i18n static %}
 <!doctype html>
-<html lang="{{ LANGUAGE_CODE|default:'en' }}">
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" data-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}{% trans "TASK MANAGEMENT" %}{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="{% static 'css/app.css' %}" rel="stylesheet">
+    <link href="{% static 'css/app.css' %}?v=5" rel="stylesheet">
+    {# Inline: apply saved theme and sidebar state immediately to prevent flash #}
+    <script>
+        (function () {
+            var t = localStorage.getItem('tm_app_theme') ||
+                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', t);
+
+            if (localStorage.getItem('tm_sidebar_collapsed') === 'true') {
+                document.documentElement.classList.add('sidebar-collapsed');
+            }
+        })();
+    </script>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -16,10 +28,14 @@
     <div class="app-shell">
         {% include "includes/sidebar.html" %}
         <main class="app-main">
+            {% include "includes/contextual_nav.html" %}
             {% if messages %}
                 <div class="container-fluid pt-3">
                     {% for message in messages %}
-                        <div class="alert alert-{{ message.tags|default:'info' }} mb-2" role="alert">{{ message }}</div>
+                        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show mb-2" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{% trans 'Close' %}"></button>
+                        </div>
                     {% endfor %}
                 </div>
             {% endif %}
@@ -31,9 +47,16 @@
         {% block auth_content %}{% endblock %}
     </main>
 {% endif %}
+
+
+
+{% if user.is_authenticated %}
+    {% include "includes/confirm_modal.html" %}
+    {% include "includes/year_modal.html" %}
+{% endif %}
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-<script src="{% static 'js/app.js' %}"></script>
+<script src="{% static 'js/app.js' %}?v=4"></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>
-

@@ -1,12 +1,82 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
-{% block title %}{% trans "Page not found" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+{% block title %}404 — {% trans "Page Not Found" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <h1 class="h3">{% trans "Page not found" %}</h1>
-    <p class="text-muted">{% trans "The requested page could not be found." %}</p>
+<div class="container py-5 my-auto">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 text-center">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+                <div class="mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary p-4 mb-2" style="width: 100px; height: 100px;">
+                        <i class="bi bi-compass fs-1"></i>
+                    </div>
+                    <div class="display-3 fw-bold font-monospace text-primary mt-2">404</div>
+                    <h2 class="h4 fw-bold text-dark mb-2">{% trans "Page Not Found" %}</h2>
+                    <p class="text-muted mb-0">
+                        {% trans "The URL link you requested does not exist, has been moved, or is temporarily unavailable." %}
+                    </p>
+                </div>
+
+                <div class="d-flex flex-column flex-sm-row justify-content-center gap-2 pt-3 border-top">
+                    <button type="button" onclick="window.history.back()" class="btn btn-outline-secondary px-4">
+                        <i class="bi bi-arrow-left me-1"></i>{% trans "Go Back" %}
+                    </button>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary px-4">
+                            <i class="bi bi-speedometer2 me-1"></i>{% trans "Dashboard" %}
+                        </a>
+                    {% else %}
+                        <a href="{% url 'home' %}" class="btn btn-primary px-4">
+                            <i class="bi bi-house me-1"></i>{% trans "Home" %}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="text-muted small mt-4">
+                &copy; {% now "Y" %} {% trans "Al-Khwarizmi University. All rights reserved." %}
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
+{% block auth_content %}
+<div class="container py-5 my-auto">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 text-center">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+                <div class="mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary p-4 mb-2" style="width: 100px; height: 100px;">
+                        <i class="bi bi-compass fs-1"></i>
+                    </div>
+                    <div class="display-3 fw-bold font-monospace text-primary mt-2">404</div>
+                    <h2 class="h4 fw-bold text-dark mb-2">{% trans "Page Not Found" %}</h2>
+                    <p class="text-muted mb-0">
+                        {% trans "The URL link you requested does not exist, has been moved, or is temporarily unavailable." %}
+                    </p>
+                </div>
+
+                <div class="d-flex flex-column flex-sm-row justify-content-center gap-2 pt-3 border-top">
+                    <button type="button" onclick="window.history.back()" class="btn btn-outline-secondary px-4">
+                        <i class="bi bi-arrow-left me-1"></i>{% trans "Go Back" %}
+                    </button>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary px-4">
+                            <i class="bi bi-speedometer2 me-1"></i>{% trans "Dashboard" %}
+                        </a>
+                    {% else %}
+                        <a href="{% url 'home' %}" class="btn btn-primary px-4">
+                            <i class="bi bi-house me-1"></i>{% trans "Home" %}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="text-muted small mt-4">
+                &copy; {% now "Y" %} {% trans "Al-Khwarizmi University. All rights reserved." %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

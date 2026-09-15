@@ -1,0 +1,574 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Manage Assignees" %} &mdash; {{ task.task_number }} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none">{% trans "Dashboard" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'task_list' %}" class="text-decoration-none">{% trans "Tasks" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'task_detail' pk=task.pk %}" class="text-decoration-none">{{ task.task_number }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{% trans "Assignees" %}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10 col-xl-9">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-body">
+                <!-- Header -->
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 pb-3 mb-4 border-bottom">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-primary-subtle text-primary fw-semibold px-2.5 py-1 rounded-pill">
+                                <i class="bi bi-person-gear me-1"></i>{% trans "Assignment Management" %}
+                            </span>
+                            <span class="badge bg-light text-muted border px-2.5 py-1 rounded-pill">
+                                {{ task.task_number }}
+                            </span>
+                        </div>
+                        <h1 class="h3 fw-bold text-body mb-1">{% trans "Manage Task Assignees" %}</h1>
+                        <p class="text-muted small mb-0">
+                            {% trans "Select one or more employees to execute this task and designate one as the Primary Assignee." %}
+                        </p>
+                    </div>
+
+                    <a href="{% url 'task_detail' pk=task.pk %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                        <i class="bi bi-arrow-left me-1"></i>{% trans "Back to Task" %}
+                    </a>
+                </div>
+
+                <!-- Task Context Info Card -->
+                <div class="bg-body-tertiary border rounded-3 p-3 mb-4">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-card-heading text-primary fs-5"></i>
+                                <div>
+                                    <div class="text-muted small" style="font-size: 11px;">{% trans "Task Title" %}</div>
+                                    <div class="fw-semibold text-body text-truncate">{{ task.title }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-building text-secondary fs-5"></i>
+                                <div>
+                                    <div class="text-muted small" style="font-size: 11px;">{% trans "Department" %}</div>
+                                    <div class="fw-semibold text-body small text-truncate">
+                                        {{ task.responsible_department.name|default:_("Unassigned") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-calendar-event text-danger fs-5"></i>
+                                <div>
+                                    <div class="text-muted small" style="font-size: 11px;">{% trans "Deadline" %}</div>
+                                    <div class="fw-semibold text-body small">
+                                        {{ task.deadline|date:"d M Y"|default:_("No deadline") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <form method="post" id="assigneesForm" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger py-2 small mb-4 rounded-3 shadow-xs">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if form.assignees.errors %}
+                        <div class="alert alert-danger py-2 small mb-4 rounded-3 shadow-xs">
+                            <i class="bi bi-exclamation-circle-fill me-1"></i>
+                            {% for error in form.assignees.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if form.primary_assignee.errors %}
+                        <div class="alert alert-danger py-2 small mb-4 rounded-3 shadow-xs">
+                            <i class="bi bi-exclamation-circle-fill me-1"></i>
+                            {% for error in form.primary_assignee.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Search, Stats & Action Toolbar -->
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2 mb-3">
+                        <!-- Search Box -->
+                        <div class="input-group input-group-sm flex-grow-1" style="max-width: 420px;">
+                            <span class="input-group-text bg-body border-end-0 text-muted">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" id="employeeSearchInput" class="form-control border-start-0"
+                                   placeholder="{% trans 'Search by name, position or username...' %}" autocomplete="off">
+                            <button class="btn btn-outline-secondary d-none" type="button" id="clearSearchBtn">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+
+                        <!-- Selection Summary & Mass Actions -->
+                        <div class="d-flex align-items-center justify-content-between justify-content-md-end gap-2">
+                            <div id="selectionSummaryBadge" class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill small">
+                                <i class="bi bi-check2-circle me-1"></i>
+                                <span id="selectedCountText" class="fw-bold">0</span> {% trans "selected" %}
+                            </div>
+                            <div class="d-flex align-items-center gap-1">
+                                <button type="button" id="selectAllBtn" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-1">
+                                    <i class="bi bi-check-all me-1"></i>{% trans "Select All" %}
+                                </button>
+                                <button type="button" id="clearAllSelectionBtn" class="btn btn-sm btn-outline-danger rounded-pill px-2.5 py-1 d-none">
+                                    <i class="bi bi-x-circle me-1"></i>{% trans "Clear All" %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Selected Employees Chips Bar -->
+                    <div id="selectedChipsContainer" class="p-2.5 bg-body-tertiary rounded-3 border mb-3 d-none">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small fw-semibold" style="font-size: 11px;">
+                                {% trans "SELECTED EMPLOYEES" %}
+                            </span>
+                            <span class="text-muted" style="font-size: 11px;">
+                                {% trans "Click '⭐ Set Primary' to designate lead" %}
+                            </span>
+                        </div>
+                        <div id="chipsList" class="d-flex flex-wrap gap-1.5 align-items-center">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Primary Assignee Guide Note -->
+                    <div id="primaryAssigneeGuideNote" class="alert alert-warning py-2.5 px-3 rounded-3 border-warning-subtle d-flex align-items-center justify-content-between mb-3 d-none">
+                        <div class="d-flex align-items-center gap-2 overflow-hidden">
+                            <span class="badge bg-warning text-dark fw-bold px-2 py-1 rounded-pill">
+                                <i class="bi bi-star-fill text-dark me-1"></i>{% trans "Primary Assignee" %}
+                            </span>
+                            <span id="currentPrimaryNameText" class="fw-semibold text-dark text-truncate">{% trans "Not chosen" %}</span>
+                        </div>
+                        <span class="text-muted small d-none d-sm-inline" style="font-size: 11px;">
+                            {% trans "Lead coordinator for this task" %}
+                        </span>
+                    </div>
+
+                    <!-- Notice if no employees match search -->
+                    <div id="noMatchNotice" class="alert alert-secondary text-center py-4 px-3 small d-none rounded-3">
+                        <i class="bi bi-search fs-3 text-muted mb-2 d-block"></i>
+                        <strong>{% trans "No employees found" %}</strong>
+                        <p class="text-muted mb-0">{% trans "Try modifying your search query." %}</p>
+                    </div>
+
+                    <!-- Notice if no assignable employees exist -->
+                    <div id="noEmployeesNotice" class="alert alert-info text-center py-4 px-3 small d-none rounded-3">
+                        <i class="bi bi-people fs-3 text-muted mb-2 d-block"></i>
+                        <strong>{% trans "No assignable employees available" %}</strong>
+                        <p class="text-muted mb-0">{% trans "There are no active employees available in this department." %}</p>
+                    </div>
+
+                    <!-- Interactive Employee Cards Container -->
+                    <div id="employeeCardsContainer" class="mb-4">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+
+                    <!-- Hidden standard Django form selects to guarantee submission integrity -->
+                    <div class="d-none">
+                        {{ form.assignees }}
+                        {{ form.primary_assignee }}
+                    </div>
+
+                    <!-- Form Action Buttons -->
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{% url 'task_detail' pk=task.pk %}" class="btn btn-outline-secondary px-4 rounded-pill">
+                            {% trans "Cancel" %}
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm d-inline-flex align-items-center gap-2">
+                            <i class="bi bi-check2-circle fs-5"></i>
+                            <span>{% trans "Save Assignees" %}</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.employee-assignment-card {
+    transition: all 0.18s ease-in-out;
+    background: var(--bs-card-bg, #ffffff);
+    cursor: pointer;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+}
+.employee-assignment-card:hover {
+    border-color: var(--bs-primary) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+.employee-assignment-card.is-selected {
+    border-color: rgba(13, 110, 253, 0.7) !important;
+    background: rgba(13, 110, 253, 0.04);
+}
+.employee-assignment-card.is-primary {
+    border-color: #ffc107 !important;
+    background: rgba(255, 193, 7, 0.08);
+    box-shadow: 0 0 0 1px #ffc107;
+}
+.selected-chip {
+    transition: all 0.15s ease;
+    font-size: 12px;
+}
+.selected-chip:hover {
+    opacity: 0.95;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const rawEmployees = {{ employees_json|default:"[]"|safe }};
+    const initialAssigneeIds = {{ initial_assignee_ids_json|default:"[]"|safe }};
+    const initialPrimaryId = {{ initial_primary_id_json|default:"''"|safe }};
+
+    const hiddenAssigneesSelect = document.getElementById('id_assignees');
+    const hiddenPrimarySelect = document.getElementById('id_primary_assignee');
+
+    const container = document.getElementById('employeeCardsContainer');
+    const searchInput = document.getElementById('employeeSearchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const clearAllBtn = document.getElementById('clearAllSelectionBtn');
+    const selectionBadge = document.getElementById('selectionSummaryBadge');
+    const selectedCountText = document.getElementById('selectedCountText');
+    const primaryNote = document.getElementById('primaryAssigneeGuideNote');
+    const currentPrimaryText = document.getElementById('currentPrimaryNameText');
+    const noMatchNotice = document.getElementById('noMatchNotice');
+    const noEmployeesNotice = document.getElementById('noEmployeesNotice');
+    const chipsContainer = document.getElementById('selectedChipsContainer');
+    const chipsList = document.getElementById('chipsList');
+
+    // Track state
+    const selectedEmpIds = new Set();
+    let currentPrimaryId = initialPrimaryId || null;
+
+    // Initialize pre-selected from hidden form controls or initial context
+    if (hiddenAssigneesSelect) {
+        let hasOptions = false;
+        Array.from(hiddenAssigneesSelect.options).forEach(opt => {
+            if (opt.selected) {
+                selectedEmpIds.add(opt.value);
+                hasOptions = true;
+            }
+        });
+        if (!hasOptions && initialAssigneeIds && initialAssigneeIds.length > 0) {
+            initialAssigneeIds.forEach(id => selectedEmpIds.add(id));
+        }
+    } else if (initialAssigneeIds) {
+        initialAssigneeIds.forEach(id => selectedEmpIds.add(id));
+    }
+
+    if (hiddenPrimarySelect && hiddenPrimarySelect.value) {
+        currentPrimaryId = hiddenPrimarySelect.value;
+    }
+
+    if (!currentPrimaryId && selectedEmpIds.size > 0) {
+        currentPrimaryId = Array.from(selectedEmpIds)[0];
+    }
+
+    function syncHiddenForm() {
+        // Sync assignees in hidden select
+        if (hiddenAssigneesSelect) {
+            Array.from(hiddenAssigneesSelect.options).forEach(opt => {
+                opt.selected = selectedEmpIds.has(opt.value);
+            });
+        }
+
+        // Sync primary_assignee in hidden select
+        if (hiddenPrimarySelect) {
+            hiddenPrimarySelect.value = currentPrimaryId || '';
+        }
+
+        // Update UI summary indicators
+        const count = selectedEmpIds.size;
+        if (selectedCountText) selectedCountText.textContent = count;
+        if (clearAllBtn) clearAllBtn.classList.toggle('d-none', count === 0);
+
+        // Update Primary Note
+        if (primaryNote && currentPrimaryText) {
+            if (currentPrimaryId && selectedEmpIds.has(currentPrimaryId)) {
+                const emp = rawEmployees.find(e => e.id === currentPrimaryId);
+                currentPrimaryText.textContent = emp ? emp.name : '{% trans "Selected" %}';
+                primaryNote.classList.remove('d-none');
+                primaryNote.classList.add('d-flex');
+            } else {
+                primaryNote.classList.add('d-none');
+                primaryNote.classList.remove('d-flex');
+            }
+        }
+
+        // Render Selected Chips
+        renderSelectedChips();
+    }
+
+    function renderSelectedChips() {
+        if (!chipsContainer || !chipsList) return;
+        if (selectedEmpIds.size === 0) {
+            chipsContainer.classList.add('d-none');
+            chipsList.innerHTML = '';
+            return;
+        }
+
+        chipsContainer.classList.remove('d-none');
+        let chipsHtml = '';
+        selectedEmpIds.forEach(id => {
+            const emp = rawEmployees.find(e => e.id === id);
+            if (!emp) return;
+            const isPrimary = (currentPrimaryId === id);
+            chipsHtml += `
+                <span class="badge ${isPrimary ? 'bg-warning text-dark border border-warning' : 'bg-primary-subtle text-primary border border-primary-subtle'} rounded-pill d-inline-flex align-items-center gap-1.5 px-2.5 py-1.5 selected-chip">
+                    ${isPrimary ? '<i class="bi bi-star-fill text-dark small"></i>' : ''}
+                    <span class="fw-semibold">${emp.name}</span>
+                    <button type="button" class="btn-close btn-close-${isPrimary ? 'dark' : 'white'} p-0 ms-1" style="font-size: 8px;"
+                            onclick="event.stopPropagation(); window._removeEmployeeChip('${id}')" title="{% trans 'Remove' %}"></button>
+                </span>
+            `;
+        });
+        chipsList.innerHTML = chipsHtml;
+    }
+
+    function renderEmployees() {
+        const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+
+        if (clearSearchBtn) {
+            clearSearchBtn.classList.toggle('d-none', !query);
+        }
+
+        if (!rawEmployees || rawEmployees.length === 0) {
+            if (noEmployeesNotice) noEmployeesNotice.classList.remove('d-none');
+            if (container) {
+                container.classList.add('d-none');
+                container.innerHTML = '';
+            }
+            syncHiddenForm();
+            return;
+        }
+        if (noEmployeesNotice) noEmployeesNotice.classList.add('d-none');
+
+        // Filter employees
+        const filtered = rawEmployees.filter(emp => {
+            if (!query) return true;
+            const matchName = (emp.name || '').toLowerCase().includes(query);
+            const matchUser = (emp.username || '').toLowerCase().includes(query);
+            const matchPos = (emp.position_name || '').toLowerCase().includes(query);
+            const matchDept = (emp.department_name || '').toLowerCase().includes(query);
+            return (matchName || matchUser || matchPos || matchDept);
+        });
+
+        if (filtered.length === 0) {
+            if (noMatchNotice) noMatchNotice.classList.remove('d-none');
+            if (container) {
+                container.classList.add('d-none');
+                container.innerHTML = '';
+            }
+            syncHiddenForm();
+            return;
+        }
+
+        if (noMatchNotice) noMatchNotice.classList.add('d-none');
+        if (container) container.classList.remove('d-none');
+
+        // Group by department
+        const grouped = {};
+        filtered.forEach(emp => {
+            const dName = emp.department_name || '{% trans "General Department" %}';
+            if (!grouped[dName]) grouped[dName] = [];
+            grouped[dName].push(emp);
+        });
+
+        let html = '';
+        Object.keys(grouped).forEach(deptName => {
+            const emps = grouped[deptName];
+            const allDeptSelected = emps.every(e => selectedEmpIds.has(e.id));
+
+            html += `
+                <div class="department-group-block mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2.5 pb-1 border-bottom">
+                        <span class="fw-bold small text-body d-flex align-items-center gap-2">
+                            <i class="bi bi-building text-primary"></i> ${deptName}
+                            <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-0.5" style="font-size: 11px;">${emps.length}</span>
+                        </span>
+                        <button type="button" class="btn btn-sm btn-link text-primary text-decoration-none py-0 px-1 small select-dept-all-btn" data-dept-name="${deptName}">
+                            ${allDeptSelected ? '{% trans "Deselect group" %}' : '{% trans "Select group" %}'}
+                        </button>
+                    </div>
+                    <div class="row g-2.5">
+            `;
+
+            emps.forEach(emp => {
+                const isChecked = selectedEmpIds.has(emp.id);
+                const isPrimary = (currentPrimaryId === emp.id && isChecked);
+
+                let cardClasses = 'card h-100 employee-assignment-card rounded-3 p-3';
+                if (isPrimary) cardClasses += ' is-primary';
+                else if (isChecked) cardClasses += ' is-selected';
+
+                html += `
+                    <div class="col-12 col-md-6">
+                        <div class="${cardClasses}" data-emp-id="${emp.id}" onclick="window._toggleEmployeeCard('${emp.id}', event)">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2.5 overflow-hidden flex-grow-1">
+                                    <div class="form-check m-0" onclick="event.stopPropagation()">
+                                        <input class="form-check-input emp-checkbox cursor-pointer" type="checkbox"
+                                               value="${emp.id}" id="emp_check_${emp.id}"
+                                               ${isChecked ? 'checked' : ''}
+                                               onchange="window._toggleEmployee('${emp.id}', this.checked)">
+                                    </div>
+                                    <div class="avatar-circle-sm bg-primary-subtle text-primary fw-bold rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; font-size: 14px;">
+                                        ${emp.photo_url ? `<img src="${emp.photo_url}" class="rounded-circle w-100 h-100 object-fit-cover">` : emp.initials}
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <div class="fw-semibold text-body text-truncate small">${emp.name}</div>
+                                        <div class="text-muted text-truncate" style="font-size: 11px;">
+                                            ${emp.position_name || '{% trans "Staff" %}'} &bull; <span class="text-secondary">@${emp.username}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="primary-action-zone flex-shrink-0 ms-2" onclick="event.stopPropagation()">
+                                    ${isChecked ? (
+                                        isPrimary ? `
+                                            <span class="badge bg-warning text-dark border border-warning fw-bold rounded-pill px-2.5 py-1 shadow-xs" style="font-size: 11px;">
+                                                <i class="bi bi-star-fill text-dark me-1"></i>{% trans "Primary" %}
+                                            </span>
+                                        ` : `
+                                            <button type="button" class="btn btn-sm btn-outline-warning text-dark py-1 px-2.5 rounded-pill" style="font-size: 11px;" onclick="window._setPrimaryAssignee('${emp.id}')" title="{% trans 'Set as Primary Assignee' %}">
+                                                <i class="bi bi-star me-1 text-warning"></i>{% trans "Set Primary" %}
+                                            </button>
+                                        `
+                                    ) : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+        });
+
+        if (container) container.innerHTML = html;
+        syncHiddenForm();
+    }
+
+    // Global handlers for inline event handlers
+    window._toggleEmployee = function(empId, isChecked) {
+        if (isChecked) {
+            selectedEmpIds.add(empId);
+            if (!currentPrimaryId || !selectedEmpIds.has(currentPrimaryId)) {
+                currentPrimaryId = empId;
+            }
+        } else {
+            selectedEmpIds.delete(empId);
+            if (currentPrimaryId === empId) {
+                const remaining = Array.from(selectedEmpIds);
+                currentPrimaryId = remaining.length > 0 ? remaining[0] : null;
+            }
+        }
+        renderEmployees();
+    };
+
+    window._toggleEmployeeCard = function(empId, event) {
+        const checkbox = document.getElementById(`emp_check_${empId}`);
+        if (checkbox) {
+            checkbox.checked = !checkbox.checked;
+            window._toggleEmployee(empId, checkbox.checked);
+        }
+    };
+
+    window._removeEmployeeChip = function(empId) {
+        selectedEmpIds.delete(empId);
+        if (currentPrimaryId === empId) {
+            const remaining = Array.from(selectedEmpIds);
+            currentPrimaryId = remaining.length > 0 ? remaining[0] : null;
+        }
+        renderEmployees();
+    };
+
+    window._setPrimaryAssignee = function(empId) {
+        if (!selectedEmpIds.has(empId)) {
+            selectedEmpIds.add(empId);
+        }
+        currentPrimaryId = empId;
+        renderEmployees();
+    };
+
+    // Department group Select All / Deselect All button
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.select-dept-all-btn');
+        if (btn) {
+            const deptName = btn.getAttribute('data-dept-name');
+            const deptEmps = rawEmployees.filter(emp => (emp.department_name || '{% trans "General Department" %}') === deptName);
+            const allSelected = deptEmps.every(emp => selectedEmpIds.has(emp.id));
+
+            deptEmps.forEach(emp => {
+                if (allSelected) {
+                    selectedEmpIds.delete(emp.id);
+                    if (currentPrimaryId === emp.id) currentPrimaryId = null;
+                } else {
+                    selectedEmpIds.add(emp.id);
+                    if (!currentPrimaryId) currentPrimaryId = emp.id;
+                }
+            });
+            if (!currentPrimaryId && selectedEmpIds.size > 0) {
+                currentPrimaryId = Array.from(selectedEmpIds)[0];
+            }
+            renderEmployees();
+        }
+    });
+
+    // Select All across all employees
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', function() {
+            rawEmployees.forEach(emp => selectedEmpIds.add(emp.id));
+            if (!currentPrimaryId && rawEmployees.length > 0) {
+                currentPrimaryId = rawEmployees[0].id;
+            }
+            renderEmployees();
+        });
+    }
+
+    // Clear all assignees button
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener('click', function() {
+            selectedEmpIds.clear();
+            currentPrimaryId = null;
+            renderEmployees();
+        });
+    }
+
+    // Search input
+    if (searchInput) {
+        searchInput.addEventListener('input', renderEmployees);
+    }
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', function() {
+            if (searchInput) searchInput.value = '';
+            renderEmployees();
+        });
+    }
+
+    // Initial render
+    renderEmployees();
+});
+</script>
+{% endblock %}

@@ -5,11 +5,14 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from accounts.models import Role
-from organization.models import Department, DepartmentResponsibility, Position
+from organization.models import ActingRectorDelegation, Department, DepartmentResponsibility, Position
 from organization.services import (
+    assign_acting_rector,
     assign_department_head,
+    assign_rector,
     assign_vice_rector_responsibility,
     remove_vice_rector_responsibility,
+    revoke_acting_rector,
 )
 
 User = get_user_model()
@@ -46,6 +49,32 @@ class OrganizationModelAndServiceTests(TestCase):
         self.dept_it.refresh_from_db()
         self.assertEqual(self.dept_it.head, self.user_it)
         self.assertTrue(self.user_it.is_department_head)
+
+    def test_single_department_head_rule_enforced(self):
+        # 1. user_it is initial head
+        assign_department_head(self.dept_it, self.user_it, actor=self.rector)
+        self.dept_it.refresh_from_db()
+        self.assertEqual(self.dept_it.head, self.user_it)
+        self.assertTrue(self.user_it.is_department_head)
+
+        # 2. Assign new user as head
+        user_new = User.objects.create_user(
+            username='user.new', email='user.new@example.com', password='Password123!',
+            department=self.dept_it,
+        )
+        assign_department_head(self.dept_it, user_new, actor=self.rector)
+        self.dept_it.refresh_from_db()
+        self.user_it.refresh_from_db()
+        user_new.refresh_from_db()
+
+        # Check only user_new is head
+        self.assertEqual(self.dept_it.head, user_new)
+        self.assertTrue(user_new.is_department_head)
+        # Previous head's role revoked
+        self.assertFalse(self.user_it.is_department_head)
+        # Exactly one user in this department holds the DEPARTMENT_HEAD role
+        head_count = User.objects.filter(department=self.dept_it, roles__code=Role.Codes.DEPARTMENT_HEAD).count()
+        self.assertEqual(head_count, 1)
 
     def test_vice_rector_responsibility_assignment_and_removal(self):
         resp = assign_vice_rector_responsibility(self.vr_acad, self.dept_it, actor=self.rector)
@@ -197,3 +226,90 @@ class OrganizationViewSecurityAndAccessTests(TestCase):
                 vice_rector=self.vr_acad, department=self.dept_fin, is_active=True
             ).exists()
         )
+
+    def test_single_rector_rule_enforced(self):
+        # Initial rector
+        self.assertTrue(self.rector.is_rector)
+
+        # Create candidate user and assign as rector
+        new_rector = User.objects.create_user(
+            username='new.rector', email='new.rector@example.com', password='Password123!',
+        )
+        assign_rector(new_rector, actor=self.rector)
+
+        self.rector.refresh_from_db()
+        new_rector.refresh_from_db()
+
+        self.assertTrue(new_rector.is_rector)
+        self.assertFalse(self.rector.is_rector)
+        # Exactly one user in university holds RECTOR role
+        self.assertEqual(User.objects.filter(roles__code=Role.Codes.RECTOR).count(), 1)
+
+    def test_acting_rector_delegation_assignment_and_revocation(self):
+        # VR is not acting rector initially
+        self.assertFalse(self.vr_acad.is_acting_rector)
+        self.assertFalse(self.vr_acad.can_act_as_rector)
+
+        # Rector delegates to VR
+        delegation = assign_acting_rector(
+            rector=self.rector,
+            acting_rector=self.vr_acad,
+            actor=self.rector,
+            reason='Annual Leave',
+        )
+        self.assertTrue(delegation.is_active)
+        self.vr_acad.refresh_from_db()
+        self.assertTrue(self.vr_acad.is_acting_rector)
+        self.assertTrue(self.vr_acad.can_act_as_rector)
+
+        # Revocation
+        revoke_acting_rector(delegation, actor=self.rector)
+        self.vr_acad.refresh_from_db()
+        self.assertFalse(self.vr_acad.is_acting_rector)
+        self.assertFalse(self.vr_acad.can_act_as_rector)
+
+    def test_superadmin_invisible_in_structure_overview_to_staff(self):
+        # Create a superadmin user
+        superadmin = User.objects.create_superuser(
+            username='rootadmin', email='rootadmin@example.com', password='Password123!',
+        )
+        # Log in as Department Head
+        self.client.login(username='head.it', password='Password123!')
+        res = self.client.get(reverse('organization_overview'))
+        self.assertEqual(res.status_code, 200)
+        # Superadmin username / email must NOT be present in page content
+        self.assertNotContains(res, 'rootadmin')
+        self.assertNotContains(res, 'rootadmin@example.com')
+
+        # Log in as Employee
+        self.client.login(username='emp.it', password='Password123!')
+        res_emp = self.client.get(reverse('organization_overview'))
+        self.assertEqual(res_emp.status_code, 200)
+        self.assertNotContains(res_emp, 'rootadmin')
+
+    def test_acting_rector_views(self):
+        self.client.login(username='rector', password='Password123!')
+        res_assign = self.client.post(
+            reverse('acting_rector_assign'),
+            {
+                'acting_rector': self.vr_acad.pk,
+                'start_date': '2026-09-08',
+                'reason': 'Business Trip',
+            },
+            follow=True,
+        )
+        self.assertEqual(res_assign.status_code, 200)
+        self.vr_acad.refresh_from_db()
+        self.assertTrue(self.vr_acad.is_acting_rector)
+
+        delegation = ActingRectorDelegation.objects.filter(acting_rector=self.vr_acad, is_active=True).first()
+        self.assertIsNotNone(delegation)
+
+        res_revoke = self.client.post(
+            reverse('acting_rector_revoke', kwargs={'pk': delegation.pk}),
+            follow=True,
+        )
+        self.assertEqual(res_revoke.status_code, 200)
+        self.vr_acad.refresh_from_db()
+        self.assertFalse(self.vr_acad.is_acting_rector)
+

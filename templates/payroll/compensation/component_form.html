@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Create Compensation Component" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3 p-4">
+                <div class="border-bottom pb-3 mb-3">
+                    <a href="{% url 'payroll:component_list' %}" class="text-decoration-none text-muted small">&larr; {% trans "Back to Components" %}</a>
+                    <h3 class="fw-bold text-dark mt-2 mb-0">{% trans "New Compensation Component" %}</h3>
+                    <p class="text-muted small mb-0">{% trans "Define a standard allowance, recurring incentive, or fixed deduction." %}</p>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-muted">{{ form.name.label }}</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-muted">{{ form.code.label }}</label>
+                        {{ form.code }}
+                        {% if form.code.errors %}<div class="text-danger small mt-1">{{ form.code.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-muted">{{ form.component_type.label }}</label>
+                            {{ form.component_type }}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-muted">{{ form.calculation_type.label }}</label>
+                            {{ form.calculation_type }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-muted">{{ form.default_value.label }}</label>
+                        {{ form.default_value }}
+                        {% if form.default_value.errors %}<div class="text-danger small mt-1">{{ form.default_value.errors }}</div>{% endif %}
+                        <div class="form-text small">{% trans "Enter monetary amount in UZS or percentage (0-100) if percentage-based." %}</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            {{ form.is_taxable }}
+                            <label class="form-check-label small fw-semibold" for="{{ form.is_taxable.id_for_label }}">{{ form.is_taxable.label }}</label>
+                        </div>
+                        <div class="form-check form-switch mt-2">
+                            {{ form.is_active }}
+                            <label class="form-check-label small fw-semibold" for="{{ form.is_active.id_for_label }}">{{ form.is_active.label }}</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small text-muted">{{ form.description.label }}</label>
+                        {{ form.description }}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'payroll:component_list' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check2-circle me-1"></i>{% trans "Save Component" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

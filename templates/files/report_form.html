@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% if is_create %}{% trans "New Work Report" %}{% else %}{% trans "Edit Report" %}{% endif %} — {{ task.task_number }} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-3 px-lg-4">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="{% if is_create %}{% url 'task_detail' pk=task.pk %}{% else %}{% url 'task_report_detail' pk=report.pk %}{% endif %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>{% trans "Cancel" %}
+        </a>
+        <div>
+            <h1 class="h4 fw-bold mb-0">
+                {% if is_create %}
+                    <i class="bi bi-file-earmark-plus text-primary me-2"></i>{% trans "Create Structured Work Report" %}
+                {% else %}
+                    <i class="bi bi-pencil-square text-primary me-2"></i>{% trans "Edit Work Report" %}
+                {% endif %}
+            </h1>
+            <div class="text-muted small mt-1">
+                <span class="task-number-pill">{{ task.task_number }}</span>
+                <span>{{ task.title }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 p-lg-5">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger mb-4">
+                            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-8">
+                                <label class="form-label small fw-bold">{% trans "Report Title" %} <span class="text-danger">*</span></label>
+                                {{ form.title }}
+                                {% if form.title.errors %}<div class="text-danger small">{{ form.title.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">{% trans "Reporting Period / Milestone" %}</label>
+                                {{ form.reporting_period }}
+                                {% if form.reporting_period.errors %}<div class="text-danger small">{{ form.reporting_period.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">{% trans "Executive Summary" %} <span class="text-danger">*</span></label>
+                            {{ form.summary }}
+                            <div class="form-text small">{% trans "Provide a clear, high-level summary of work progress and goals achieved." %}</div>
+                            {% if form.summary.errors %}<div class="text-danger small">{{ form.summary.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">{% trans "Completed Work & Activities" %} <span class="text-danger">*</span></label>
+                            {{ form.completed_work }}
+                            <div class="form-text small">{% trans "Detail all specific tasks, development efforts, research, or operational steps performed." %}</div>
+                            {% if form.completed_work.errors %}<div class="text-danger small">{{ form.completed_work.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">{% trans "Key Results & Deliverables" %} <span class="text-danger">*</span></label>
+                            {{ form.results }}
+                            <div class="form-text small">{% trans "List concrete deliverables, metrics, URLs, or artifacts generated." %}</div>
+                            {% if form.results.errors %}<div class="text-danger small">{{ form.results.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">{% trans "Identified Challenges & Problems (Optional)" %}</label>
+                                {{ form.problems }}
+                                {% if form.problems.errors %}<div class="text-danger small">{{ form.problems.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">{% trans "Recommendations & Next Steps (Optional)" %}</label>
+                                {{ form.recommendations }}
+                                {% if form.recommendations.errors %}<div class="text-danger small">{{ form.recommendations.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-8">
+                                <label class="form-label small fw-bold">{% trans "Conclusion (Optional)" %}</label>
+                                {{ form.conclusion }}
+                                {% if form.conclusion.errors %}<div class="text-danger small">{{ form.conclusion.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">{% trans "Report Status" %}</label>
+                                {{ form.status }}
+                                {% if form.status.errors %}<div class="text-danger small">{{ form.status.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% if is_create %}{% url 'task_detail' pk=task.pk %}{% else %}{% url 'task_report_detail' pk=report.pk %}{% endif %}" class="btn btn-secondary">
+                                {% trans "Cancel" %}
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check-circle-fill me-1"></i>
+                                {% if is_create %}{% trans "Create Report" %}{% else %}{% trans "Save Changes" %}{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

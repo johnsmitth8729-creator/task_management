@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Executive KPI Review" %} | {{ period.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-primary">{% trans "Executive Review" %}</span>
+                <h1 class="h3 fw-bold text-dark mb-0">{{ period.name }}</h1>
+                <span class="font-monospace text-muted">({{ period.code }})</span>
+            </div>
+            <p class="text-muted mb-0">{% trans "Review university performance package, approve results, return for revision, or sign electronically." %}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'kpi:period_detail' pk=period.pk %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>{% trans "Back to Period" %}
+            </a>
+        </div>
+    </div>
+
+    <!-- Review Decision Actions -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">{% trans "Executive Decision Panel" %}</h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="p-3 border rounded-3 bg-light h-100">
+                        <h6 class="fw-bold text-success mb-2"><i class="bi bi-check-circle me-1"></i>{% trans "Approve KPI Period" %}</h6>
+                        <p class="text-muted small mb-3">{% trans "Confirm that all department scores are verified and ready for official electronic signature." %}</p>
+                        <form action="{% url 'kpi:period_rector_approve' pk=period.pk %}" method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label small text-muted">{% trans "Approval Notes (Optional)" %}</label>
+                                <textarea name="notes" class="form-control form-control-sm" rows="2" placeholder="{% trans "Executive review remarks..." %}"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 fw-semibold">
+                                <i class="bi bi-check2-all me-1"></i>{% trans "Approve KPI Results" %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="p-3 border rounded-3 bg-light h-100">
+                        <h6 class="fw-bold text-danger mb-2"><i class="bi bi-x-circle me-1"></i>{% trans "Return for Revision" %}</h6>
+                        <p class="text-muted small mb-3">{% trans "Return to HR and department heads for correction. A rejection reason is strictly required." %}</p>
+                        <form action="{% url 'kpi:period_rector_reject' pk=period.pk %}" method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label small text-muted">{% trans "Revision Reason (Mandatory)" %} <span class="text-danger">*</span></label>
+                                <textarea name="reason" class="form-control form-control-sm" rows="2" required placeholder="{% trans "Explain what must be adjusted or corrected..." %}"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-outline-danger w-100 fw-semibold">
+                                <i class="bi bi-arrow-return-left me-1"></i>{% trans "Reject & Return for Revision" %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- University Aggregate Preview -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-header bg-white py-3 border-0">
+            <h5 class="card-title fw-bold text-dark mb-0">{% trans "University Performance Overview" %}</h5>
+        </div>
+        <div class="card-body pt-0">
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-3 text-center">
+                        <span class="text-muted small">{% trans "Average University Score" %}</span>
+                        <div class="display-6 fw-bold text-primary mt-1">{{ university_summary.university_avg_score }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-3 text-center">
+                        <span class="text-muted small">{% trans "Departments Evaluated" %}</span>
+                        <div class="display-6 fw-bold text-dark mt-1">{{ university_summary.total_departments }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-3 text-center">
+                        <span class="text-muted small">{% trans "University Task Completion" %}</span>
+                        <div class="display-6 fw-bold text-success mt-1">{{ university_summary.task_completion_rate }}%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table of departments -->
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>{% trans "Department" %}</th>
+                            <th>{% trans "Headcount" %}</th>
+                            <th>{% trans "Evaluated" %}</th>
+                            <th>{% trans "Tasks" %}</th>
+                            <th class="text-end">{% trans "Department Score" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in university_summary.departments %}
+                            <tr>
+                                <td class="fw-semibold">{{ d.department.name }}</td>
+                                <td>{{ d.headcount }}</td>
+                                <td>{{ d.evaluated_headcount }}</td>
+                                <td>{{ d.completed_tasks }} / {{ d.total_tasks }}</td>
+                                <td class="text-end">
+                                    <span class="badge fs-6 {% if d.avg_kpi_score >= 80 %}bg-success-subtle text-success{% elif d.avg_kpi_score >= 60 %}bg-warning-subtle text-warning{% else %}bg-danger-subtle text-danger{% endif %}">
+                                        {{ d.avg_kpi_score }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

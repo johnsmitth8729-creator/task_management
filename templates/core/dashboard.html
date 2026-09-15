@@ -21,14 +21,96 @@
             </p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{% url 'profile' %}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-person me-1"></i>{% trans "View Profile" %}
+            <a href="{% url 'task_list' %}" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-check2-square me-1"></i>{% trans "View Tasks" %}
             </a>
-            {% if user.is_rector %}
-                <a href="{% url 'organization_overview' %}" class="btn btn-primary btn-sm">
-                    <i class="bi bi-diagram-3 me-1"></i>{% trans "Organization Structure" %}
+            {% if user.is_rector or user.is_vice_rector %}
+                <a href="{% url 'task_create' %}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>{% trans "Create Task" %}
                 </a>
             {% endif %}
+        </div>
+    </div>
+
+    <!-- TASK SUMMARY METRICS (Scoped per role) -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4 col-xl-2">
+            <a href="{% url 'task_list' %}" class="text-decoration-none">
+                <div class="stat-card">
+                    <div class="stat-icon bg-primary-subtle text-primary">
+                        <i class="bi bi-list-task"></i>
+                    </div>
+                    <div>
+                        <div class="fs-4 fw-bold text-dark">{{ task_stats.total }}</div>
+                        <div class="small text-muted">{% trans "Total Tasks" %}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <a href="{% url 'task_list' %}?status=IN_PROGRESS" class="text-decoration-none">
+                <div class="stat-card">
+                    <div class="stat-icon bg-warning-subtle text-warning">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <div>
+                        <div class="fs-4 fw-bold text-dark">{{ task_stats.active }}</div>
+                        <div class="small text-muted">{% trans "Active Tasks" %}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <a href="{% url 'task_list' %}?status=COMPLETED" class="text-decoration-none">
+                <div class="stat-card">
+                    <div class="stat-icon bg-success-subtle text-success">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div>
+                        <div class="fs-4 fw-bold text-dark">{{ task_stats.completed }}</div>
+                        <div class="small text-muted">{% trans "Completed" %}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <a href="{% url 'task_list' %}?is_overdue=1" class="text-decoration-none">
+                <div class="stat-card">
+                    <div class="stat-icon bg-danger-subtle text-danger">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <div>
+                        <div class="fs-4 fw-bold text-dark">{{ task_stats.overdue }}</div>
+                        <div class="small text-muted">{% trans "Overdue" %}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <a href="{% url 'completed_tasks' %}" class="text-decoration-none">
+                <div class="stat-card">
+                    <div class="stat-icon bg-info-subtle text-info">
+                        <i class="bi bi-patch-check-fill"></i>
+                    </div>
+                    <div>
+                        <div class="fs-4 fw-bold text-dark">{{ signature_stats.signed }}</div>
+                        <div class="small text-muted">{% trans "Signed Tasks" %}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <a href="{% url 'completed_tasks' %}" class="text-decoration-none">
+                <div class="stat-card">
+                    <div class="stat-icon bg-secondary-subtle text-secondary">
+                        <i class="bi bi-pen"></i>
+                    </div>
+                    <div>
+                        <div class="fs-4 fw-bold text-dark">{{ signature_stats.pending_signature }}</div>
+                        <div class="small text-muted">{% trans "Pending Signature" %}</div>
+                    </div>
+                </div>
+            </a>
         </div>
     </div>
 

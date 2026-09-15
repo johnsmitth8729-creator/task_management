@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Adjust Base Salary" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3 p-4">
+                <div class="border-bottom pb-3 mb-3">
+                    <a href="{% url 'payroll:employee_detail' pk=target_user.pk %}" class="text-decoration-none text-muted small">&larr; {% trans "Back to Compensation" %}</a>
+                    <h3 class="fw-bold text-dark mt-2 mb-0">{% trans "Adjust Base Salary" %}</h3>
+                    <p class="text-muted small mb-0">{{ target_user.display_name }} (@{{ target_user.username }})</p>
+                </div>
+
+                {% if current_profile %}
+                    <div class="alert alert-info py-2 px-3 small mb-3">
+                        <i class="bi bi-info-circle me-1"></i>
+                        {% trans "Current Base Salary" %}: <strong>{{ current_profile.base_salary|floatformat:2 }} {{ current_profile.currency }}</strong>
+                        ({% trans "effective since" %} {{ current_profile.effective_from|date:"Y-m-d" }})
+                    </div>
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-muted">{{ form.base_salary.label }}</label>
+                        {{ form.base_salary }}
+                        {% if form.base_salary.errors %}<div class="text-danger small mt-1">{{ form.base_salary.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-muted">{{ form.currency.label }}</label>
+                            {{ form.currency }}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-muted">{{ form.salary_type.label }}</label>
+                            {{ form.salary_type }}
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-muted">{{ form.effective_from.label }}</label>
+                            {{ form.effective_from }}
+                            {% if form.effective_from.errors %}<div class="text-danger small mt-1">{{ form.effective_from.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-muted">{{ form.effective_to.label }} ({% trans "Optional" %})</label>
+                            {{ form.effective_to }}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small text-muted">{{ form.notes.label }}</label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}<div class="text-danger small mt-1">{{ form.notes.errors }}</div>{% endif %}
+                        <div class="form-text small">{% trans "Provide institutional reason for salary modification (promotion, grade advance, adjustment)." %}</div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'payroll:employee_detail' pk=target_user.pk %}" class="btn btn-outline-secondary">
+                            {% trans "Cancel" %}
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check2-circle me-1"></i>{% trans "Save & Apply Salary" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

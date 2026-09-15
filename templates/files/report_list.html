@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Work Reports" %} — {{ task.task_number }} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-3 px-lg-4">
+
+    <!-- Header Navigation -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-3">
+            <a href="{% url 'task_detail' pk=task.pk %}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>{% trans "Back to Task" %}
+            </a>
+            <div>
+                <h1 class="h4 fw-bold mb-0">{% trans "Structured Work Reports" %}</h1>
+                <div class="text-muted small mt-1">
+                    <span class="task-number-pill">{{ task.task_number }}</span>
+                    <span>{{ task.title }}</span>
+                </div>
+            </div>
+        </div>
+
+        {% if can_create_report %}
+        <a href="{% url 'task_report_create' task_pk=task.pk %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle-fill me-1"></i>{% trans "New Report" %}
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Reports Table -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        {% if reports %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">{% trans "Report Title" %}</th>
+                        <th>{% trans "Author" %}</th>
+                        <th>{% trans "Period / Milestone" %}</th>
+                        <th>{% trans "Version" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Created Date" %}</th>
+                        <th class="text-end pe-4">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rep in reports %}
+                    <tr>
+                        <td class="ps-4">
+                            <a href="{% url 'task_report_detail' pk=rep.pk %}" class="fw-bold text-decoration-none text-primary">
+                                {{ rep.title }}
+                            </a>
+                            <div class="text-muted small text-truncate" style="max-width:300px;">{{ rep.summary }}</div>
+                        </td>
+                        <td>{{ rep.author.display_name|default:"—" }}</td>
+                        <td>{{ rep.reporting_period|default:"—" }}</td>
+                        <td><span class="badge bg-light text-dark border">v{{ rep.version }}</span></td>
+                        <td>
+                            <span class="badge {% if rep.status == 'APPROVED' %}bg-success{% elif rep.status == 'SUBMITTED' %}bg-primary{% elif rep.status == 'REJECTED' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                {{ rep.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="small text-muted">{{ rep.created_at|date:"d M Y H:i" }}</td>
+                        <td class="text-end pe-4">
+                            <div class="d-flex align-items-center justify-content-end gap-1">
+                                <a href="{% url 'task_report_detail' pk=rep.pk %}" class="btn btn-sm btn-outline-secondary" title="{% trans 'View' %}">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'task_report_export_pdf' pk=rep.pk %}" class="btn btn-sm btn-outline-danger" title="{% trans 'PDF' %}">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </a>
+                                <a href="{% url 'task_report_export_docx' pk=rep.pk %}" class="btn btn-sm btn-outline-primary" title="{% trans 'Word' %}">
+                                    <i class="bi bi-file-earmark-word"></i>
+                                </a>
+                                <a href="{% url 'task_report_export_xlsx' pk=rep.pk %}" class="btn btn-sm btn-outline-success" title="{% trans 'Excel' %}">
+                                    <i class="bi bi-file-earmark-excel"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-file-earmark-text display-4 text-muted mb-3 d-block"></i>
+            <h5 class="fw-semibold">{% trans "No work reports created yet." %}</h5>
+            <p class="text-muted small">{% trans "Structured work reports allow employees and managers to document milestones, deliverables, and outcomes." %}</p>
+            {% if can_create_report %}
+            <a href="{% url 'task_report_create' task_pk=task.pk %}" class="btn btn-primary mt-2">
+                <i class="bi bi-plus-circle me-1"></i>{% trans "Create First Report" %}
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

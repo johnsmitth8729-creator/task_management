@@ -51,17 +51,29 @@
                         </a>
                     {% endif %}
 
-                    {% if user.is_rector and user.id != profile_user.id %}
+                    {% if can_toggle_active %}
                         <form action="{% url 'user_toggle_active' pk=profile_user.pk %}" method="post">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-danger btn-sm w-100">
-                                {% if profile_user.is_active %}
+                            {% if profile_user.is_active %}
+                                <button type="submit" class="btn btn-outline-warning btn-sm w-100"
+                                        data-confirm="{% blocktrans with name=profile_user.display_name %}Are you sure you want to deactivate {{ name }}'s account?{% endblocktrans %}"
+                                        data-confirm-yes="{% trans 'Yes, deactivate' %}">
                                     <i class="bi bi-pause-circle me-1"></i>{% trans "Deactivate Account" %}
-                                {% else %}
+                                </button>
+                            {% else %}
+                                <button type="submit" class="btn btn-outline-success btn-sm w-100"
+                                        data-confirm="{% blocktrans with name=profile_user.display_name %}Are you sure you want to activate {{ name }}'s account?{% endblocktrans %}"
+                                        data-confirm-yes="{% trans 'Yes, activate' %}">
                                     <i class="bi bi-play-circle me-1"></i>{% trans "Activate Account" %}
-                                {% endif %}
-                            </button>
+                                </button>
+                            {% endif %}
                         </form>
+                    {% endif %}
+
+                    {% if can_delete %}
+                        <button type="button" class="btn btn-outline-danger btn-sm w-100" data-bs-toggle="modal" data-bs-target="#deleteUserModal">
+                            <i class="bi bi-trash me-1"></i>{% trans "Delete User" %}
+                        </button>
                     {% endif %}
                 </div>
             </div>
@@ -71,7 +83,7 @@
             <!-- Details -->
             <div class="content-panel">
                 <h2 class="h5 fw-bold text-dark mb-4">{% trans "Account & Organizational Details" %}</h2>
-                <dl class="row mb-0">
+                <dl class="row mb-0 gy-2">
                     <dt class="col-sm-4 text-muted">{% trans "Full Name" %}</dt>
                     <dd class="col-sm-8 fw-semibold">{{ profile_user.display_name }}</dd>
 
@@ -97,6 +109,53 @@
                     <dt class="col-sm-4 text-muted">{% trans "Position" %}</dt>
                     <dd class="col-sm-8">{{ profile_user.position.name|default:_("Not assigned") }}</dd>
 
+                    <dt class="col-sm-4 text-muted">{% trans "Hire Date" %}</dt>
+                    <dd class="col-sm-8 fw-semibold">{{ profile_user.employment_start_date|date:"Y-m-d"|default:"-" }}</dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Work Presence" %}</dt>
+                    <dd class="col-sm-8">
+                        {% if profile_user.work_presence == 'PRESENT' %}
+                            <span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle me-1"></i>{{ profile_user.get_work_presence_display }}</span>
+                        {% elif profile_user.work_presence == 'REMOTE' %}
+                            <span class="badge bg-info-subtle text-info"><i class="bi bi-laptop me-1"></i>{{ profile_user.get_work_presence_display }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary"><i class="bi bi-dash-circle me-1"></i>{{ profile_user.get_work_presence_display }}</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "Leave / Permission Status" %}</dt>
+                    <dd class="col-sm-8">
+                        {% if profile_user.leave_status == 'NONE' %}
+                            <span class="badge bg-light text-muted">{{ profile_user.get_leave_status_display }}</span>
+                        {% elif profile_user.leave_status == 'PERMISSION' %}
+                            <span class="badge bg-warning-subtle text-warning-emphasis"><i class="bi bi-clock me-1"></i>{{ profile_user.get_leave_status_display }}</span>
+                        {% elif profile_user.leave_status == 'VACATION' %}
+                            <span class="badge bg-primary-subtle text-primary"><i class="bi bi-sun me-1"></i>{{ profile_user.get_leave_status_display }}</span>
+                        {% elif profile_user.leave_status == 'SICK_LEAVE' %}
+                            <span class="badge bg-danger-subtle text-danger"><i class="bi bi-bandaid me-1"></i>{{ profile_user.get_leave_status_display }}</span>
+                        {% elif profile_user.leave_status == 'BUSINESS_TRIP' %}
+                            <span class="badge bg-info-subtle text-info-emphasis"><i class="bi bi-airplane me-1"></i>{{ profile_user.get_leave_status_display }}</span>
+                        {% else %}
+                            <span class="badge bg-warning-subtle text-warning-emphasis">{{ profile_user.get_leave_status_display }}</span>
+                        {% endif %}
+                        {% if profile_user.leave_notes %}
+                            <div class="small text-muted mt-1"><i class="bi bi-info-circle me-1"></i>{{ profile_user.leave_notes }}</div>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4 text-muted">{% trans "CV / Resume (PDF)" %}</dt>
+                    <dd class="col-sm-8">
+                        {% if profile_user.cv_file %}
+                            <a href="{{ profile_user.cv_file.url }}" target="_blank" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-file-earmark-pdf me-1"></i>{% trans "View / Download CV (PDF)" %}
+                            </a>
+                        {% else %}
+                            <span class="badge bg-light text-muted">
+                                <i class="bi bi-file-earmark-x me-1"></i>{% trans "No CV uploaded" %}
+                            </span>
+                        {% endif %}
+                    </dd>
+
                     <dt class="col-sm-4 text-muted">{% trans "Preferred Language" %}</dt>
                     <dd class="col-sm-8">{{ profile_user.get_preferred_language_display }}</dd>
 
@@ -110,4 +169,27 @@
         </div>
     </div>
 </div>
+
+{% if can_delete %}
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger" id="deleteUserModalLabel"><i class="bi bi-exclamation-triangle me-2"></i>{% trans "Confirm User Deletion" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
+            </div>
+            <div class="modal-body text-start">
+                <p>{% blocktrans with name=profile_user.display_name %}Are you sure you want to permanently delete <strong>{{ name }}</strong>? This action cannot be undone.{% endblocktrans %}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                <form action="{% url 'user_delete' pk=profile_user.pk %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>{% trans "Yes, Delete User" %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

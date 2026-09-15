@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Approval Center" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/workflow.css' %}?v=5" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-3 px-lg-4">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+            <h1 class="h4 fw-bold mb-1">
+                <i class="bi bi-shield-check text-primary me-2"></i>{% trans "Management Approval Center" %}
+            </h1>
+            <p class="text-muted small mb-0">
+                {% trans "Review tasks submitted by employees and approved by Department Heads requiring Second / Final Approval and Electronic Signature." %}
+            </p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-primary fs-6 px-3 py-2">
+                {{ pending_count }} {% trans "Ready for Signing" %}
+            </span>
+            <span class="badge bg-success fs-6 px-3 py-2">
+                {{ signed_count }} {% trans "Signed" %}
+            </span>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-pills mb-4 gap-2">
+        <li class="nav-item">
+            <a class="nav-link rounded-pill px-4 fw-semibold {% if active_tab != 'signed' %}active{% else %}bg-white border text-dark{% endif %}"
+               href="{% url 'management_second_approval' %}?tab=pending{% if selected_dept %}&department={{ selected_dept }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">
+                <i class="bi bi-pen me-2"></i>{% trans "Tasks Ready for Signing" %}
+                <span class="badge {% if active_tab != 'signed' %}bg-white text-primary{% else %}bg-primary text-white{% endif %} ms-2">{{ pending_count }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link rounded-pill px-4 fw-semibold {% if active_tab == 'signed' %}active bg-success{% else %}bg-white border text-dark{% endif %}"
+               href="{% url 'management_second_approval' %}?tab=signed{% if selected_dept %}&department={{ selected_dept }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">
+                <i class="bi bi-patch-check-fill me-2 text-success {% if active_tab == 'signed' %}text-white{% endif %}"></i>{% trans "Signed Tasks" %}
+                <span class="badge {% if active_tab == 'signed' %}bg-white text-success{% else %}bg-success text-white{% endif %} ms-2">{{ signed_count }}</span>
+            </a>
+        </li>
+    </ul>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center">
+                <input type="hidden" name="tab" value="{{ active_tab }}">
+                <div class="col-12 col-md-4">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" name="q" value="{{ search_query }}" class="form-control border-start-0" placeholder="{% trans 'Search task #, title, employee...' %}">
+                    </div>
+                </div>
+                {% if departments %}
+                <div class="col-6 col-md-3">
+                    <select name="department" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">{% trans "All Departments" %}</option>
+                        {% for d in departments %}
+                        <option value="{{ d.id }}" {% if selected_dept == d.id|stringformat:"s" %}selected{% endif %}>
+                            {{ d.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                <div class="col-6 col-md-3">
+                    <select name="priority" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">{% trans "All Priorities" %}</option>
+                        {% for val, label in task_priorities %}
+                        <option value="{{ val }}" {% if selected_priority == val %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-sm btn-primary w-100">
+                        <i class="bi bi-filter me-1"></i>{% trans "Filter" %}
+                    </button>
+                    {% if search_query or selected_dept or selected_priority %}
+                    <a href="{% url 'management_second_approval' %}?tab={{ active_tab }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-x"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Task Table / List -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        {% if assignments %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">{% trans "Task #" %}</th>
+                        <th>{% trans "Title & Details" %}</th>
+                        <th>{% trans "Department" %}</th>
+                        {% if active_tab == 'signed' %}
+                            <th>{% trans "Signer" %}</th>
+                            <th>{% trans "Date Signed" %}</th>
+                            <th>{% trans "Document ID" %}</th>
+                        {% else %}
+                            <th>{% trans "Employee" %}</th>
+                            <th>{% trans "Deadline" %}</th>
+                            <th>{% trans "Stage" %}</th>
+                        {% endif %}
+                        <th class="text-end pe-4">{% trans "Action" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in assignments %}
+                    {% with task_sig=a.task.signatures.all.0 %}
+                    <tr>
+                        <td class="ps-4">
+                            <span class="task-number-pill">{{ a.task.task_number }}</span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-truncate" style="max-width:320px;">
+                                {{ a.task.title }}
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mt-1">
+                                {% if a.task.priority == 'URGENT' %}
+                                    <span class="badge bg-danger">{% trans "Urgent" %}</span>
+                                {% elif a.task.priority == 'HIGH' %}
+                                    <span class="badge bg-warning text-dark">{% trans "High" %}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ a.task.get_priority_display }}</span>
+                                {% endif %}
+                                <span class="badge bg-info text-dark">{{ a.task.get_complexity_display }}</span>
+                                {% if a.task.status == 'COMPLETED' %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">{% trans "Completed" %}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">
+                                {{ a.task.responsible_department.name|default:"—" }}
+                            </span>
+                        </td>
+
+                        {% if active_tab == 'signed' %}
+                            <td>
+                                <div class="fw-semibold small">{{ task_sig.signer.display_name|default:"Rektor" }}</div>
+                                <div class="text-muted" style="font-size:.75rem;">{{ task_sig.signer.position.name|default:"Rektor" }}</div>
+                            </td>
+                            <td>
+                                <div class="small fw-semibold text-dark">
+                                    {{ task_sig.signed_at|date:"d M Y H:i"|default:"—" }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace">
+                                    {{ task_sig.verification_id }}
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="{% url 'management_second_approval_detail' pk=a.pk %}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-eye-fill me-1"></i>{% trans "Review" %}
+                                    </a>
+                                    {% if task_sig %}
+                                    <a href="{% url 'signature_pdf' verification_id=task_sig.verification_id %}" target="_blank" class="btn btn-sm btn-success">
+                                        <i class="bi bi-file-earmark-pdf-fill me-1"></i>{% trans "PDF Yuklab olish" %}
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        {% else %}
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="avatar-sm avatar-primary" style="width:32px;height:32px;font-size:.85rem;border-radius:.5rem;">
+                                        {{ a.user.display_name|first|upper }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold small">{{ a.user.display_name }}</div>
+                                        <div class="text-muted" style="font-size:.75rem;">{{ a.user.position.name|default:"" }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if a.task.deadline %}
+                                    <div class="small fw-semibold {% if a.task.is_overdue %}text-danger{% endif %}">
+                                        {{ a.task.deadline|date:"d M Y" }}
+                                    </div>
+                                    {% if a.task.is_overdue %}
+                                        <span class="badge bg-danger" style="font-size:.7rem;">{% trans "Overdue" %}</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted small">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if a.task.status == 'COMPLETED' %}
+                                    <span class="badge bg-success">{% trans "Ready for Signing" %}</span>
+                                {% elif a.assignment_status == 'SECOND_APPROVAL' %}
+                                    <span class="badge bg-primary">{% trans "Second Approval" %}</span>
+                                {% else %}
+                                    <span class="badge bg-info text-dark">{% trans "Submitted" %}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                {% if request.user.is_rector or request.user.is_superuser %}
+                                    <a href="{% url 'management_second_approval_detail' pk=a.pk %}" class="btn btn-sm btn-primary px-3">
+                                        <i class="bi bi-pen-fill me-1"></i>{% trans "Review & Sign" %}
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'management_second_approval_detail' pk=a.pk %}" class="btn btn-sm btn-outline-primary px-3">
+                                        <i class="bi bi-eye-fill me-1"></i>{% trans "Review" %}
+                                    </a>
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    </tr>
+                    {% endwith %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="card-footer bg-transparent border-0 py-3 d-flex justify-content-center">
+            <nav aria-label="{% trans 'Pagination' %}">
+                <ul class="pagination pagination-sm mb-0">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filter_params %}&{{ filter_params }}{% endif %}">«</a></li>
+                    {% endif %}
+                    {% for page_num in paginator.page_range %}
+                        {% if page_obj.number == page_num %}
+                            <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                        {% elif page_num > page_obj.number|add:'-3' and page_num < page_obj.number|add:'3' %}
+                            <li class="page-item"><a class="page-link" href="?page={{ page_num }}{% if filter_params %}&{{ filter_params }}{% endif %}">{{ page_num }}</a></li>
+                        {% elif page_num == 1 or page_num == paginator.num_pages %}
+                            <li class="page-item"><a class="page-link" href="?page={{ page_num }}{% if filter_params %}&{{ filter_params }}{% endif %}">{{ page_num }}</a></li>
+                        {% elif page_num == page_obj.number|add:'-3' or page_num == page_obj.number|add:'3' %}
+                            <li class="page-item disabled"><span class="page-link">…</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filter_params %}&{{ filter_params }}{% endif %}">»</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi {% if active_tab == 'signed' %}bi-patch-check text-success{% else %}bi-clipboard-check text-muted{% endif %}" style="font-size:3rem;"></i>
+            <h5 class="fw-bold mt-3 mb-1">
+                {% if active_tab == 'signed' %}
+                    {% trans "No signed tasks available at this time" %}
+                {% else %}
+                    {% trans "No tasks awaiting executive signature" %}
+                {% endif %}
+            </h5>
+            <p class="text-muted small">
+                {% if active_tab == 'signed' %}
+                    {% trans "Approved and electronically signed tasks are archived in this section." %}
+                {% else %}
+                    {% trans "Tasks approved during first approval by Department Heads appear here for executive review and signing." %}
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

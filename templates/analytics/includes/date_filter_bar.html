@@ -1,0 +1,47 @@
+{% load i18n %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-3">
+        <form method="get" class="row g-2 align-items-center" id="analyticsFilterForm">
+            <!-- Period Presets -->
+            <div class="col-12 col-xl-auto d-flex flex-wrap gap-1 align-items-center">
+                <span class="text-muted small fw-semibold me-2"><i class="bi bi-calendar3 me-1"></i>{% trans "Period" %}:</span>
+                <a href="?period=today{% if selected_department %}&department_id={{ selected_department.id }}{% endif %}" class="btn btn-sm {% if period == 'today' %}btn-primary{% else %}btn-outline-secondary{% endif %}">{% trans "Today" %}</a>
+                <a href="?period=7d{% if selected_department %}&department_id={{ selected_department.id }}{% endif %}" class="btn btn-sm {% if period == '7d' %}btn-primary{% else %}btn-outline-secondary{% endif %}">{% trans "7 Days" %}</a>
+                <a href="?period=30d{% if period == '30d' or not period %}btn-primary{% else %}btn-outline-secondary{% endif %}">{% trans "30 Days" %}</a>
+                <a href="?period=this_month{% if selected_department %}&department_id={{ selected_department.id }}{% endif %}" class="btn btn-sm {% if period == 'this_month' %}btn-primary{% else %}btn-outline-secondary{% endif %}">{% trans "This Month" %}</a>
+                <a href="?period=this_quarter{% if selected_department %}&department_id={{ selected_department.id }}{% endif %}" class="btn btn-sm {% if period == 'this_quarter' %}btn-primary{% else %}btn-outline-secondary{% endif %}">{% trans "This Quarter" %}</a>
+                <a href="?period=this_year{% if selected_department %}&department_id={{ selected_department.id }}{% endif %}" class="btn btn-sm {% if period == 'this_year' %}btn-primary{% else %}btn-outline-secondary{% endif %}">{% trans "This Year" %}</a>
+            </div>
+
+            <!-- Custom Date Range Picker -->
+            <div class="col-12 col-md-auto d-flex gap-2 align-items-center">
+                <input type="hidden" name="period" value="custom">
+                <input type="date" name="start_date" class="form-control form-control-sm" value="{{ start_date }}" aria-label="{% trans 'Start Date' %}">
+                <span class="text-muted small">—</span>
+                <input type="date" name="end_date" class="form-control form-control-sm" value="{{ end_date }}" aria-label="{% trans 'End Date' %}">
+            </div>
+
+            <!-- Department Filter (if visible to user) -->
+            {% if visible_departments and visible_departments.count > 1 %}
+            <div class="col-12 col-md-auto">
+                <select name="department_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">{% trans "All Authorized Departments" %}</option>
+                    {% for d in visible_departments %}
+                        <option value="{{ d.id }}" {% if selected_department.id == d.id %}selected{% endif %}>{{ d.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            <!-- Submit & Reset -->
+            <div class="col-auto ms-auto d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-primary">
+                    <i class="bi bi-funnel-fill me-1"></i>{% trans "Filter" %}
+                </button>
+                <a href="?period=30d" class="btn btn-sm btn-outline-secondary" title="{% trans 'Reset' %}">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

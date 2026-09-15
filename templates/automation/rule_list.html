@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Automation Rules" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-gradient mb-1">
+                <i class="bi bi-gear-wide-connected me-2 text-primary"></i>{% trans "Event-Driven Automation Rules" %}
+            </h1>
+            <p class="text-muted small mb-0">{% trans "Configure automatic triggers, condition filters, and reactive actions for task workflows." %}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'automation:dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>{% trans "Dashboard" %}
+            </a>
+            {% if user.is_superuser %}
+                <a href="{% url 'automation:rule_create' %}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>{% trans "Add New Rule" %}
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>{% trans "Priority" %}</th>
+                            <th>{% trans "Rule Name" %}</th>
+                            <th>{% trans "Trigger Event" %}</th>
+                            <th>{% trans "Action Type" %}</th>
+                            <th>{% trans "Status" %}</th>
+                            {% if user.is_superuser %}<th class="text-end">{% trans "Actions" %}</th>{% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rule in rules %}
+                            <tr>
+                                <td><span class="badge bg-secondary">{{ rule.priority_order }}</span></td>
+                                <td>
+                                    <div class="fw-bold">{{ rule.name }}</div>
+                                    {% if rule.description %}<small class="text-muted">{{ rule.description|truncatechars:60 }}</small>{% endif %}
+                                </td>
+                                <td><span class="badge bg-light text-dark border">{{ rule.get_trigger_event_display }}</span></td>
+                                <td><span class="badge bg-primary bg-opacity-10 text-primary">{{ rule.get_action_type_display }}</span></td>
+                                <td>
+                                    {% if rule.is_active %}
+                                        <span class="badge bg-success">{% trans "Active" %}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{% trans "Inactive" %}</span>
+                                    {% endif %}
+                                </td>
+                                {% if user.is_superuser %}
+                                    <td class="text-end">
+                                        <div class="btn-group btn-group-sm">
+                                            <form method="post" action="{% url 'automation:rule_toggle' rule.pk %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn {% if rule.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %} btn-sm">
+                                                    {% if rule.is_active %}{% trans "Disable" %}{% else %}{% trans "Enable" %}{% endif %}
+                                                </button>
+                                            </form>
+                                            <a href="{% url 'automation:rule_edit' rule.pk %}" class="btn btn-outline-primary btn-sm ms-1">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">{% trans "No automation rules configured." %}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Employee Salaries" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">
+                <i class="bi bi-wallet2 text-primary me-2"></i>{% trans "Salary & Compensation Management" %}
+            </h1>
+            <p class="text-muted small mb-0">{% trans "Active compensation profiles, employee grades, and base salary assignments." %}</p>
+        </div>
+    </div>
+
+    <!-- Filters Card -->
+    <div class="card border-0 shadow-sm rounded-3 p-3 mb-4">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-12 col-md-4">
+                <input type="text" name="q" value="{{ request.GET.q }}" class="form-control form-control-sm" placeholder="{% trans 'Search by name, username, email...' %}">
+            </div>
+            <div class="col-6 col-md-3">
+                <select name="department" class="form-select form-select-sm">
+                    <option value="">{% trans "-- All Departments --" %}</option>
+                    {% for d in departments %}
+                        <option value="{{ d.id }}" {% if request.GET.department == d.id|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">{% trans "-- All Statuses --" %}</option>
+                    <option value="ACTIVE" {% if request.GET.status == 'ACTIVE' %}selected{% endif %}>{% trans "Active" %}</option>
+                    <option value="PROBATION" {% if request.GET.status == 'PROBATION' %}selected{% endif %}>{% trans "Probation" %}</option>
+                    <option value="SUSPENDED" {% if request.GET.status == 'SUSPENDED' %}selected{% endif %}>{% trans "Suspended" %}</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-primary w-100">
+                    <i class="bi bi-search me-1"></i>{% trans "Filter" %}
+                </button>
+                <a href="{% url 'payroll:employee_list' %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Employee Table -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small text-uppercase">
+                    <tr>
+                        <th>{% trans "Employee" %}</th>
+                        <th>{% trans "Department" %}</th>
+                        <th>{% trans "Position" %}</th>
+                        <th>{% trans "Grade" %}</th>
+                        <th>{% trans "Current Base Salary" %}</th>
+                        <th>{% trans "Effective Since" %}</th>
+                        <th class="text-end">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emp in employees %}
+                        {% with active_sal=emp.salary_profiles.first %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar-circle-sm bg-primary-subtle text-primary fw-bold">
+                                            {{ emp.initials }}
+                                        </div>
+                                        <div>
+                                            <a href="{% url 'payroll:employee_detail' pk=emp.pk %}" class="fw-bold text-dark text-decoration-none">
+                                                {{ emp.display_name }}
+                                            </a>
+                                            <div class="text-muted small">@{{ emp.username }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ emp.department.name|default:"-" }}</td>
+                                <td>{{ emp.position.name|default:"-" }}</td>
+                                <td>
+                                    {% if emp.grade %}
+                                        <span class="badge bg-info-subtle text-info-emphasis">{{ emp.grade.code }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if active_sal %}
+                                        <span class="fw-bold text-dark">{{ active_sal.base_salary|floatformat:2 }}</span>
+                                        <span class="text-muted small">{{ active_sal.currency }}</span>
+                                    {% else %}
+                                        <span class="badge bg-warning-subtle text-warning-emphasis">{% trans "Not set" %}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if active_sal %}
+                                        <span class="small text-muted">{{ active_sal.effective_from|date:"Y-m-d" }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'payroll:employee_detail' pk=emp.pk %}" class="btn btn-sm btn-light" title="{% trans 'View Compensation Details' %}">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    {% if can_manage_salary %}
+                                        <a href="{% url 'payroll:salary_create' user_id=emp.pk %}" class="btn btn-sm btn-outline-primary" title="{% trans 'Adjust Salary' %}">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endwith %}
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-people display-6 d-block mb-2"></i>
+                                {% trans "No employee profiles found matching your search." %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+            <div class="card-footer bg-white border-top py-3">
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+                    {% endif %}
+                    <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

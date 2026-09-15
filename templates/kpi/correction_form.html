@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Request KPI Score Correction" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white p-4 border-0">
+                    <h4 class="fw-bold mb-1">{% trans "Request KPI Correction" %}</h4>
+                    <p class="text-muted small mb-0">
+                        {% trans "Submit an evidence-backed correction request for" %} <strong>{{ result.assignment.kpi.name }}</strong> ({{ result.assignment.period.name }}).
+                    </p>
+                </div>
+                <div class="card-body p-4 pt-0">
+                    <div class="alert alert-info py-2 px-3 small mb-3">
+                        <div><strong>{% trans "Current Recorded Value" %}:</strong> {{ result.actual_value }}</div>
+                        <div><strong>{% trans "Target Value" %}:</strong> {{ result.assignment.target_value }}</div>
+                        <div><strong>{% trans "Calculated Score" %}:</strong> {{ result.weighted_score }} pts</div>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">{% trans "Requested Actual Value" %} <span class="text-danger">*</span></label>
+                            {{ form.requested_actual_value }}
+                            {% if form.requested_actual_value.errors %}
+                                <div class="text-danger small mt-1">{{ form.requested_actual_value.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">{% trans "Correction Justification / Reason" %} <span class="text-danger">*</span></label>
+                            {{ form.reason }}
+                            {% if form.reason.errors %}
+                                <div class="text-danger small mt-1">{{ form.reason.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">{% trans "Supporting Evidence" %}</label>
+                            {{ form.evidence }}
+                            <div class="form-text small">{% trans "Provide links to completed tasks, official letters, or document reference numbers." %}</div>
+                            {% if form.evidence.errors %}
+                                <div class="text-danger small mt-1">{{ form.evidence.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'kpi:dashboard' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+                            <button type="submit" class="btn btn-primary fw-semibold">
+                                <i class="bi bi-send me-1"></i>{% trans "Submit Request" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

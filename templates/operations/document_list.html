@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Official University Documents" %} | University Task Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="h3 fw-bold mb-1"><i class="bi bi-file-earmark-ruled-fill text-primary me-2"></i>{% trans "Official Documents & Orders Registry" %}</h2>
+            <p class="text-muted mb-0">{% trans "Central repository of promulgated Rector Orders, university regulations, decrees, and senate protocols." %}</p>
+        </div>
+        {% if can_manage_docs %}
+            <a href="{% url 'operations:document_create' %}" class="btn btn-primary">
+                <i class="bi bi-upload me-1"></i>{% trans "Promulgate Document" %}
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" class="form-control" placeholder="{% trans 'Search by document title, reference number...' %}" value="{{ search_query }}">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select name="doc_type" class="form-select">
+                        <option value="">{% trans "All Document Types" %}</option>
+                        {% for code, label in doc_types %}
+                            <option value="{{ code }}" {% if current_type == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">{% trans "Filter" %}</button>
+                    {% if search_query or current_type %}
+                        <a href="{% url 'operations:document_list' %}" class="btn btn-outline-secondary">{% trans "Reset" %}</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Documents Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>{% trans "Ref Number" %}</th>
+                        <th>{% trans "Document Title" %}</th>
+                        <th>{% trans "Type" %}</th>
+                        <th>{% trans "Version" %}</th>
+                        <th>{% trans "Effective Date" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th class="text-end">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documents %}
+                        <tr>
+                            <td class="font-monospace fw-bold text-primary">{{ doc.doc_number }}</td>
+                            <td>
+                                <a href="{% url 'operations:document_detail' pk=doc.id %}" class="fw-semibold text-decoration-none text-dark">
+                                    {{ doc.title }}
+                                </a>
+                            </td>
+                            <td><span class="badge bg-light text-secondary">{{ doc.get_document_type_display }}</span></td>
+                            <td><span class="badge bg-info-subtle text-info font-monospace">v{{ doc.version }}</span></td>
+                            <td class="small text-muted">{{ doc.effective_date|date:"M d, Y" }}</td>
+                            <td>
+                                {% if doc.status == 'SIGNED_ENACTED' %}
+                                    <span class="badge bg-success">{% trans "In Effect" %}</span>
+                                {% elif doc.status == 'ARCHIVED' %}
+                                    <span class="badge bg-secondary">{% trans "Archived" %}</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">{{ doc.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1">
+                                    {% if doc.file %}
+                                        <a href="{{ doc.file.url }}" target="_blank" class="btn btn-sm btn-outline-success" title="{% trans 'Download' %}">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                    {% endif %}
+                                    <a href="{% url 'operations:document_detail' pk=doc.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-folder2-open display-5 mb-2"></i>
+                                <p class="mb-0">{% trans "No official university documents found." %}</p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Evaluate KPI Result" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h1 class="h3 fw-bold text-dark mb-1">{% trans "Evaluate KPI Indicator" %}</h1>
+                    <p class="text-muted mb-0">{% trans "Record actual outcome, compute raw and weighted score, and finalize results" %}</p>
+                </div>
+                <a href="{% url 'kpi:assignment_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>{% trans "Back" %}
+                </a>
+            </div>
+
+            <!-- Indicator Details Card -->
+            <div class="card border-0 shadow-sm rounded-3 mb-4">
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">{% trans "Employee" %}</small>
+                            <span class="fw-bold text-dark fs-6">{{ assignment.user.display_name }}</span>
+                            <small class="text-muted d-block">{{ assignment.user.department.name|default:"—" }} · {{ assignment.user.position.name|default:"—" }}</small>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">{% trans "KPI Indicator" %}</small>
+                            <span class="fw-bold text-dark fs-6">{{ assignment.kpi.name }}</span>
+                            <span class="badge bg-secondary-subtle text-secondary font-monospace">{{ assignment.kpi.code }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">{% trans "Evaluation Period" %}</small>
+                            <span class="fw-semibold text-dark">{{ assignment.period.name }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">{% trans "Target Value" %}</small>
+                            <span class="fw-bold font-monospace text-dark">{{ assignment.target_value }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">{% trans "Weight Percentage" %}</small>
+                            <span class="badge bg-primary-subtle text-primary font-monospace">{{ assignment.weight }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evaluation Form -->
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger mb-4">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">{{ form.actual_value.label }}</label>
+                            {{ form.actual_value }}
+                            {% if form.actual_value.errors %}<div class="text-danger small mt-1">{{ form.actual_value.errors }}</div>{% endif %}
+                            <small class="text-muted">{% trans "Measurement Type" %}: {{ assignment.kpi.get_measurement_type_display }}</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">{{ form.notes.label }}</label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}<div class="text-danger small mt-1">{{ form.notes.errors }}</div>{% endif %}
+                        </div>
+
+                        {% if result %}
+                            <div class="p-3 rounded-3 bg-light mb-4">
+                                <div class="row g-2 text-center">
+                                    <div class="col-4">
+                                        <div class="text-muted small">{% trans "Current Raw Score" %}</div>
+                                        <h5 class="fw-bold font-monospace text-dark mb-0">{{ result.raw_score }} / 100</h5>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="text-muted small">{% trans "Weighted Contribution" %}</div>
+                                        <h5 class="fw-bold font-monospace text-primary mb-0">{{ result.weighted_score }} pts</h5>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="text-muted small">{% trans "Status" %}</div>
+                                        <span class="badge bg-info-subtle text-info mt-1">{{ result.get_status_display }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                            <a href="{% url 'kpi:assignment_list' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+                            <button type="submit" name="save_draft" class="btn btn-outline-primary">
+                                <i class="bi bi-save me-1"></i>{% trans "Save Evaluation" %}
+                            </button>
+                            {% if can_approve %}
+                                <button type="submit" name="approve" class="btn btn-success px-4">
+                                    <i class="bi bi-check-circle me-1"></i>{% trans "Approve & Finalize" %}
+                                </button>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

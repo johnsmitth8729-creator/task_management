@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}
+    {% if selected_scope == 'control' %}
+        {% trans "Tasks Under Control" %}
+    {% elif selected_is_overdue == '1' %}
+        {% trans "Overdue Tasks" %}
+    {% elif user.is_employee and not user.is_rector and not user.is_vice_rector and not user.is_department_head and not user.is_superuser %}
+        {% trans "My Tasks" %}
+    {% elif user.is_vice_rector or user.is_department_head %}
+        {% trans "Department Tasks" %}
+    {% else %}
+        {% trans "All Tasks" %}
+    {% endif %} | {% trans "TASK MANAGEMENT" %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">
+                {% if selected_scope == 'control' %}
+                    <i class="bi bi-eye text-info me-2"></i>{% trans "Tasks Under Control" %}
+                {% elif selected_is_overdue == '1' %}
+                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>{% trans "Overdue Tasks" %}
+                {% elif user.is_employee and not user.is_rector and not user.is_vice_rector and not user.is_department_head and not user.is_superuser %}
+                    {% trans "My Tasks" %}
+                {% elif user.is_vice_rector or user.is_department_head %}
+                    {% trans "Department Tasks" %}
+                {% else %}
+                    {% trans "All Tasks" %}
+                {% endif %}
+            </h1>
+            <p class="text-muted mb-0">
+                {% if selected_scope == 'control' %}
+                    {% trans "Active operational tasks currently under supervision and control" %}
+                {% elif selected_is_overdue == '1' %}
+                    {% trans "Tasks that have passed their deadline and require immediate attention" %}
+                {% else %}
+                    {% trans "Manage, track, and monitor operational task workflow" %}
+                {% endif %}
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            {% if can_create_task %}
+                <a href="{% url 'task_create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i>{% trans "New Task" %}
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Filters Panel -->
+    <div class="content-panel mb-4">
+        <form method="get" class="row g-3">
+            {% if selected_scope %}
+                <input type="hidden" name="scope" value="{{ selected_scope }}">
+            {% endif %}
+            <div class="col-12 col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="{% trans 'Search by task number, title...' %}" value="{{ selected_q }}">
+                </div>
+            </div>
+
+            {% if departments %}
+                <div class="col-6 col-md-2">
+                    <select name="department" class="form-select">
+                        <option value="">{% trans "All Departments" %}</option>
+                        {% for dept in departments %}
+                            <option value="{{ dept.id }}" {% if selected_department == dept.id|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
+
+            <div class="col-6 col-md-2">
+                <select name="status" class="form-select">
+                    <option value="">{% trans "All Statuses" %}</option>
+                    {% for key, label in statuses %}
+                        <option value="{{ key }}" {% if selected_status == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <select name="priority" class="form-select">
+                    <option value="">{% trans "All Priorities" %}</option>
+                    {% for key, label in priorities %}
+                        <option value="{{ key }}" {% if selected_priority == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <select name="complexity" class="form-select">
+                    <option value="">{% trans "All Complexities" %}</option>
+                    {% for key, label in complexities %}
+                        <option value="{{ key }}" {% if selected_complexity == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <select name="task_type" class="form-select">
+                    <option value="">{% trans "All Types" %}</option>
+                    {% for tt in task_types %}
+                        <option value="{{ tt.id }}" {% if selected_task_type == tt.id|stringformat:"s" %}selected{% endif %}>{{ tt.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <select name="sort" class="form-select">
+                    <option value="-created_at" {% if selected_sort == '-created_at' %}selected{% endif %}>{% trans "Newest Created" %}</option>
+                    <option value="created_at" {% if selected_sort == 'created_at' %}selected{% endif %}>{% trans "Oldest Created" %}</option>
+                    <option value="deadline" {% if selected_sort == 'deadline' %}selected{% endif %}>{% trans "Deadline (Earliest)" %}</option>
+                    <option value="-deadline" {% if selected_sort == '-deadline' %}selected{% endif %}>{% trans "Deadline (Latest)" %}</option>
+                    <option value="-progress" {% if selected_sort == '-progress' %}selected{% endif %}>{% trans "Progress (High to Low)" %}</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-3 d-flex align-items-center gap-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="is_overdue" value="1" id="filterOverdue" {% if selected_is_overdue == '1' %}checked{% endif %}>
+                    <label class="form-check-label text-danger fw-semibold small" for="filterOverdue">
+                        {% trans "Overdue Only" %}
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="include_archived" value="1" id="filterArchived" {% if include_archived == '1' %}checked{% endif %}>
+                    <label class="form-check-label text-muted small" for="filterArchived">
+                        {% trans "Archived" %}
+                    </label>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-secondary w-100">{% trans "Apply Filters" %}</button>
+                <a href="{% url 'task_list' %}{% if selected_scope %}?scope={{ selected_scope }}{% elif selected_is_overdue == '1' %}?is_overdue=1{% endif %}" class="btn btn-outline-secondary">{% trans "Reset" %}</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Task List Table -->
+    <div class="content-panel">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>{% trans "Task #" %}</th>
+                        <th>{% trans "Title & Department" %}</th>
+                        <th>{% trans "Priority" %}</th>
+                        <th>{% trans "Complexity" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Progress" %}</th>
+                        <th>{% trans "Deadline" %}</th>
+                        <th>{% trans "Assignees" %}</th>
+                        <th class="text-end">{% trans "Action" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'task_detail' pk=task.pk %}" class="task-number-pill text-decoration-none">
+                                    {{ task.task_number }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{% url 'task_detail' pk=task.pk %}" class="fw-bold text-dark text-decoration-none d-block text-truncate" style="max-width: 320px;">
+                                    {{ task.title }}
+                                </a>
+                                <small class="text-muted d-flex align-items-center gap-1">
+                                    {% if task.responsible_department %}
+                                        <i class="bi bi-building"></i> {{ task.responsible_department.name }}
+                                    {% else %}
+                                        <em>{% trans "No department" %}</em>
+                                    {% endif %}
+                                    {% if task.task_type %}
+                                        &bull; <span class="badge bg-light text-secondary">{{ task.task_type.name }}</span>
+                                    {% endif %}
+                                </small>
+                            </td>
+                            <td>
+                                <span class="badge badge-priority-{{ task.priority|lower }}">
+                                    {{ task.get_priority_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge badge-complexity-{{ task.complexity|lower }}">
+                                    {{ task.get_complexity_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge badge-status-{{ task.status|lower }}">
+                                    {{ task.get_status_display }}
+                                </span>
+                            </td>
+                            <td style="min-width: 110px;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height: 6px;">
+                                        <div class="progress-bar {% if task.progress == 100 %}bg-success{% elif task.progress > 50 %}bg-primary{% else %}bg-info{% endif %}"
+                                             role="progressbar" style="width: {{ task.progress }}%;"></div>
+                                    </div>
+                                    <small class="text-muted fw-semibold" style="font-size: 0.75rem;">{{ task.progress }}%</small>
+                                </div>
+                            </td>
+                            <td>
+                                {% if task.deadline %}
+                                    <div class="small fw-semibold {% if task.is_overdue %}text-danger{% else %}text-muted{% endif %}">
+                                        <i class="bi bi-calendar-event me-1"></i>{{ task.deadline|date:"Y-m-d" }}
+                                    </div>
+                                    {% if task.is_overdue %}
+                                        <span class="badge badge-overdue">{% trans "Overdue" %}</span>
+                                    {% elif task.days_until_deadline is not None and task.days_until_deadline <= 2 and task.days_until_deadline >= 0 %}
+                                        <span class="badge bg-warning text-dark">{% trans "Due soon" %}</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted small">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% for assignment in task.assignments.all|slice:":3" %}
+                                        {% if assignment.user.photo %}
+                                            <img src="{{ assignment.user.photo.url }}" title="{{ assignment.user.display_name }}{% if assignment.is_primary %} ({% trans 'Primary' %}){% endif %}" class="avatar-circle avatar-circle-sm me-n2" style="border: 2px solid var(--app-surface);">
+                                        {% else %}
+                                            <span class="avatar-circle avatar-circle-sm bg-secondary text-white me-n2" title="{{ assignment.user.display_name }}{% if assignment.is_primary %} ({% trans 'Primary' %}){% endif %}" style="border: 2px solid var(--app-surface);">
+                                                {{ assignment.user.initials }}
+                                            </span>
+                                        {% endif %}
+                                    {% empty %}
+                                        <span class="text-muted small">{% trans "Unassigned" %}</span>
+                                    {% endfor %}
+                                    {% if task.assignments.count > 3 %}
+                                        <span class="badge bg-light text-secondary ms-1">+{{ task.assignments.count|add:"-3" }}</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'task_detail' pk=task.pk %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-5 text-muted">
+                                <i class="bi bi-clipboard2-check fs-1 text-secondary d-block mb-2"></i>
+                                <div class="fw-semibold">{% trans "No tasks found." %}</div>
+                                <small>{% trans "Try adjusting search terms or filters." %}</small>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mt-3 pt-3 border-top">
+                <small class="text-muted">
+                    {% blocktrans with start=page_obj.start_index end=page_obj.end_index total=paginator.count %}
+                        Showing {{ start }} to {{ end }} of {{ total }} tasks
+                    {% endblocktrans %}
+                </small>
+                <nav aria-label="Task page navigation">
+                    <ul class="pagination pagination-sm mb-0">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filter_params %}&{{ filter_params }}{% endif %}" aria-label="{% trans 'Previous' %}">&laquo;</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                        {% endif %}
+
+                        {% for num in paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if filter_params %}&{{ filter_params }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% elif num == 1 or num == paginator.num_pages %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if filter_params %}&{{ filter_params }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filter_params %}&{{ filter_params }}{% endif %}" aria-label="{% trans 'Next' %}">&raquo;</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

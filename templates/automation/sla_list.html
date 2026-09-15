@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "SLA Policies" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-gradient mb-1">
+                <i class="bi bi-shield-check me-2 text-primary"></i>{% trans "Service Level Agreement (SLA) Policies" %}
+            </h1>
+            <p class="text-muted small mb-0">{% trans "Define response and resolution duration targets per task priority level." %}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'automation:dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>{% trans "Dashboard" %}
+            </a>
+            {% if user.is_superuser %}
+                <a href="{% url 'automation:sla_create' %}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>{% trans "New Policy" %}
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for policy in policies %}
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="card border-0 shadow-sm h-100 kpi-card">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge {% if policy.priority == 'CRITICAL' %}bg-danger{% elif policy.priority == 'HIGH' %}bg-warning text-dark{% elif policy.priority == 'MEDIUM' %}bg-info text-dark{% else %}bg-secondary{% endif %} fs-6">
+                                {{ policy.get_priority_display }}
+                            </span>
+                            {% if policy.is_active %}
+                                <span class="badge bg-success">{% trans "Active" %}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{% trans "Inactive" %}</span>
+                            {% endif %}
+                        </div>
+                        <h5 class="fw-bold mb-3">{{ policy.name }}</h5>
+                        <ul class="list-unstyled small mb-4 flex-fill">
+                            <li class="mb-2 d-flex justify-content-between border-bottom pb-1">
+                                <span class="text-muted">{% trans "First Response" %}:</span>
+                                <strong>{{ policy.first_response_hours }} {% trans "hours" %}</strong>
+                            </li>
+                            <li class="mb-2 d-flex justify-content-between border-bottom pb-1">
+                                <span class="text-muted">{% trans "Target Resolution" %}:</span>
+                                <strong>{{ policy.resolution_hours }} {% trans "hours" %}</strong>
+                            </li>
+                            <li class="d-flex justify-content-between">
+                                <span class="text-muted">{% trans "Warning Threshold" %}:</span>
+                                <strong>{{ policy.warning_threshold_percent }}%</strong>
+                            </li>
+                        </ul>
+                        {% if user.is_superuser %}
+                            <a href="{% url 'automation:sla_edit' policy.pk %}" class="btn btn-outline-primary btn-sm mt-auto">
+                                <i class="bi bi-pencil me-1"></i>{% trans "Edit Policy" %}
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5 text-muted">
+                {% trans "No SLA policies defined. Create policies for Critical, High, Medium, and Low priorities." %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

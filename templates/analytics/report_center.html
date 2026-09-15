@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "University Report Center" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h1 class="h3 fw-bold text-gradient mb-1">
+                <i class="bi bi-file-earmark-bar-graph me-2 text-primary"></i>{% trans "University Report Center" %}
+            </h1>
+            <p class="text-muted small mb-0">
+                {% trans "Generate and export official university performance, task delivery, compliance, and audit reports in PDF, Excel, and CSV." %}
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'analytics:executive_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>{% trans "Back to Analytics" %}
+            </a>
+        </div>
+    </div>
+
+    <!-- Report Generation Catalog Cards -->
+    <div class="row g-4">
+        <!-- 1. University Tasks Overview Report -->
+        <div class="col-12 col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm h-100 report-card">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-3">
+                            <i class="bi bi-list-task fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">{% trans "University Tasks Overview" %}</h5>
+                            <span class="badge bg-light text-muted">{% trans "Executive & Management" %}</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small flex-grow-1">
+                        {% trans "Comprehensive task status breakdown, priority distribution, on-time rates, and signature state." %}
+                    </p>
+                    <div class="d-flex gap-2 pt-3 border-top">
+                        <a href="{% url 'analytics:report_export' %}?report_type=UNIVERSITY_TASKS&format=pdf" class="btn btn-sm btn-outline-danger flex-fill">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+                        </a>
+                        <a href="{% url 'analytics:report_export' %}?report_type=UNIVERSITY_TASKS&format=excel" class="btn btn-sm btn-outline-success flex-fill">
+                            <i class="bi bi-file-earmark-excel me-1"></i>Excel
+                        </a>
+                        <a href="{% url 'analytics:report_export' %}?report_type=UNIVERSITY_TASKS&format=csv" class="btn btn-sm btn-outline-secondary flex-fill">
+                            <i class="bi bi-filetype-csv me-1"></i>CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Department Performance Report -->
+        <div class="col-12 col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm h-100 report-card">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 bg-info bg-opacity-10 text-info rounded-3">
+                            <i class="bi bi-building fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">{% trans "Department Performance" %}</h5>
+                            <span class="badge bg-light text-muted">{% trans "Comparative Analytics" %}</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small flex-grow-1">
+                        {% trans "Department-level comparison of completed volume, on-time delivery percentages, average turnaround days, and KPI ratings." %}
+                    </p>
+                    <div class="d-flex gap-2 pt-3 border-top">
+                        <a href="{% url 'analytics:report_export' %}?report_type=DEPARTMENT_PERFORMANCE&format=pdf" class="btn btn-sm btn-outline-danger flex-fill">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+                        </a>
+                        <a href="{% url 'analytics:report_export' %}?report_type=DEPARTMENT_PERFORMANCE&format=excel" class="btn btn-sm btn-outline-success flex-fill">
+                            <i class="bi bi-file-earmark-excel me-1"></i>Excel
+                        </a>
+                        <a href="{% url 'analytics:report_export' %}?report_type=DEPARTMENT_PERFORMANCE&format=csv" class="btn btn-sm btn-outline-secondary flex-fill">
+                            <i class="bi bi-filetype-csv me-1"></i>CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Deadline Compliance Report -->
+        <div class="col-12 col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm h-100 report-card">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 bg-warning bg-opacity-10 text-warning rounded-3">
+                            <i class="bi bi-clock-history fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">{% trans "Deadline & Bottlenecks" %}</h5>
+                            <span class="badge bg-light text-muted">{% trans "Delivery Velocity" %}</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small flex-grow-1">
+                        {% trans "Detailed analysis of upcoming due dates, overdue task volume, and average queue turnaround duration." %}
+                    </p>
+                    <div class="d-flex gap-2 pt-3 border-top">
+                        <a href="{% url 'analytics:report_export' %}?report_type=DEADLINE_COMPLIANCE&format=pdf" class="btn btn-sm btn-outline-danger flex-fill">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+                        </a>
+                        <a href="{% url 'analytics:report_export' %}?report_type=DEADLINE_COMPLIANCE&format=excel" class="btn btn-sm btn-outline-success flex-fill">
+                            <i class="bi bi-file-earmark-excel me-1"></i>Excel
+                        </a>
+                        <a href="{% url 'analytics:report_export' %}?report_type=DEADLINE_COMPLIANCE&format=csv" class="btn btn-sm btn-outline-secondary flex-fill">
+                            <i class="bi bi-filetype-csv me-1"></i>CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Electronic Signature Audit Report -->
+        {% if can_view_signatures %}
+        <div class="col-12 col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm h-100 report-card">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 bg-purple bg-opacity-10 rounded-3" style="color:#8b5cf6; background: rgba(139, 92, 246, 0.1);">
+                            <i class="bi bi-shield-check fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">{% trans "Signature & Verification Audit" %}</h5>
+                            <span class="badge bg-light text-muted">{% trans "Cryptographic Audit" %}</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small flex-grow-1">
+                        {% trans "Audit log of Ed25519 digital signatures, signer credentials, verification timestamps, and revocation records." %}
+                    </p>
+                    <div class="d-flex gap-2 pt-3 border-top">
+                        <a href="{% url 'analytics:report_export' %}?report_type=SIGNATURE_AUDIT&format=pdf" class="btn btn-sm btn-outline-danger flex-fill">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+                        </a>
+                        <a href="{% url 'analytics:report_export' %}?report_type=SIGNATURE_AUDIT&format=excel" class="btn btn-sm btn-outline-success flex-fill">
+                            <i class="bi bi-file-earmark-excel me-1"></i>Excel
+                        </a>
+                        <a href="{% url 'analytics:report_export' %}?report_type=SIGNATURE_AUDIT&format=csv" class="btn btn-sm btn-outline-secondary flex-fill">
+                            <i class="bi bi-filetype-csv me-1"></i>CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- 5. Payroll & Compensation Analytics Report (Finance/Superadmin only) -->
+        {% if can_view_payroll %}
+        <div class="col-12 col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm h-100 report-card">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 bg-success bg-opacity-10 text-success rounded-3">
+                            <i class="bi bi-cash-stack fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">{% trans "Payroll & Compensation" %}</h5>
+                            <span class="badge bg-light text-muted">{% trans "Finance & Budget" %}</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small flex-grow-1">
+                        {% trans "Macro institutional payroll spend, bonus distributions, tax withholdings, and departmental cost allocations." %}
+                    </p>
+                    <div class="d-flex gap-2 pt-3 border-top">
+                        <a href="{% url 'analytics:report_export' %}?report_type=PAYROLL_ANALYTICS&format=pdf" class="btn btn-sm btn-outline-danger flex-fill">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+                        </a>
+                        <a href="{% url 'analytics:report_export' %}?report_type=PAYROLL_ANALYTICS&format=excel" class="btn btn-sm btn-outline-success flex-fill">
+                            <i class="bi bi-file-earmark-excel me-1"></i>Excel
+                        </a>
+                        <a href="{% url 'analytics:report_export' %}?report_type=PAYROLL_ANALYTICS&format=csv" class="btn btn-sm btn-outline-secondary flex-fill">
+                            <i class="bi bi-filetype-csv me-1"></i>CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- 6. HR Workforce Distribution Report -->
+        {% if can_view_hr %}
+        <div class="col-12 col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm h-100 report-card">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 bg-secondary bg-opacity-10 text-secondary rounded-3">
+                            <i class="bi bi-people fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">{% trans "Workforce Distribution" %}</h5>
+                            <span class="badge bg-light text-muted">{% trans "Human Resources" %}</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small flex-grow-1">
+                        {% trans "Employee headcount by department, position assignments, and university workforce overview." %}
+                    </p>
+                    <div class="d-flex gap-2 pt-3 border-top">
+                        <a href="{% url 'analytics:report_export' %}?report_type=HR_DISTRIBUTION&format=pdf" class="btn btn-sm btn-outline-danger flex-fill">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+                        </a>
+                        <a href="{% url 'analytics:report_export' %}?report_type=HR_DISTRIBUTION&format=excel" class="btn btn-sm btn-outline-success flex-fill">
+                            <i class="bi bi-file-earmark-excel me-1"></i>Excel
+                        </a>
+                        <a href="{% url 'analytics:report_export' %}?report_type=HR_DISTRIBUTION&format=csv" class="btn btn-sm btn-outline-secondary flex-fill">
+                            <i class="bi bi-filetype-csv me-1"></i>CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,482 @@
+{% load i18n static %}
+<!doctype html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" data-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% trans "Al-Khwarizmi University" %} | {% trans "TASK MANAGEMENT" %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="{% static 'css/app.css' %}?v=5" rel="stylesheet">
+    <link href="{% static 'css/pages/landing.css' %}?v=5" rel="stylesheet">
+    {# Inline theme detection to prevent flash of wrong theme #}
+    <script>
+        (function () {
+            var t = localStorage.getItem('tm_app_theme') ||
+                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+</head>
+<body>
+
+<!-- 1. PUBLIC NAVBAR -->
+<header class="landing-navbar py-2 py-lg-3">
+    <div class="container d-flex align-items-center justify-content-between">
+        <!-- University Brand Logo -->
+        <a href="{% url 'home' %}" class="landing-nav-brand">
+            <img src="{% static 'images/logo-dark.png' %}" alt="Al-Khwarizmi University" class="brand-logo-img logo-dark-variant" style="height: 40px;">
+            <img src="{% static 'images/logo-light.png' %}" alt="Al-Khwarizmi University" class="brand-logo-img logo-light-variant" style="height: 40px;">
+            <div class="d-flex flex-column">
+                <span class="fw-bold fs-6 text-uppercase letter-spacing-1 text-primary d-none d-sm-inline" style="line-height: 1.1; font-size: 0.8rem !important;">{% trans "Al-Khwarizmi University" %}</span>
+                <span class="fw-extrabold fs-5 text-dark fw-bold mb-0" style="line-height: 1.1;">{% trans "TASK MANAGEMENT" %}</span>
+            </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="d-none d-lg-flex align-items-center gap-2">
+            <a href="#features" class="landing-nav-link">{% trans "Capabilities" %}</a>
+            <a href="#workflow" class="landing-nav-link">{% trans "Workflow" %}</a>
+            <a href="#security" class="landing-nav-link">{% trans "Security" %}</a>
+            <a href="#about" class="landing-nav-link">{% trans "About" %}</a>
+        </nav>
+
+        <!-- Right Action Items: Language, Theme, Login CTA -->
+        <div class="d-flex align-items-center gap-2">
+            <!-- Language Switcher -->
+            {% include "includes/language_switcher.html" %}
+
+            <!-- Theme Switcher -->
+            <button class="btn btn-outline-secondary btn-sm theme-toggle-btn" type="button" onclick="toggleAppTheme()" aria-label="{% trans 'Toggle theme' %}" title="{% trans 'Toggle theme' %}">
+                <i class="bi bi-moon-stars-fill theme-icon-dark"></i>
+                <i class="bi bi-sun-fill theme-icon-light"></i>
+            </button>
+
+            <!-- Prominent Login CTA -->
+            <a href="{% url 'login' %}" class="btn btn-primary btn-sm px-3 fw-bold d-flex align-items-center gap-1 shadow-sm">
+                <i class="bi bi-box-arrow-in-right"></i>
+                <span>{% trans "Login" %}</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- 2. HERO SECTION -->
+<section class="landing-hero position-relative">
+    <!-- Ambient Floating Orbs -->
+    <div class="landing-bg-orb landing-bg-orb-1"></div>
+    <div class="landing-bg-orb landing-bg-orb-2"></div>
+    <div class="landing-bg-orb landing-bg-orb-3"></div>
+
+    <div class="container position-relative" style="z-index: 1;">
+        <div class="row align-items-center g-5">
+            <!-- Left Column: Hero Copy & CTA -->
+            <div class="col-lg-6">
+                <div class="hero-pill">
+                    <i class="bi bi-mortarboard-fill"></i>
+                    <span>{% trans "Al-Khwarizmi University Digital Governance" %}</span>
+                </div>
+
+                <h1 class="hero-title">
+                    {% trans "University" %} <span class="hero-title-gradient">{% trans "Task Management" %}</span> {% trans "Platform" %}
+                </h1>
+
+                <p class="hero-subtitle">
+                    {% trans "A modern digital operating system for assigning, tracking, verifying, and approving academic and administrative workflows across university departments." %}
+                </p>
+
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <a href="{% url 'login' %}" class="btn btn-primary btn-lg px-4 py-3 fw-bold hero-cta-btn d-flex align-items-center gap-2">
+                        <i class="bi bi-box-arrow-in-right fs-5"></i>
+                        <span>{% trans "Login to Platform" %}</span>
+                    </a>
+                    <a href="#workflow" class="btn btn-outline-secondary btn-lg px-4 py-3 fw-semibold d-flex align-items-center gap-2">
+                        <i class="bi bi-diagram-3 fs-5"></i>
+                        <span>{% trans "Explore Workflow" %}</span>
+                    </a>
+                </div>
+
+                <!-- Trust Points -->
+                <div class="d-flex align-items-center gap-4 mt-4 pt-2 text-muted small">
+                    <div class="d-flex align-items-center gap-1">
+                        <i class="bi bi-shield-check text-success fs-6"></i>
+                        <span>{% trans "Institutional Security" %}</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <i class="bi bi-check2-all text-primary fs-6"></i>
+                        <span>{% trans "Two-Level Approvals" %}</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <i class="bi bi-file-earmark-check text-warning fs-6"></i>
+                        <span>{% trans "Verified Evidence" %}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Interactive Hero Mockup Card -->
+            <div class="col-lg-6">
+                <div class="hero-showcase-container">
+                    <!-- Top Badge (Positioned cleanly above card) -->
+                    <div class="d-flex justify-content-end">
+                        <div class="hero-showcase-badge text-success">
+                            <i class="bi bi-patch-check-fill fs-5"></i>
+                            <div>
+                                <div class="small fw-bold">{% trans "Level 1 Verified" %}</div>
+                                <div class="text-muted" style="font-size: 0.725rem;">{% trans "Department Head Sign-off" %}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Showcase Card -->
+                    <div class="hero-mockup-card">
+                        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-primary-subtle text-primary font-monospace fw-bold">TM-000104</span>
+                                <span class="badge bg-warning-subtle text-warning fw-semibold">{% trans "Second Approval" %}</span>
+                            </div>
+                            <span class="small text-muted"><i class="bi bi-clock me-1"></i>{% trans "Due in 5 days" %}</span>
+                        </div>
+
+                        <h5 class="fw-bold mb-2">{% trans "University Academic Accreditation & Digital Curriculum Audit" %}</h5>
+                        <p class="text-muted small mb-3">{% trans "Comprehensive syllabus alignment, faculty qualification validation, and research index compilation." %}</p>
+
+                        <!-- Progress Bar -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between small fw-semibold mb-1">
+                                <span>{% trans "Progress" %}</span>
+                                <span class="text-primary font-monospace">85%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar" style="width: 85%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Participants & Actions -->
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="avatar-circle avatar-circle-sm bg-primary text-white">AR</span>
+                                <span class="avatar-circle avatar-circle-sm bg-info text-white">DA</span>
+                                <span class="avatar-circle avatar-circle-sm bg-success text-white">IT</span>
+                                <span class="small text-muted ms-1">+3 {% trans "assigned" %}</span>
+                            </div>
+                            <span class="btn btn-sm btn-outline-primary fw-semibold disabled py-1 px-2">
+                                <i class="bi bi-eye me-1"></i>{% trans "In Review" %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Badge (Positioned cleanly below card) -->
+                    <div class="d-flex justify-content-start">
+                        <div class="hero-showcase-badge text-primary">
+                            <i class="bi bi-shield-lock-fill fs-5"></i>
+                            <div>
+                                <div class="small fw-bold">{% trans "Immutable Evidence Vault" %}</div>
+                                <div class="text-muted" style="font-size: 0.725rem;">{% trans "PDF / DOCX / XLSX Reports" %}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 3. KEY METRICS STRIP -->
+<section class="landing-stats-strip">
+    <div class="container">
+        <div class="row g-4 text-center">
+            <div class="col-6 col-md-3">
+                <div class="stat-item-number font-monospace">100%</div>
+                <div class="stat-item-label">{% trans "Digital Traceability" %}</div>
+                <div class="stat-item-desc">{% trans "Zero lost paper directives" %}</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-item-number font-monospace">2-Level</div>
+                <div class="stat-item-label">{% trans "Rigorous Approvals" %}</div>
+                <div class="stat-item-desc">{% trans "Dept Head + Executive" %}</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-item-number font-monospace">5 Roles</div>
+                <div class="stat-item-label">{% trans "Strict Governance" %}</div>
+                <div class="stat-item-desc">{% trans "IDOR & Scoped RBAC" %}</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-item-number font-monospace">24/7</div>
+                <div class="stat-item-label">{% trans "Audit & Notifications" %}</div>
+                <div class="stat-item-desc">{% trans "Continuous compliance tracking" %}</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 4. PLATFORM CAPABILITIES -->
+<section id="features" class="landing-section">
+    <div class="container">
+        <div class="section-header reveal-on-scroll">
+            <span class="section-badge">{% trans "Platform Capabilities" %}</span>
+            <h2 class="section-title">{% trans "Engineered for University Excellence" %}</h2>
+            <p class="section-desc">
+                {% trans "Designed specifically for higher education governance, streamlining communication between Rectorate, Vice Rectors, Department Heads, and Employees." %}
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Feature 1 -->
+            <div class="col-md-6 col-lg-4 reveal-on-scroll">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="bi bi-diagram-3-fill"></i>
+                    </div>
+                    <h3 class="feature-card-title">{% trans "Operational Task Delegation" %}</h3>
+                    <p class="feature-card-text">
+                        {% trans "Structured directives with clear department ownership, priorities, complexities, and enforced academic deadlines." %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="col-md-6 col-lg-4 reveal-on-scroll">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h3 class="feature-card-title">{% trans "Two-Stage Approval System" %}</h3>
+                    <p class="feature-card-text">
+                        {% trans "Stage 1 Department Head verification followed by Stage 2 Vice Rector or Rector executive sign-off with mandatory review rationale." %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="col-md-6 col-lg-4 reveal-on-scroll">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="bi bi-folder-check"></i>
+                    </div>
+                    <h3 class="feature-card-title">{% trans "Protected Evidence Vault" %}</h3>
+                    <p class="feature-card-text">
+                        {% trans "Folder-based file management, PDF/DOCX/XLSX work reports, and immutable proof of completion for approved submissions." %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="col-md-6 col-lg-4 reveal-on-scroll">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="bi bi-speedometer2"></i>
+                    </div>
+                    <h3 class="feature-card-title">{% trans "Executive & Dept Dashboards" %}</h3>
+                    <p class="feature-card-text">
+                        {% trans "Live workload metrics, overdue task tracking, completion ratios, and structured operational work centers." %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="col-md-6 col-lg-4 reveal-on-scroll">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="bi bi-bell-fill"></i>
+                    </div>
+                    <h3 class="feature-card-title">{% trans "Instant Real-Time Alerts" %}</h3>
+                    <p class="feature-card-text">
+                        {% trans "Automated in-app alerts on new task assignments, submission status changes, review feedback, and deadline reminders." %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="col-md-6 col-lg-4 reveal-on-scroll">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="bi bi-lock-fill"></i>
+                    </div>
+                    <h3 class="feature-card-title">{% trans "Institutional Security & RBAC" %}</h3>
+                    <p class="feature-card-text">
+                        {% trans "Technical Superadmin separation, department-scoped authorization, IDOR protection, and complete audit logging." %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 5. UNIVERSITY WORKFLOW VISUALIZATION -->
+<section id="workflow" class="landing-section bg-surface border-top border-bottom">
+    <div class="container">
+        <div class="section-header reveal-on-scroll">
+            <span class="section-badge">{% trans "Lifecycle Flow" %}</span>
+            <h2 class="section-title">{% trans "How Tasks Move from Directive to Approval" %}</h2>
+            <p class="section-desc">
+                {% trans "A transparent, structured 5-stage lifecycle ensuring quality, accountability, and timely completion." %}
+            </p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <!-- Step 1 -->
+            <div class="col-md-6 col-lg reveal-on-scroll">
+                <div class="workflow-step-card">
+                    <div class="step-num-badge">1</div>
+                    <h5 class="fw-bold mb-2">{% trans "Directive Created" %}</h5>
+                    <p class="small text-muted mb-0">{% trans "Rector or Vice Rector initiates a structured task with official deadline and department assignment." %}</p>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="col-md-6 col-lg reveal-on-scroll">
+                <div class="workflow-step-card">
+                    <div class="step-num-badge">2</div>
+                    <h5 class="fw-bold mb-2">{% trans "Dept Distribution" %}</h5>
+                    <p class="small text-muted mb-0">{% trans "Department Head assigns responsible specialist employees with specific roles and instructions." %}</p>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="col-md-6 col-lg reveal-on-scroll">
+                <div class="workflow-step-card">
+                    <div class="step-num-badge">3</div>
+                    <h5 class="fw-bold mb-2">{% trans "Execution & Evidence" %}</h5>
+                    <p class="small text-muted mb-0">{% trans "Employee updates progress (0-100%), attaches deliverables, and submits for Stage 1 approval." %}</p>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="col-md-6 col-lg reveal-on-scroll">
+                <div class="workflow-step-card">
+                    <div class="step-num-badge">4</div>
+                    <h5 class="fw-bold mb-2">{% trans "Dept Head Review" %}</h5>
+                    <p class="small text-muted mb-0">{% trans "Department Head reviews attached reports and either approves to Level 2 or returns with notes." %}</p>
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="col-md-6 col-lg reveal-on-scroll">
+                <div class="workflow-step-card">
+                    <div class="step-num-badge">5</div>
+                    <h5 class="fw-bold mb-2">{% trans "Executive Approval" %}</h5>
+                    <p class="small text-muted mb-0">{% trans "Vice Rector or Rector grants final approval, permanently locking verified evidence." %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 6. INSTITUTIONAL SECURITY & TRUST -->
+<section id="security" class="landing-section">
+    <div class="container">
+        <div class="security-banner-card reveal-on-scroll">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-5 text-center text-lg-start">
+                    <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle bg-primary-subtle text-primary mb-3" style="width: 72px; height: 72px; font-size: 2rem;">
+                        <i class="bi bi-shield-shaded"></i>
+                    </div>
+                    <h3 class="fw-bold mb-2">{% trans "Institutional Integrity & Governance" %}</h3>
+                    <p class="text-muted mb-0">
+                        {% trans "Every directive, review, file download, and deadline adjustment is cryptographically traceable and scoped to authorized personnel." %}
+                    </p>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="security-check-item">
+                                <i class="bi bi-check-circle-fill security-check-icon"></i>
+                                <div>
+                                    <div class="fw-bold text-dark small">{% trans "Technical Superadmin Separation" %}</div>
+                                    <div class="text-muted" style="font-size: 0.8rem;">{% trans "Django Admin access is strictly isolated from university operational roles." %}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="security-check-item">
+                                <i class="bi bi-check-circle-fill security-check-icon"></i>
+                                <div>
+                                    <div class="fw-bold text-dark small">{% trans "Full Audit Logging" %}</div>
+                                    <div class="text-muted" style="font-size: 0.8rem;">{% trans "Comprehensive timestamped event log for every state transition and review." %}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="security-check-item">
+                                <i class="bi bi-check-circle-fill security-check-icon"></i>
+                                <div>
+                                    <div class="fw-bold text-dark small">{% trans "IDOR & Cross-Dept Protection" %}</div>
+                                    <div class="text-muted" style="font-size: 0.8rem;">{% trans "Backend queryset scoping prevents unauthorized cross-department data tampering." %}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="security-check-item">
+                                <i class="bi bi-check-circle-fill security-check-icon"></i>
+                                <div>
+                                    <div class="fw-bold text-dark small">{% trans "Immutable Approved Evidence" %}</div>
+                                    <div class="text-muted" style="font-size: 0.8rem;">{% trans "Approved work submissions cannot be deleted or overwritten by any user." %}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 7. FINAL CALL TO ACTION -->
+<section class="container pb-5">
+    <div class="landing-cta-section reveal-on-scroll">
+        <h2 class="landing-cta-title">{% trans "Ready to access your workspace?" %}</h2>
+        <p class="landing-cta-subtitle">
+            {% trans "Sign in with your university credentials to view assigned directives, update progress, and review pending approvals." %}
+        </p>
+        <a href="{% url 'login' %}" class="btn btn-light btn-lg px-5 py-3 fw-bold text-primary shadow-lg d-inline-flex align-items-center gap-2">
+            <i class="bi bi-box-arrow-in-right fs-5"></i>
+            <span>{% trans "Login to Platform" %}</span>
+        </a>
+    </div>
+</section>
+
+<!-- 8. PUBLIC FOOTER -->
+<footer id="about" class="landing-footer">
+    <div class="container">
+        <div class="row g-4 align-items-center justify-content-between mb-4">
+            <!-- Brand & Info -->
+            <div class="col-md-6 d-flex align-items-center gap-3">
+                <img src="{% static 'images/logo-dark.png' %}" alt="Al-Khwarizmi University" class="brand-logo-img logo-dark-variant" style="height: 38px;">
+                <img src="{% static 'images/logo-light.png' %}" alt="Al-Khwarizmi University" class="brand-logo-img logo-light-variant" style="height: 38px;">
+                <div>
+                    <div class="fw-bold text-dark">{% trans "Al-Khwarizmi University" %}</div>
+                    <div class="small text-muted">{% trans "Digital Task Management & Workflow Operating System" %}</div>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="col-md-6 d-flex justify-content-md-end gap-3 small">
+                <a href="{% url 'login' %}" class="footer-link">{% trans "Sign In" %}</a>
+                <span class="text-muted">·</span>
+                <a href="#features" class="footer-link">{% trans "Capabilities" %}</a>
+                <span class="text-muted">·</span>
+                <a href="#workflow" class="footer-link">{% trans "Workflow" %}</a>
+                <span class="text-muted">·</span>
+                <a href="#security" class="footer-link">{% trans "Security" %}</a>
+            </div>
+        </div>
+
+        <div class="pt-3 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center small text-muted gap-2">
+            <div>
+                © {% now "Y" %} {% trans "Al-Khwarizmi University. All rights reserved." %}
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-success-subtle text-success">
+                    <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>{% trans "Operational Platform" %}
+                </span>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/app.js' %}?v=5"></script>
+<script src="{% static 'js/pages/landing.js' %}?v=5"></script>
+</body>
+</html>

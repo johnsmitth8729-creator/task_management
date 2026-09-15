@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Create Payroll Adjustment" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3 p-4">
+                <div class="border-bottom pb-3 mb-3">
+                    <a href="{% url 'payroll:dashboard' %}" class="text-decoration-none text-muted small">&larr; {% trans "Back to Dashboard" %}</a>
+                    <h3 class="fw-bold text-dark mt-2 mb-0">{% trans "Create Payroll Adjustment" %}</h3>
+                    <p class="text-muted small mb-0">{% trans "Record a discretionary bonus, allowance, penalty, or calculation correction." %}</p>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-muted">{{ form.employee.label }}</label>
+                        {{ form.employee }}
+                        {% if form.employee.errors %}<div class="text-danger small mt-1">{{ form.employee.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-muted">{{ form.period.label }} ({% trans "Optional" %})</label>
+                        {{ form.period }}
+                        <div class="form-text small">{% trans "Select period if this adjustment should apply only to a specific cycle." %}</div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-muted">{{ form.type.label }}</label>
+                            {{ form.type }}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-muted">{{ form.amount.label }} (UZS)</label>
+                            {{ form.amount }}
+                            {% if form.amount.errors %}<div class="text-danger small mt-1">{{ form.amount.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small text-muted">{{ form.reason.label }}</label>
+                        {{ form.reason }}
+                        {% if form.reason.errors %}<div class="text-danger small mt-1">{{ form.reason.errors }}</div>{% endif %}
+                        <div class="form-text small">{% trans "Mandatory institutional explanation for this discretionary adjustment." %}</div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'payroll:dashboard' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check2-circle me-1"></i>{% trans "Submit Adjustment" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% load i18n %}
+{% comment %}Progress bar component. Expects: value (int 0-100){% endcomment %}
+<div class="wf-progress-bar-wrap">
+    <div class="wf-progress-bar-fill {% if value == 100 %}fill-complete{% elif value >= 50 %}fill-warning{% endif %}"
+         style="width: {{ value }}%"></div>
+</div>
+<div class="wf-progress-label">{{ value }}%</div>

@@ -28,7 +28,7 @@
             </div>
             <p class="text-muted mb-0">{{ department.description|default:_("No description provided.") }}</p>
         </div>
-        {% if user.is_rector %}
+        {% if user.is_rector or user.is_superuser %}
             <div class="d-flex gap-2">
                 <a href="{% url 'department_edit' pk=department.pk %}" class="btn btn-outline-primary btn-sm">
                     <i class="bi bi-pencil me-1"></i>{% trans "Edit Department" %}
@@ -213,7 +213,7 @@
     </div>
 </div>
 
-{% if user.is_rector and head_form %}
+{% if user.is_rector or user.is_superuser %}{% if head_form %}
     <!-- Modal for Assigning Department Head -->
     <div class="modal fade" id="assignHeadModal" tabindex="-1" aria-labelledby="assignHeadModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -241,5 +241,5 @@
             </div>
         </div>
     </div>
-{% endif %}
+{% endif %}{% endif %}
 {% endblock %}

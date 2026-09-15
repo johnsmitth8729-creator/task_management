@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Task Templates" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">{% trans "Task Templates" %}</h1>
+            <p class="text-muted mb-0">{% trans "Standardized reusable templates for common operational workflows" %}</p>
+        </div>
+        {% if can_manage %}
+            <a href="{% url 'task_template_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i>{% trans "Create Template" %}
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="row g-3">
+        {% for t in templates %}
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="content-panel h-100 d-flex flex-direction-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h2 class="h5 fw-bold text-dark mb-0">{{ t.name }}</h2>
+                            <span class="badge badge-priority-{{ t.default_priority|lower }}">{{ t.get_default_priority_display }}</span>
+                        </div>
+                        {% if t.task_type %}
+                            <span class="badge bg-light text-secondary mb-2">{{ t.task_type.name }}</span>
+                        {% endif %}
+                        <p class="text-secondary small mb-3" style="line-height: 1.5;">{{ t.description|default:_("No description provided.")|truncatewords:25 }}</p>
+                        <div class="small text-muted mb-3">
+                            <div><strong>{% trans "Default Complexity:" %}</strong> {{ t.get_default_complexity_display }}</div>
+                            {% if t.default_duration_days %}
+                                <div><strong>{% trans "Duration:" %}</strong> {{ t.default_duration_days }} {% trans "days" %}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
+                        <a href="{% url 'task_template_use' pk=t.pk %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-fill me-1"></i>{% trans "Use Template" %}
+                        </a>
+                        {% if can_manage %}
+                            <a href="{% url 'task_template_edit' pk=t.pk %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="content-panel text-center py-5 text-muted">
+                    <i class="bi bi-file-earmark-ruled fs-1 text-secondary d-block mb-2"></i>
+                    <h2 class="h5 fw-bold">{% trans "No templates found." %}</h2>
+                    <p class="small mb-0">{% trans "Create task templates to standardize recurring workflow definitions." %}</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "HR Authority & Governance Permissions" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h1 class="h3 fw-bold text-dark mb-0">{% trans "Rector HR Governance & Authority" %}</h1>
+                <span class="badge bg-primary-subtle text-primary">{% trans "Executive Control" %}</span>
+            </div>
+            <p class="text-muted mb-0">{% trans "Configure granular operational permissions for Human Resources personnel across university domains" %}</p>
+        </div>
+        <a href="{% url 'hr:overview' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>{% trans "HR Directory" %}
+        </a>
+    </div>
+
+    <!-- Info Alert -->
+    <div class="alert alert-info border-0 shadow-sm rounded-3 mb-4">
+        <div class="d-flex gap-2 align-items-start">
+            <i class="bi bi-shield-check fs-5 mt-1"></i>
+            <div>
+                <strong>{% trans "Granular Authority Principle" %}:</strong>
+                {% trans "Human Resources personnel do not automatically possess unrestricted administrative power. The Rector explicitly configures allowed operations for each HR manager, protecting organizational integrity and ensuring strict separation of operational duties." %}
+            </div>
+        </div>
+    </div>
+
+    {% for hr_user in hr_users %}
+        <div class="card border-0 shadow-sm rounded-3 mb-4">
+            <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="avatar-circle avatar-circle-sm bg-primary text-white">{{ hr_user.initials }}</span>
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark">{{ hr_user.display_name }}</h5>
+                        <small class="text-muted">{{ hr_user.email }} · @{{ hr_user.username }}</small>
+                    </div>
+                </div>
+                <span class="badge bg-info-subtle text-info">{% trans "HR Manager" %}</span>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="user_id" value="{{ hr_user.id }}">
+
+                    <div class="row g-4 mb-4">
+                        <!-- Employee Management Capabilities -->
+                        <div class="col-lg-3 col-md-6">
+                            <div class="p-3 rounded-3 bg-light h-100">
+                                <h6 class="fw-bold mb-3 text-dark border-bottom pb-2">
+                                    <i class="bi bi-people me-2 text-primary"></i>{% trans "Employee Operations" %}
+                                </h6>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_view_employees" id="view_{{ hr_user.id }}" {% if hr_user.hr_authority.can_view_employees or not hr_user.hr_authority %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small" for="view_{{ hr_user.id }}">{% trans "View Employee Directory" %}</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_create_employees" id="create_{{ hr_user.id }}" {% if hr_user.hr_authority.can_create_employees %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small" for="create_{{ hr_user.id }}">{% trans "Create New Employees" %}</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_edit_employees" id="edit_{{ hr_user.id }}" {% if hr_user.hr_authority.can_edit_employees or not hr_user.hr_authority %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small" for="edit_{{ hr_user.id }}">{% trans "Edit Employee Profiles" %}</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_deactivate_employees" id="deact_{{ hr_user.id }}" {% if hr_user.hr_authority.can_deactivate_employees %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small text-danger" for="deact_{{ hr_user.id }}">{% trans "Deactivate / Suspend Employees" %}</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Placement & Assignment Capabilities -->
+                        <div class="col-lg-3 col-md-6">
+                            <div class="p-3 rounded-3 bg-light h-100">
+                                <h6 class="fw-bold mb-3 text-dark border-bottom pb-2">
+                                    <i class="bi bi-diagram-2 me-2 text-primary"></i>{% trans "Placement & Governance" %}
+                                </h6>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_assign_department" id="dept_{{ hr_user.id }}" {% if hr_user.hr_authority.can_assign_department or not hr_user.hr_authority %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small" for="dept_{{ hr_user.id }}">{% trans "Assign Departments" %}</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_assign_position" id="pos_{{ hr_user.id }}" {% if hr_user.hr_authority.can_assign_position or not hr_user.hr_authority %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small" for="pos_{{ hr_user.id }}">{% trans "Assign Positions" %}</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_assign_grade" id="grade_{{ hr_user.id }}" {% if hr_user.hr_authority.can_assign_grade or not hr_user.hr_authority %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small" for="grade_{{ hr_user.id }}">{% trans "Assign Employee Grades" %}</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_assign_supervisor" id="sup_{{ hr_user.id }}" {% if hr_user.hr_authority.can_assign_supervisor or not hr_user.hr_authority %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small" for="sup_{{ hr_user.id }}">{% trans "Assign Direct Supervisors" %}</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_assign_department_head" id="head_{{ hr_user.id }}" {% if hr_user.hr_authority.can_assign_department_head %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small" for="head_{{ hr_user.id }}">{% trans "Assign Department Heads" %}</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KPI & Performance Capabilities -->
+                        <div class="col-lg-3 col-md-6">
+                            <div class="p-3 rounded-3 bg-light h-100">
+                                <h6 class="fw-bold mb-3 text-dark border-bottom pb-2">
+                                    <i class="bi bi-graph-up me-2 text-primary"></i>{% trans "KPI & Performance" %}
+                                </h6>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_view_kpi" id="kpi_v_{{ hr_user.id }}" {% if hr_user.hr_authority.can_view_kpi or not hr_user.hr_authority %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small" for="kpi_v_{{ hr_user.id }}">{% trans "View Performance & KPI" %}</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_manage_kpi" id="kpi_m_{{ hr_user.id }}" {% if hr_user.hr_authority.can_manage_kpi %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small" for="kpi_m_{{ hr_user.id }}">{% trans "Manage KPI Definitions & Assign" %}</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_approve_kpi" id="kpi_a_{{ hr_user.id }}" {% if hr_user.hr_authority.can_approve_kpi %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small text-primary" for="kpi_a_{{ hr_user.id }}">{% trans "Approve & Finalize KPI Scores" %}</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payroll & Compensation Capabilities -->
+                        <div class="col-lg-3 col-md-6">
+                            <div class="p-3 rounded-3 bg-light h-100">
+                                <h6 class="fw-bold mb-3 text-dark border-bottom pb-2">
+                                    <i class="bi bi-cash-stack me-2 text-success"></i>{% trans "Payroll & Compensation" %}
+                                </h6>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_view_payroll" id="pay_v_{{ hr_user.id }}" {% if hr_user.hr_authority.can_view_payroll %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small" for="pay_v_{{ hr_user.id }}">{% trans "View Payroll & Compensation" %}</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_manage_salary" id="pay_sal_{{ hr_user.id }}" {% if hr_user.hr_authority.can_manage_salary %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small" for="pay_sal_{{ hr_user.id }}">{% trans "Manage Employee Salaries" %}</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_create_adjustment" id="pay_adj_{{ hr_user.id }}" {% if hr_user.hr_authority.can_create_adjustment %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small" for="pay_adj_{{ hr_user.id }}">{% trans "Create Payroll Adjustments" %}</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_manage_payroll" id="pay_m_{{ hr_user.id }}" {% if hr_user.hr_authority.can_manage_payroll %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small" for="pay_m_{{ hr_user.id }}">{% trans "Manage Periods & Calculate" %}</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_approve_payroll" id="pay_app_{{ hr_user.id }}" {% if hr_user.hr_authority.can_approve_payroll %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small text-primary" for="pay_app_{{ hr_user.id }}">{% trans "Approve Payroll Records" %}</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_mark_paid" id="pay_paid_{{ hr_user.id }}" {% if hr_user.hr_authority.can_mark_paid %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small text-success" for="pay_paid_{{ hr_user.id }}">{% trans "Mark Payroll as Paid" %}</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="can_view_payroll_reports" id="pay_rep_{{ hr_user.id }}" {% if hr_user.hr_authority.can_view_payroll_reports %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold small" for="pay_rep_{{ hr_user.id }}">{% trans "View & Export Reports" %}</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-shield-check me-1"></i>{% trans "Save Permissions for" %} {{ hr_user.display_name }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% empty %}
+        <div class="card border-0 shadow-sm rounded-3 p-5 text-center text-muted">
+            <i class="bi bi-person-x display-6 d-block mb-2"></i>
+            {% trans "No active HR Manager users found in the system. Assign the HR role to a user first." %}
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

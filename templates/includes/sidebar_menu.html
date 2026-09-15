@@ -1,0 +1,16 @@
+{% load i18n %}
+
+{% for section in sidebar_navigation_groups %}
+<div class="sidebar-nav-item-wrap" data-section-id="{{ nav_id_prefix }}-{{ section.id }}">
+    <a class="nav-link sidebar-section-link {% if section.is_active %}active{% endif %}"
+       href="{{ section.landing_url }}"
+       data-bs-title="{{ section.label }}"
+       title="{{ section.label }}">
+        <i class="{{ section.icon }} sidebar-link-icon"></i>
+        <span class="sidebar-link-title">{{ section.label }}</span>
+        {% if section.badge %}
+            <span class="badge rounded-pill {{ section.badge.css_class }} ms-auto font-monospace">{{ section.badge.count }}</span>
+        {% endif %}
+    </a>
+</div>
+{% endfor %}

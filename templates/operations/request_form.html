@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Submit Application" %} | University Task Management{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 800px;">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="h3 fw-bold mb-1"><i class="bi bi-file-earmark-text text-primary me-2"></i>{% if request_type %}{{ request_type.name }}{% else %}{% trans "New Application" %}{% endif %}</h2>
+            <p class="text-muted mb-0">{% trans "Official university electronic application and multi-tier approval workflow." %}</p>
+        </div>
+        <a href="{% url 'operations:service_catalog' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>{% trans "Catalog" %}
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{% trans "Service / Request Type" %} <span class="text-danger">*</span></label>
+                    {{ form.request_type }}
+                    {% if form.request_type.errors %}<div class="text-danger small">{{ form.request_type.errors }}</div>{% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{% trans "Subject / Purpose" %} <span class="text-danger">*</span></label>
+                    {{ form.subject }}
+                    {% if form.subject.errors %}<div class="text-danger small">{{ form.subject.errors }}</div>{% endif %}
+                </div>
+
+                {% if request_type and request_type.form_schema %}
+                    <h6 class="fw-bold mt-4 mb-3 border-bottom pb-2">{% trans "Additional Service Specifications" %}</h6>
+                    {% for field in request_type.form_schema %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">{{ field.label|default:field.name }} {% if field.required %}<span class="text-danger">*</span>{% endif %}</label>
+                            {% if field.type == 'textarea' %}
+                                <textarea name="{{ field.name }}" class="form-control" rows="3" placeholder="{{ field.placeholder|default:'' }}" {% if field.required %}required{% endif %}></textarea>
+                            {% elif field.type == 'date' %}
+                                <input type="date" name="{{ field.name }}" class="form-control" {% if field.required %}required{% endif %}>
+                            {% elif field.type == 'number' %}
+                                <input type="number" name="{{ field.name }}" class="form-control" placeholder="{{ field.placeholder|default:'' }}" {% if field.required %}required{% endif %}>
+                            {% else %}
+                                <input type="text" name="{{ field.name }}" class="form-control" placeholder="{{ field.placeholder|default:'' }}" {% if field.required %}required{% endif %}>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="form-check form-switch mt-4 mb-4">
+                    {{ form.is_urgent }}
+                    <label class="form-check-label fw-semibold ms-2" for="{{ form.is_urgent.id_for_label }}">
+                        <i class="bi bi-lightning-fill text-warning me-1"></i>{% trans "Mark as High Priority / Urgent" %}
+                    </label>
+                    <div class="text-muted small">{% trans "Urgent requests are flagged in leader approval queues and subject to expedited SLAs." %}</div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'operations:service_catalog' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-send-check me-1"></i>{% trans "Submit Application" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ record.employee_name_snapshot }} — {{ record.period.name }} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+
+    <!-- Breadcrumb & Top Actions -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="small text-muted mb-1">
+                <a href="{% url 'payroll:record_list' %}" class="text-decoration-none text-muted">&larr; {% trans "All Records" %}</a>
+            </div>
+            <h1 class="h3 fw-bold text-dark mb-0">
+                {{ record.employee_name_snapshot }}
+                <span class="badge {% if record.status == 'APPROVED' %}bg-success{% elif record.status == 'CALCULATED' %}bg-primary{% elif record.status == 'PAID' %}bg-info text-dark{% else %}bg-secondary{% endif %} fs-6 ms-2">
+                    {{ record.get_status_display }}
+                </span>
+                <span class="badge {% if record.payment_status == 'PAID' %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning-emphasis{% endif %} fs-6 ms-1">
+                    {{ record.get_payment_status_display }}
+                </span>
+            </h1>
+            <p class="text-muted small mb-0">
+                {{ record.period.name }} ({{ record.period.code }}) &bull; {{ record.department_snapshot|default:_("No Department") }} &bull; {{ record.position_snapshot|default:_("No Position") }}
+            </p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            {% if can_approve %}
+                <form action="{% url 'payroll:record_approve' pk=record.pk %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-sm">
+                        <i class="bi bi-check2-circle me-1"></i>{% trans "Approve & Lock" %}
+                    </button>
+                </form>
+            {% endif %}
+
+            {% if can_mark_paid %}
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#markPaidModal">
+                    <i class="bi bi-cash-stack me-1"></i>{% trans "Mark as Paid" %}
+                </button>
+            {% endif %}
+
+            <a href="{% url 'payroll:record_pdf' pk=record.pk %}" class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-file-earmark-pdf me-1"></i>{% trans "Download Payslip (PDF)" %}
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="row g-4 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3">
+                <span class="text-muted small text-uppercase fw-semibold">{% trans "Base Salary" %}</span>
+                <h4 class="fw-bold text-dark mt-1 mb-0">{{ record.base_salary|floatformat:2 }}</h4>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3">
+                <span class="text-muted small text-uppercase fw-semibold">{% trans "Gross Salary" %}</span>
+                <h4 class="fw-bold text-dark mt-1 mb-0">{{ record.gross_salary|floatformat:2 }}</h4>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3">
+                <span class="text-muted small text-uppercase fw-semibold">{% trans "Total Deductions" %}</span>
+                <h4 class="fw-bold text-danger mt-1 mb-0">-{{ record.tax_total|add:record.total_deductions|floatformat:2 }}</h4>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-success-subtle">
+                <span class="text-success-emphasis small text-uppercase fw-bold">{% trans "Net Salary Payable" %}</span>
+                <h4 class="fw-bold text-success mt-1 mb-0">{{ record.net_salary|floatformat:2 }} {{ record.currency }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Itemized Lines Table -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-header bg-white border-bottom py-3">
+            <h5 class="fw-bold text-dark mb-0">
+                <i class="bi bi-list-ul text-primary me-2"></i>{% trans "Itemized Compensation & Deductions" %}
+            </h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small text-uppercase">
+                    <tr>
+                        <th>{% trans "Item Description" %}</th>
+                        <th>{% trans "Category" %}</th>
+                        <th>{% trans "Calculation Basis" %}</th>
+                        <th class="text-end">{% trans "Amount" %}</th>
+                        <th>{% trans "Taxable" %}</th>
+                        <th>{% trans "Notes" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for line in lines %}
+                        <tr>
+                            <td class="fw-semibold">{{ line.name_snapshot }}</td>
+                            <td>
+                                {% if line.component_type == 'ALLOWANCE' %}
+                                    <span class="badge bg-primary-subtle text-primary">{% trans "Allowance" %}</span>
+                                {% elif line.component_type == 'BONUS' %}
+                                    <span class="badge bg-warning-subtle text-warning-emphasis">{% trans "Bonus" %}</span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger">{% trans "Deduction" %}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if line.rate_or_value %}
+                                    {{ line.rate_or_value|floatformat:2 }}
+                                    {% if line.calculation_type == 'PERCENTAGE' %}%{% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="text-end fw-bold {% if line.component_type == 'DEDUCTION' %}text-danger{% else %}text-dark{% endif %}">
+                                {% if line.component_type == 'DEDUCTION' %}-{% else %}+{% endif %}
+                                {{ line.amount|floatformat:2 }} UZS
+                            </td>
+                            <td>
+                                {% if line.taxable %}
+                                    <i class="bi bi-check-circle-fill text-success" title="{% trans 'Subject to Tax' %}"></i>
+                                {% else %}
+                                    <i class="bi bi-dash-circle text-muted" title="{% trans 'Tax-exempt' %}"></i>
+                                {% endif %}
+                            </td>
+                            <td class="text-muted small">{{ line.description|default:"-" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                {% trans "No itemized lines recorded." %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Snapshots & Audit Meta -->
+    <div class="card border-0 shadow-sm rounded-3 p-4 bg-light">
+        <h6 class="fw-bold text-dark mb-3">
+            <i class="bi bi-shield-check text-primary me-2"></i>{% trans "Immutable Historical Snapshot & Governance Audit" %}
+        </h6>
+        <div class="row g-3 small">
+            <div class="col-md-3">
+                <span class="text-muted d-block">{% trans "Employee Name" %}:</span>
+                <strong>{{ record.employee_name_snapshot }}</strong>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted d-block">{% trans "Department Snapshot" %}:</span>
+                <strong>{{ record.department_snapshot|default:_("None") }}</strong>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted d-block">{% trans "Position Snapshot" %}:</span>
+                <strong>{{ record.position_snapshot|default:_("None") }}</strong>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted d-block">{% trans "Grade Snapshot" %}:</span>
+                <strong>{{ record.grade_snapshot|default:_("None") }}</strong>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted d-block">{% trans "KPI Score Snapshot" %}:</span>
+                <strong>{{ record.kpi_score_snapshot }}%</strong>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted d-block">{% trans "Calculated At" %}:</span>
+                <strong>{{ record.calculated_at|date:"Y-m-d H:i"|default:"-" }}</strong>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted d-block">{% trans "Approved By" %}:</span>
+                <strong>{{ record.approved_by.display_name|default:"-" }} ({{ record.approved_at|date:"Y-m-d"|default:"-" }})</strong>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted d-block">{% trans "Payment Reference" %}:</span>
+                <strong>{{ record.payment_reference|default:_("Unpaid") }}</strong>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Mark Paid Modal -->
+{% if can_mark_paid %}
+<div class="modal fade" id="markPaidModal" tabindex="-1" aria-labelledby="markPaidModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{% url 'payroll:record_mark_paid' pk=record.pk %}" method="post">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="markPaidModalLabel">{% trans "Mark Payroll as Disbursed / Paid" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted mb-3">
+                        {% trans "You are recording payment disbursement of" %}
+                        <strong>{{ record.net_salary|floatformat:2 }} {{ record.currency }}</strong>
+                        {% trans "to" %} {{ record.employee_name_snapshot }}.
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">{{ mark_paid_form.payment_reference.label }}</label>
+                        {{ mark_paid_form.payment_reference }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="bi bi-check2-all me-1"></i>{% trans "Confirm Disbursement" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

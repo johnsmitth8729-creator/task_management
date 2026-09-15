@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Create Tax Rule" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3 p-4">
+                <div class="border-bottom pb-3 mb-3">
+                    <a href="{% url 'payroll:tax_rule_list' %}" class="text-decoration-none text-muted small">&larr; {% trans "Back to Tax Rules" %}</a>
+                    <h3 class="fw-bold text-dark mt-2 mb-0">{% trans "New Payroll Tax Rule" %}</h3>
+                    <p class="text-muted small mb-0">{% trans "Configure progressive or standard statutory deductions." %}</p>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-muted">{{ form.name.label }}</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-muted">{{ form.code.label }}</label>
+                        {{ form.code }}
+                        {% if form.code.errors %}<div class="text-danger small mt-1">{{ form.code.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-muted">{{ form.percentage.label }}</label>
+                            {{ form.percentage }}
+                            {% if form.percentage.errors %}<div class="text-danger small mt-1">{{ form.percentage.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-muted">{{ form.fixed_amount.label }} (UZS)</label>
+                            {{ form.fixed_amount }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-muted">{{ form.applies_to.label }}</label>
+                        {{ form.applies_to }}
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-muted">{{ form.effective_from.label }}</label>
+                            {{ form.effective_from }}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small text-muted">{{ form.effective_to.label }}</label>
+                            {{ form.effective_to }}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            {{ form.is_active }}
+                            <label class="form-check-label small fw-semibold" for="{{ form.is_active.id_for_label }}">{{ form.is_active.label }}</label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'payroll:tax_rule_list' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check2-circle me-1"></i>{% trans "Save Tax Rule" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

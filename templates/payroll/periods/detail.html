@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ period.name }} — {% trans "Payroll Period" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+
+    <!-- Header & Action Ribbon -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="small text-muted mb-1">
+                <a href="{% url 'payroll:period_list' %}" class="text-decoration-none text-muted">&larr; {% trans "All Periods" %}</a>
+            </div>
+            <h1 class="h3 fw-bold text-dark mb-0">
+                {{ period.name }}
+                <span class="badge bg-light text-dark border fs-6 ms-2">{{ period.code }}</span>
+                <span class="badge {% if period.status == 'APPROVED' %}bg-success{% elif period.status == 'OPEN' %}bg-primary{% elif period.status == 'CLOSED' %}bg-secondary{% else %}bg-warning-subtle text-warning-emphasis{% endif %} fs-6 ms-1">
+                    {{ period.get_status_display }}
+                </span>
+            </h1>
+            <p class="text-muted small mb-0">
+                {{ period.start_date|date:"Y-m-d" }} &rarr; {{ period.end_date|date:"Y-m-d" }} &bull; {{ period.get_period_type_display }}
+            </p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            {% if can_manage_payroll and period.status != 'CLOSED' and period.status != 'APPROVED' %}
+                <form action="{% url 'payroll:period_calculate' pk=period.pk %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-calculator me-1"></i>{% trans "Calculate All Employees" %}
+                    </button>
+                </form>
+            {% endif %}
+
+            {% if can_approve_payroll and period.status == 'PENDING_APPROVAL' %}
+                <form action="{% url 'payroll:period_approve_all' pk=period.pk %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-sm">
+                        <i class="bi bi-check2-all me-1"></i>{% trans "Approve All Records" %}
+                    </button>
+                </form>
+            {% endif %}
+
+            {% if can_approve_payroll and period.status == 'APPROVED' %}
+                <form action="{% url 'payroll:period_close' pk=period.pk %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-dark btn-sm">
+                        <i class="bi bi-lock-fill me-1"></i>{% trans "Close Period" %}
+                    </button>
+                </form>
+            {% endif %}
+
+            <a href="{% url 'payroll:period_export_excel' pk=period.pk %}" class="btn btn-outline-success btn-sm">
+                <i class="bi bi-file-earmark-excel me-1"></i>{% trans "Export Excel" %}
+            </a>
+        </div>
+    </div>
+
+    <!-- Period Records Table -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold text-dark mb-0">
+                <i class="bi bi-receipt text-primary me-2"></i>{% trans "Employee Payroll Records" %}
+                <span class="badge bg-light text-secondary ms-2">{{ record_count }}</span>
+            </h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small text-uppercase">
+                    <tr>
+                        <th>{% trans "Employee" %}</th>
+                        <th>{% trans "Department" %}</th>
+                        <th>{% trans "Base Salary" %}</th>
+                        <th>{% trans "Allowances" %}</th>
+                        <th>{% trans "Bonuses / KPI" %}</th>
+                        <th>{% trans "Gross" %}</th>
+                        <th>{% trans "Taxes" %}</th>
+                        <th>{% trans "Net Pay" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Payment" %}</th>
+                        <th class="text-end">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in records %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">{{ r.employee_name_snapshot }}</div>
+                                <div class="text-muted small">@{{ r.employee_username_snapshot }}</div>
+                            </td>
+                            <td>{{ r.department_snapshot|default:"-" }}</td>
+                            <td>{{ r.base_salary|floatformat:2 }}</td>
+                            <td>{{ r.total_allowances|floatformat:2 }}</td>
+                            <td>
+                                <div>{{ r.total_bonuses|floatformat:2 }}</div>
+                                {% if r.kpi_bonus > 0 %}
+                                    <span class="badge bg-warning-subtle text-warning-emphasis small">+{{ r.kpi_bonus|floatformat:2 }} KPI</span>
+                                {% endif %}
+                            </td>
+                            <td class="fw-semibold">{{ r.gross_salary|floatformat:2 }}</td>
+                            <td class="text-danger">-{{ r.tax_total|floatformat:2 }}</td>
+                            <td class="fw-bold text-success">{{ r.net_salary|floatformat:2 }} {{ r.currency }}</td>
+                            <td>
+                                <span class="badge {% if r.status == 'APPROVED' %}bg-success{% elif r.status == 'CALCULATED' %}bg-primary{% elif r.status == 'PAID' %}bg-info text-dark{% else %}bg-secondary{% endif %}">
+                                    {{ r.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge {% if r.payment_status == 'PAID' %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning-emphasis{% endif %}">
+                                    {{ r.get_payment_status_display }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'payroll:record_detail' pk=r.pk %}" class="btn btn-sm btn-light" title="{% trans 'View Breakdown' %}">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'payroll:record_pdf' pk=r.pk %}" class="btn btn-sm btn-outline-danger" title="{% trans 'Payslip PDF' %}">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="11" class="text-center py-5 text-muted">
+                                <i class="bi bi-calculator display-6 d-block mb-2"></i>
+                                {% trans "No employee records calculated for this period yet." %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Department Dashboard" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/workflow.css' %}?v=4" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-3 px-lg-4">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+        <div class="stat-icon" style="background:var(--app-primary-subtle);color:var(--app-primary);font-size:1.5rem;">
+            <i class="bi bi-building-fill-gear"></i>
+        </div>
+        <div>
+            <h1 class="h4 fw-bold mb-0">{% trans "Department Dashboard" %}</h1>
+            {% if dept %}
+            <p class="text-muted small mb-0">{{ dept.name }}</p>
+            {% endif %}
+        </div>
+        <div class="ms-auto d-flex gap-2">
+            <a href="{% url 'dept_task_list' %}" class="btn btn-primary btn-sm">
+                <i class="bi bi-list-task me-1"></i>{% trans "Task Distribution" %}
+            </a>
+            <a href="{% url 'dept_first_approval' %}" class="btn btn-outline-success btn-sm">
+                <i class="bi bi-inbox-fill me-1"></i>{% trans "Approval Queue" %}
+                {% if pending_submissions > 0 %}<span class="badge bg-success ms-1">{{ pending_submissions }}</span>{% endif %}
+            </a>
+        </div>
+    </div>
+
+    <!-- Stat row -->
+    {% if dept %}
+    <div class="dept-stat-row mb-4">
+        <div class="dept-stat-item">
+            <div class="stat-value text-primary">{{ total_tasks }}</div>
+            <div class="stat-key">{% trans "Total Tasks" %}</div>
+        </div>
+        <div class="dept-stat-item">
+            <div class="stat-value text-warning">{{ assigned_tasks }}</div>
+            <div class="stat-key">{% trans "Active Tasks" %}</div>
+        </div>
+        <div class="dept-stat-item">
+            <div class="stat-value" style="color:#6b7280;">{{ unassigned_tasks }}</div>
+            <div class="stat-key">{% trans "Unassigned" %}</div>
+        </div>
+        <div class="dept-stat-item">
+            <div class="stat-value text-success">{{ pending_submissions }}</div>
+            <div class="stat-key">{% trans "Pending Approval" %}</div>
+        </div>
+        <div class="dept-stat-item">
+            <div class="stat-value {% if overdue_count > 0 %}text-danger{% else %}text-success{% endif %}">{{ overdue_count }}</div>
+            <div class="stat-key">{% trans "Overdue" %}</div>
+        </div>
+        <div class="dept-stat-item">
+            <div class="stat-value">{{ employee_count }}</div>
+            <div class="stat-key">{% trans "Employees" %}</div>
+        </div>
+    </div>
+
+    <!-- Employee Workload Table -->
+    {% if employee_data %}
+    <div class="content-panel mb-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-people-fill me-2"></i>{% trans "Employee Workload" %}</h6>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-head-custom">
+                    <tr>
+                        <th>{% trans "Employee" %}</th>
+                        <th class="text-center">{% trans "Total" %}</th>
+                        <th class="text-center">{% trans "Incoming" %}</th>
+                        <th class="text-center">{% trans "In Progress" %}</th>
+                        <th class="text-center">{% trans "Submitted" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in employee_data %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="avatar-sm">{{ item.user.display_name|first|upper }}</div>
+                                <div>
+                                    <div class="fw-semibold small">{{ item.user.display_name }}</div>
+                                    <div class="text-muted" style="font-size:.75rem;">{{ item.user.position.name|default:"" }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center"><span class="fw-bold">{{ item.total }}</span></td>
+                        <td class="text-center"><span class="badge bg-primary">{{ item.assigned }}</span></td>
+                        <td class="text-center"><span class="badge bg-warning text-dark">{{ item.in_progress }}</span></td>
+                        <td class="text-center"><span class="badge bg-success">{{ item.submitted }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Quick nav panels -->
+    <div class="row g-3">
+        <div class="col-md-4">
+            <a href="{% url 'dept_task_list' %}" class="content-panel text-decoration-none color-inherit d-block h-100">
+                <div class="text-center py-3">
+                    <i class="bi bi-list-task fs-1 mb-2 text-primary d-block"></i>
+                    <h6 class="fw-bold mb-1">{% trans "Task Distribution" %}</h6>
+                    <p class="text-muted small mb-0">{% trans "Assign employees to tasks" %}</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'dept_first_approval' %}" class="content-panel text-decoration-none color-inherit d-block h-100">
+                <div class="text-center py-3 position-relative">
+                    {% if pending_submissions > 0 %}
+                    <span class="badge bg-success position-absolute" style="top:.75rem;right:.75rem;">{{ pending_submissions }}</span>
+                    {% endif %}
+                    <i class="bi bi-inbox-fill fs-1 mb-2 text-success d-block"></i>
+                    <h6 class="fw-bold mb-1">{% trans "First Approval Queue" %}</h6>
+                    <p class="text-muted small mb-0">{% trans "Review employee submissions" %}</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'completed_tasks' %}" class="content-panel text-decoration-none color-inherit d-block h-100">
+                <div class="text-center py-3">
+                    <i class="bi bi-patch-check-fill fs-1 mb-2 text-success d-block"></i>
+                    <h6 class="fw-bold mb-1">{% trans "Completed Tasks" %}</h6>
+                    <p class="text-muted small mb-0">{% trans "View approved department deliverables" %}</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="content-panel text-center py-5">
+        <i class="bi bi-building fs-1 text-muted mb-3 d-block"></i>
+        <h5 class="fw-bold">{% trans "No Department Assigned" %}</h5>
+        <p class="text-muted">{% trans "Contact the administrator to assign you to a department." %}</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

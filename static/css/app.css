@@ -1,25 +1,100 @@
+/* ==========================================================================
+   TASK MANAGEMENT — Design System
+   Dark mode via [data-theme="dark"] on <html>.
+   Bootstrap components keep their default light rendering;
+   only our custom-class elements and colour tokens switch.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   1. DESIGN TOKENS — Light (default)
+   --------------------------------------------------------------------------- */
 :root {
-    --app-sidebar-width: 260px;
-    --app-primary: #1e3a8a;
-    --app-primary-light: #3b82f6;
-    --app-primary-subtle: #eff6ff;
-    --app-border: #e2e8f0;
-    --app-surface: #ffffff;
-    --app-muted-surface: #f8fafc;
-    --app-text: #0f172a;
-    --app-text-muted: #64748b;
+    --app-sidebar-width: 248px;
+    --app-sidebar-collapsed-width: 68px;
+    --app-primary:         #1e3a8a;
+    --app-primary-light:   #2563eb;
+    --app-primary-subtle:  #eff6ff;
+    --app-border:          #e2e8f0;
+    --app-surface:         #ffffff;
+    --app-muted-surface:   #f8fafc;
+    --app-text:            #0f172a;
+    --app-text-muted:      #64748b;
+    --app-input-bg:        #ffffff;
+    --app-input-border:    #cbd5e1;
+    --app-table-hover:     #f1f5f9;
+    --app-card-shadow:     0 0.125rem 0.25rem rgba(15,23,42,.06);
+    --app-badge-soft-bg:   #f1f5f9;
+    --app-badge-soft-text: #475569;
+
+    /* Sidebar specific tokens */
+    --app-sidebar-bg:              #f8fafc;
+    --app-sidebar-border:          #e2e8f0;
+    --app-sidebar-group-color:     #64748b;
+    --app-sidebar-link-color:      #334155;
+    --app-sidebar-link-hover-bg:   #f1f5f9;
+    --app-sidebar-link-hover-color:#0f172a;
+    --app-sidebar-active-bg:       #eff6ff;
+    --app-sidebar-active-color:    #1d4ed8;
+    --app-sidebar-active-border:   #2563eb;
+    --app-sidebar-guide:           #e2e8f0;
 }
 
+/* ---------------------------------------------------------------------------
+   2. DESIGN TOKENS — Dark
+   --------------------------------------------------------------------------- */
+[data-theme="dark"] {
+    --app-primary:         #60a5fa;
+    --app-primary-light:   #93c5fd;
+    --app-primary-subtle:  rgba(59,130,246,.18);
+    --app-border:          #334155;
+    --app-surface:         #1e293b;
+    --app-muted-surface:   #0f172a;
+    --app-text:            #f1f5f9;
+    --app-text-muted:      #94a3b8;
+    --app-input-bg:        #1e293b;
+    --app-input-border:    #475569;
+    --app-table-hover:     #273549;
+    --app-card-shadow:     0 0.25rem 0.75rem rgba(0,0,0,.4);
+    --app-badge-soft-bg:   #334155;
+    --app-badge-soft-text: #cbd5e1;
+
+    /* Sidebar specific tokens - Dark */
+    --app-sidebar-bg:              #0f172a;
+    --app-sidebar-border:          #1e293b;
+    --app-sidebar-group-color:     #94a3b8;
+    --app-sidebar-link-color:      #94a3b8;
+    --app-sidebar-link-hover-bg:   #1e293b;
+    --app-sidebar-link-hover-color:#f8fafc;
+    --app-sidebar-active-bg:       rgba(59,130,246,.16);
+    --app-sidebar-active-color:    #93c5fd;
+    --app-sidebar-active-border:   #60a5fa;
+    --app-sidebar-guide:           #1e293b;
+}
+
+/* ---------------------------------------------------------------------------
+   3. BODY & ROOT
+   --------------------------------------------------------------------------- */
 body {
     min-height: 100vh;
-    background: var(--app-muted-surface);
+    background-color: var(--app-muted-surface);
     color: var(--app-text);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.auth-main {
-    min-height: 100vh;
-}
+/* ---------------------------------------------------------------------------
+   4. LOGO SWAP
+   --------------------------------------------------------------------------- */
+.logo-dark-variant  { display: inline-block; }
+.logo-light-variant { display: none; }
+
+[data-theme="dark"] .logo-dark-variant  { display: none !important; }
+[data-theme="dark"] .logo-light-variant { display: inline-block !important; }
+
+/* ---------------------------------------------------------------------------
+   5. AUTH PAGES
+   --------------------------------------------------------------------------- */
+.auth-main { min-height: 100vh; }
 
 .login-page {
     min-height: 100vh;
@@ -30,34 +105,126 @@ body {
     background: radial-gradient(circle at top right, #dbeafe 0%, #f8fafc 60%);
 }
 
+[data-theme="dark"] .login-page {
+    background: radial-gradient(circle at top right, #1e3a8a 0%, #0f172a 70%);
+}
+
 .login-card {
     width: 100%;
     max-width: 440px;
     background: var(--app-surface);
     border: 1px solid var(--app-border);
-    border-radius: 0.75rem;
+    border-radius: .75rem;
     padding: 2.25rem;
-    box-shadow: 0 1.25rem 3rem rgba(15, 23, 42, 0.08);
+    box-shadow: 0 1.25rem 3rem rgba(15,23,42,.12);
 }
 
-.brand-logo-img {
-    height: 48px;
-    width: auto;
-    object-fit: contain;
-}
+/* ---------------------------------------------------------------------------
+   6. BRAND
+   --------------------------------------------------------------------------- */
+.brand-logo-img    { height: 44px; width: auto; object-fit: contain; }
+.brand-logo-img-lg { height: 60px; width: auto; object-fit: contain; }
 
-.brand-logo-img-lg {
-    height: 64px;
-    width: auto;
-    object-fit: contain;
-}
+.logo-dark-variant  { display: inline-block; }
+.logo-light-variant { display: none; }
+[data-theme="dark"] .logo-dark-variant  { display: none; }
+[data-theme="dark"] .logo-light-variant { display: inline-block; }
 
+/* ---------------------------------------------------------------------------
+   7. NAVBAR  — custom surface, not Bootstrap bg-* classes
+   --------------------------------------------------------------------------- */
 .app-navbar {
     min-height: 64px;
-    background: var(--app-surface);
+    background-color: var(--app-surface) !important;
     border-bottom: 1px solid var(--app-border);
 }
 
+.app-navbar .navbar-brand span {
+    color: var(--app-text) !important;
+}
+
+/* Theme toggle button */
+.theme-toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--app-text-muted);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s ease, color .15s ease;
+    padding: 0;
+    cursor: pointer;
+}
+.theme-toggle-btn:hover {
+    background: var(--app-table-hover);
+    color: var(--app-text);
+}
+
+/* Language switcher button */
+.lang-switcher-btn {
+    background: transparent;
+    border: none;
+    color: var(--app-text-muted);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s ease, color .15s ease;
+    padding: 0;
+    cursor: pointer;
+}
+.lang-switcher-btn:hover {
+    background: var(--app-table-hover);
+    color: var(--app-text);
+}
+
+/* User button */
+.navbar-user-btn {
+    background: transparent !important;
+    border: none;
+    padding: .25rem .5rem;
+    border-radius: .5rem;
+    transition: background .15s ease;
+    color: var(--app-text) !important;
+}
+.navbar-user-btn:hover  { background: var(--app-table-hover) !important; }
+.navbar-user-btn:focus  { box-shadow: none; }
+
+/* Dropdown arrow inherit colour */
+.navbar-user-btn::after { border-top-color: var(--app-text-muted); }
+
+/* ---------------------------------------------------------------------------
+   8. DROPDOWN — custom surface
+   --------------------------------------------------------------------------- */
+.dropdown-menu {
+    background-color: var(--app-surface);
+    border-color: var(--app-border);
+    color: var(--app-text);
+    box-shadow: var(--app-card-shadow);
+}
+.dropdown-item {
+    color: var(--app-text);
+}
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: var(--app-table-hover);
+    color: var(--app-text);
+}
+.dropdown-item.active {
+    background-color: var(--app-primary-subtle);
+    color: var(--app-primary);
+}
+.dropdown-divider { border-color: var(--app-border); }
+.dropdown-header  { color: var(--app-text-muted); }
+
+/* ---------------------------------------------------------------------------
+   9. SIDEBAR
+   --------------------------------------------------------------------------- */
 .app-shell {
     display: flex;
     min-height: calc(100vh - 64px);
@@ -66,169 +233,701 @@ body {
 .app-sidebar {
     width: var(--app-sidebar-width);
     flex: 0 0 var(--app-sidebar-width);
-    background: var(--app-surface);
-    border-right: 1px solid var(--app-border);
-    padding: 1.25rem 0.75rem;
+    background: var(--app-sidebar-bg);
+    border-right: 1px solid var(--app-sidebar-border);
+    padding: .85rem .55rem;
     display: flex;
     flex-direction: column;
+    transition: width .2s cubic-bezier(.4, 0, .2, 1), flex .2s cubic-bezier(.4, 0, .2, 1), padding .2s ease;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
 }
 
-.app-sidebar .nav-section-title {
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--app-text-muted);
-    padding: 0.75rem 0.75rem 0.25rem;
+.app-sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+.app-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.app-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.25);
+    border-radius: 4px;
+}
+.app-sidebar:hover::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.5);
 }
 
-.app-sidebar .nav-link,
-.offcanvas .nav-link {
+.sidebar-nav-container {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.sidebar-nav-item-wrap {
+    width: 100%;
+}
+
+.app-sidebar .sidebar-section-link,
+.offcanvas .sidebar-section-link {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    color: #334155;
-    font-size: 0.925rem;
+    gap: .75rem;
+    color: var(--app-sidebar-link-color);
+    font-size: .935rem;
     font-weight: 500;
-    padding: 0.625rem 0.875rem;
-    border-radius: 0.5rem;
-    transition: background 0.15s ease, color 0.15s ease;
+    padding: .55rem .8rem;
+    border-radius: 8px;
+    transition: all .15s ease;
+    text-decoration: none;
+    white-space: nowrap;
+    border-left: 3px solid transparent;
 }
 
-.app-sidebar .nav-link:hover,
-.offcanvas .nav-link:hover {
-    background: #f1f5f9;
-    color: #0f172a;
+.app-sidebar .sidebar-section-link i,
+.offcanvas .sidebar-section-link i {
+    font-size: 1.15rem;
+    width: 1.35rem;
+    text-align: center;
+    flex-shrink: 0;
+    color: var(--app-sidebar-group-color);
+    transition: color .15s ease;
 }
 
-.app-sidebar .nav-link.active,
-.offcanvas .nav-link.active {
-    background: var(--app-primary-subtle);
-    color: var(--app-primary);
-    font-weight: 600;
+.app-sidebar .sidebar-section-link:hover,
+.offcanvas .sidebar-section-link:hover {
+    background: var(--app-sidebar-link-hover-bg);
+    color: var(--app-text);
 }
 
-.app-sidebar .nav-link.active i,
-.offcanvas .nav-link.active i {
+.app-sidebar .sidebar-section-link:hover i,
+.offcanvas .sidebar-section-link:hover i {
     color: var(--app-primary-light);
 }
 
+.app-sidebar .sidebar-section-link.active,
+.offcanvas .sidebar-section-link.active {
+    background: var(--app-sidebar-active-bg);
+    color: var(--app-primary);
+    font-weight: 600;
+    border-left-color: var(--app-primary);
+}
+
+.app-sidebar .sidebar-section-link.active i,
+.offcanvas .sidebar-section-link.active i {
+    color: var(--app-primary);
+}
+
+.app-sidebar .sidebar-section-link .badge,
+.offcanvas .sidebar-section-link .badge {
+    font-size: .75rem;
+    font-weight: 600;
+    padding: .22em .6em;
+    border-radius: 9999px;
+    line-height: 1.2;
+}
+
+/* ---------------------------------------------------------------------------
+   LEVEL 2 CONTEXTUAL TOP NAVIGATION BAR
+   --------------------------------------------------------------------------- */
+.contextual-nav-bar {
+    background: var(--app-surface);
+    border-bottom: 1px solid var(--app-border);
+    padding: .55rem 1.25rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    position: sticky;
+    top: 64px;
+    z-index: 990;
+    width: 100%;
+    transition: background .15s ease, border-color .15s ease;
+}
+
+.contextual-nav-container {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    width: 100%;
+    max-width: 100%;
+}
+
+.contextual-nav-header {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-weight: 700;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--app-text-muted);
+    border-right: 1.5px solid var(--app-border);
+    padding-right: .85rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.contextual-nav-icon {
+    color: var(--app-primary);
+    font-size: 1.1rem;
+}
+
+.contextual-nav-scroll-wrap {
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    flex: 1;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.contextual-nav-scroll-wrap::-webkit-scrollbar {
+    display: none;
+}
+
+.contextual-nav-list {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    flex-wrap: nowrap;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.contextual-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .42rem;
+    padding: .4rem .82rem;
+    font-size: .91rem;
+    font-weight: 500;
+    color: var(--app-text-muted);
+    border-radius: 7px;
+    text-decoration: none;
+    transition: all .15s ease;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.contextual-nav-link i {
+    font-size: 1rem;
+}
+
+.contextual-nav-link:hover {
+    background: var(--app-table-hover);
+    color: var(--app-text);
+}
+
+.contextual-nav-link.active {
+    background: var(--app-primary-subtle);
+    color: var(--app-primary);
+    font-weight: 600;
+    border-color: rgba(37, 99, 235, 0.15);
+}
+
+.contextual-nav-link.active i {
+    color: var(--app-primary);
+}
+
+.contextual-nav-link .badge {
+    font-size: .75rem;
+    padding: .2em .55em;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+/* Sidebar Bottom Account Footer */
+.sidebar-account-footer {
+    border-top: 1px solid var(--app-sidebar-border) !important;
+    padding-top: .45rem !important;
+    margin-top: auto !important;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sidebar-account-footer .nav-link {
+    padding: .48rem .75rem;
+    font-size: .9rem;
+    border-radius: 7px;
+    color: var(--app-sidebar-link-color);
+}
+
+.sidebar-account-footer .nav-link i {
+    font-size: 1.15rem;
+}
+
+.sidebar-account-footer .nav-link:hover {
+    background: var(--app-sidebar-link-hover-bg);
+    color: var(--app-text);
+}
+
+.sidebar-account-footer .nav-link.text-danger:hover {
+    background: rgba(239, 68, 68, 0.08);
+    color: #dc2626 !important;
+}
+
+.text-purple {
+    color: #8b5cf6 !important;
+}
+
+/* ---------------------------------------------------------------------------
+   GLOBAL SIDEBAR COLLAPSED (Desktop Rail Mode: ~64px)
+   --------------------------------------------------------------------------- */
+html.sidebar-collapsed {
+    --app-sidebar-width: var(--app-sidebar-collapsed-width);
+}
+
+html.sidebar-collapsed .navbar-brand-text {
+    display: none !important;
+}
+
+@media (min-width: 992px) {
+    html.sidebar-collapsed .app-sidebar {
+        padding: 1.25rem .35rem;
+        align-items: center;
+    }
+
+    html.sidebar-collapsed .app-sidebar .sidebar-nav-container {
+        align-items: center;
+        width: 100%;
+    }
+
+    html.sidebar-collapsed .app-sidebar .sidebar-nav-item-wrap {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    html.sidebar-collapsed .app-sidebar .sidebar-section-link {
+        width: 44px;
+        height: 44px;
+        padding: 0 !important;
+        margin: .15rem auto;
+        justify-content: center;
+        align-items: center;
+        border-radius: .5rem;
+        border-left: none !important;
+    }
+
+    html.sidebar-collapsed .app-sidebar .sidebar-section-link.active {
+        background: var(--app-primary-subtle);
+        color: var(--app-primary);
+    }
+
+    html.sidebar-collapsed .app-sidebar .sidebar-section-link.active i {
+        color: var(--app-primary);
+    }
+
+    html.sidebar-collapsed .app-sidebar .sidebar-link-title,
+    html.sidebar-collapsed .app-sidebar .sidebar-section-link .badge {
+        display: none !important;
+    }
+
+    html.sidebar-collapsed .app-sidebar .sidebar-section-link i {
+        font-size: 1.25rem;
+        margin: 0;
+        width: auto;
+    }
+
+    /* Footer in collapsed mode */
+    html.sidebar-collapsed .app-sidebar .sidebar-account-footer {
+        align-items: center;
+        width: 100%;
+        padding: .25rem 0 !important;
+    }
+
+    html.sidebar-collapsed .app-sidebar .sidebar-account-footer .nav-link {
+        width: 44px;
+        height: 44px;
+        padding: 0 !important;
+        margin: .15rem auto;
+        justify-content: center;
+        border-radius: .5rem;
+    }
+
+    html.sidebar-collapsed .app-sidebar .sidebar-account-footer .nav-link span {
+        display: none !important;
+    }
+
+    html.sidebar-collapsed .app-sidebar .sidebar-account-footer .nav-link i {
+        font-size: 1.25rem;
+        margin: 0;
+    }
+}
+
+/* ---------------------------------------------------------------------------
+   10. MAIN CONTENT
+   --------------------------------------------------------------------------- */
 .app-main {
     flex: 1;
     min-width: 0;
     padding-bottom: 2.5rem;
 }
 
+/* ---------------------------------------------------------------------------
+   11. CONTENT PANEL — card-like box
+   --------------------------------------------------------------------------- */
 .content-panel {
     background: var(--app-surface);
     border: 1px solid var(--app-border);
-    border-radius: 0.75rem;
+    border-radius: .75rem;
     padding: 1.5rem;
-    box-shadow: 0 0.125rem 0.25rem rgba(15, 23, 42, 0.02);
+    box-shadow: var(--app-card-shadow);
 }
 
+/* In dark mode, override Bootstrap's bg-white / bg-light inside panels */
+[data-theme="dark"] .content-panel,
+[data-theme="dark"] .content-panel * {
+    border-color: var(--app-border);
+}
+
+/* ---------------------------------------------------------------------------
+   12. STAT CARDS (dashboard)
+   --------------------------------------------------------------------------- */
 .stat-card {
     background: var(--app-surface);
     border: 1px solid var(--app-border);
-    border-radius: 0.75rem;
+    border-radius: .75rem;
     padding: 1.25rem;
     display: flex;
     align-items: center;
     gap: 1rem;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: transform .15s ease, box-shadow .15s ease;
+    box-shadow: var(--app-card-shadow);
 }
-
 .stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 0.5rem 1.5rem rgba(15, 23, 42, 0.05);
+    box-shadow: 0 .5rem 1.5rem rgba(15,23,42,.1);
 }
-
 .stat-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 0.625rem;
+    width: 48px;
+    height: 48px;
+    border-radius: .625rem;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
 }
 
+/* ---------------------------------------------------------------------------
+   13. AVATAR
+   --------------------------------------------------------------------------- */
 .avatar-circle {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
-    background: #e2e8f0;
-    color: #334155;
+    background: var(--app-badge-soft-bg);
+    color: var(--app-text);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: .875rem;
     object-fit: cover;
+    border: 1px solid var(--app-border);
 }
-
 .avatar-circle-lg {
-    width: 80px;
-    height: 80px;
+    width: 72px;
+    height: 72px;
     border-radius: 50%;
-    background: #e2e8f0;
-    color: #1e293b;
+    background: var(--app-badge-soft-bg);
+    color: var(--app-text);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 1.75rem;
+    font-size: 1.6rem;
     object-fit: cover;
 }
-
 .avatar-circle-sm {
-    width: 32px;
-    height: 32px;
-    font-size: 0.75rem;
+    width: 30px;
+    height: 30px;
+    font-size: .75rem;
 }
 
-/* Hierarchy Tree UI */
-.org-tree {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
+/* ---------------------------------------------------------------------------
+   14. ORG TREE
+   --------------------------------------------------------------------------- */
+.org-tree { display: flex; flex-direction: column; gap: 1.5rem; }
 .org-node {
     background: var(--app-surface);
     border: 1px solid var(--app-border);
-    border-radius: 0.75rem;
+    border-radius: .75rem;
     padding: 1.25rem;
-    box-shadow: 0 0.125rem 0.375rem rgba(15, 23, 42, 0.04);
+    box-shadow: var(--app-card-shadow);
 }
+.org-node.rector-node      { border-left: 5px solid #1e3a8a; }
+.org-node.vice-rector-node { border-left: 5px solid #0284c7; }
+.org-node.dept-node        { border-left: 5px solid #10b981; }
 
-.org-node.rector-node {
-    border-left: 5px solid var(--app-primary);
+/* ---------------------------------------------------------------------------
+   15. FORM CONTROLS — dark mode overrides
+   --------------------------------------------------------------------------- */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+    background-color: var(--app-input-bg);
+    border-color: var(--app-input-border);
+    color: var(--app-text);
 }
-
-.org-node.vice-rector-node {
-    border-left: 5px solid #0284c7;
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+    background-color: var(--app-input-bg);
+    border-color: var(--app-primary-light);
+    color: var(--app-text);
+    box-shadow: 0 0 0 .25rem var(--app-primary-subtle);
 }
-
-.org-node.dept-node {
-    border-left: 5px solid #10b981;
-}
-
-.table th {
-    font-size: 0.8125rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+[data-theme="dark"] .form-control::placeholder {
     color: var(--app-text-muted);
+    opacity: .7;
+}
+[data-theme="dark"] .form-control:disabled,
+[data-theme="dark"] .form-select:disabled {
+    background-color: var(--app-muted-surface);
+    color: var(--app-text-muted);
+}
+[data-theme="dark"] .input-group-text {
+    background-color: var(--app-surface);
+    border-color: var(--app-input-border);
+    color: var(--app-text-muted);
+}
+[data-theme="dark"] .form-label,
+[data-theme="dark"] .form-check-label {
+    color: var(--app-text);
+}
+
+/* ---------------------------------------------------------------------------
+   16. TABLES — dark mode overrides
+   --------------------------------------------------------------------------- */
+[data-theme="dark"] .table {
+    --bs-table-color: var(--app-text);
+    --bs-table-bg: transparent;
+    --bs-table-border-color: var(--app-border);
+    --bs-table-hover-bg: var(--app-table-hover);
+    --bs-table-hover-color: var(--app-text);
+    color: var(--app-text);
+}
+[data-theme="dark"] .table th {
+    color: var(--app-text-muted);
+}
+[data-theme="dark"] .table td,
+[data-theme="dark"] .table th {
+    border-color: var(--app-border);
+}
+
+/* ---------------------------------------------------------------------------
+   17. CARDS — dark mode (only our custom cards, not Bootstrap .card) 
+   --------------------------------------------------------------------------- */
+[data-theme="dark"] .content-panel {
+    background: var(--app-surface);
+    border-color: var(--app-border);
+    color: var(--app-text);
+}
+
+/* Table on dark: white row backgrounds look wrong */
+[data-theme="dark"] .table > :not(caption) > * > * {
+    background-color: transparent;
+    color: var(--app-text);
+}
+
+/* ---------------------------------------------------------------------------
+   18. MODALS — dark mode
+   --------------------------------------------------------------------------- */
+[data-theme="dark"] .modal-content {
+    background-color: var(--app-surface);
+    border-color: var(--app-border);
+    color: var(--app-text);
+}
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+    border-color: var(--app-border);
+}
+
+/* ---------------------------------------------------------------------------
+   19. OFFCANVAS — mobile sidebar
+   --------------------------------------------------------------------------- */
+.offcanvas {
+    background-color: var(--app-surface);
+    color: var(--app-text);
+}
+.offcanvas-header { border-bottom: 1px solid var(--app-border); }
+
+/* ---------------------------------------------------------------------------
+   20. ALERTS — dark mode softened colours
+   --------------------------------------------------------------------------- */
+[data-theme="dark"] .alert-info    { background-color:rgba(59,130,246,.15); border-color:rgba(59,130,246,.3); color:#93c5fd; }
+[data-theme="dark"] .alert-success { background-color:rgba(34,197,94,.15);  border-color:rgba(34,197,94,.3);  color:#86efac; }
+[data-theme="dark"] .alert-warning { background-color:rgba(245,158,11,.15); border-color:rgba(245,158,11,.3); color:#fcd34d; }
+[data-theme="dark"] .alert-danger  { background-color:rgba(239,68,68,.15);  border-color:rgba(239,68,68,.3);  color:#fca5a5; }
+
+/* ---------------------------------------------------------------------------
+   21. PAGINATION — dark mode
+   --------------------------------------------------------------------------- */
+[data-theme="dark"] .page-link {
+    background-color: var(--app-surface);
+    border-color: var(--app-border);
+    color: var(--app-primary);
+}
+[data-theme="dark"] .page-link:hover {
+    background-color: var(--app-table-hover);
+    border-color: var(--app-border);
+}
+[data-theme="dark"] .page-item.active .page-link {
+    background-color: var(--app-primary);
+    border-color: var(--app-primary);
+    color: #fff;
+}
+[data-theme="dark"] .page-item.disabled .page-link {
+    background-color: var(--app-muted-surface);
+    border-color: var(--app-border);
+    color: var(--app-text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   22. BADGES — custom soft variants
+   --------------------------------------------------------------------------- */
+.badge-priority-low    { background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; }
+.badge-priority-medium { background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; }
+.badge-priority-high   { background:#fef3c7; color:#b45309; border:1px solid #fde68a; }
+.badge-priority-urgent { background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; }
+
+[data-theme="dark"] .badge-priority-low    { background:#334155; color:#cbd5e1; border-color:#475569; }
+[data-theme="dark"] .badge-priority-medium { background:rgba(2,132,199,.2); color:#38bdf8; border-color:#0284c7; }
+[data-theme="dark"] .badge-priority-high   { background:rgba(217,119,6,.2); color:#fbbf24; border-color:#d97706; }
+[data-theme="dark"] .badge-priority-urgent { background:rgba(220,38,38,.2); color:#f87171; border-color:#dc2626; }
+
+.badge-complexity-simple   { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
+.badge-complexity-medium   { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; }
+.badge-complexity-complex  { background:#faf5ff; color:#7e22ce; border:1px solid #e9d5ff; }
+.badge-complexity-critical { background:#fff1f2; color:#be123c; border:1px solid #fecdd3; }
+
+[data-theme="dark"] .badge-complexity-simple   { background:rgba(22,163,74,.2);  color:#4ade80; border-color:#16a34a; }
+[data-theme="dark"] .badge-complexity-medium   { background:rgba(37,99,235,.2);  color:#60a5fa; border-color:#2563eb; }
+[data-theme="dark"] .badge-complexity-complex  { background:rgba(147,51,234,.2); color:#c084fc; border-color:#9333ea; }
+[data-theme="dark"] .badge-complexity-critical { background:rgba(225,29,72,.2);  color:#fb7185; border-color:#e11d48; }
+
+.badge-status-draft       { background:#f1f5f9; color:#475569; }
+.badge-status-created     { background:#e0e7ff; color:#4338ca; }
+.badge-status-assigned    { background:#dbeafe; color:#1d4ed8; }
+.badge-status-in_progress { background:#fef3c7; color:#b45309; }
+.badge-status-completed   { background:#dcfce7; color:#15803d; }
+.badge-status-cancelled   { background:#fee2e2; color:#b91c1c; }
+.badge-status-archived    { background:#334155; color:#f8fafc; }
+
+[data-theme="dark"] .badge-status-draft       { background:#334155; color:#cbd5e1; }
+[data-theme="dark"] .badge-status-created     { background:rgba(99,102,241,.25);  color:#a5b4fc; }
+[data-theme="dark"] .badge-status-assigned    { background:rgba(59,130,246,.25);  color:#93c5fd; }
+[data-theme="dark"] .badge-status-in_progress { background:rgba(245,158,11,.25);  color:#fcd34d; }
+[data-theme="dark"] .badge-status-completed   { background:rgba(34,197,94,.25);   color:#86efac; }
+[data-theme="dark"] .badge-status-cancelled   { background:rgba(239,68,68,.25);   color:#fca5a5; }
+[data-theme="dark"] .badge-status-archived    { background:#1e293b; color:#94a3b8; border:1px solid #475569; }
+
+.badge-overdue {
+    background-color: #ef4444;
+    color: #fff;
     font-weight: 600;
-    border-top: none;
 }
 
-.table td {
-    vertical-align: middle;
+/* ---------------------------------------------------------------------------
+   23. TASK NUMBER
+   --------------------------------------------------------------------------- */
+.task-number-pill {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-weight: 700;
+    font-size: .85rem;
+    padding: .2rem .5rem;
+    border-radius: .375rem;
+    background: var(--app-primary-subtle);
+    color: var(--app-primary);
 }
 
+/* ---------------------------------------------------------------------------
+   24. TIMELINE
+   --------------------------------------------------------------------------- */
+.task-timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+.task-timeline::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    left: .75rem;
+    width: 2px;
+    background-color: var(--app-border);
+}
+.timeline-item { position: relative; padding-bottom: 1.5rem; }
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-dot {
+    position: absolute;
+    left: -2rem;
+    top: .25rem;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: var(--app-primary);
+    border: 3px solid var(--app-surface);
+    box-shadow: 0 0 0 2px var(--app-primary-light);
+}
+
+/* ---------------------------------------------------------------------------
+   25. LANGUAGE DROPDOWN
+   --------------------------------------------------------------------------- */
+.lang-dropdown-menu { min-width: 160px; }
+.lang-dropdown-menu .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .9rem;
+    padding: .5rem 1rem;
+}
+.lang-dropdown-menu .lang-check-icon {
+    width: 16px;
+    color: var(--app-primary);
+    font-size: .8rem;
+}
+
+/* ---------------------------------------------------------------------------
+   26. PROGRESS BAR — dark
+   --------------------------------------------------------------------------- */
+[data-theme="dark"] .progress {
+    background-color: var(--app-muted-surface);
+}
+
+/* ---------------------------------------------------------------------------
+   27. BORDERS & TEXT utilities — dark overrides
+   --------------------------------------------------------------------------- */
+[data-theme="dark"] .border,
+[data-theme="dark"] .border-bottom,
+[data-theme="dark"] .border-top,
+[data-theme="dark"] .border-end,
+[data-theme="dark"] .border-start {
+    border-color: var(--app-border) !important;
+}
+
+/* text- utilities that Bootstrap sets to hard colours */
+[data-theme="dark"] .text-dark     { color: var(--app-text) !important; }
+[data-theme="dark"] .text-body     { color: var(--app-text) !important; }
+[data-theme="dark"] .text-muted    { color: var(--app-text-muted) !important; }
+[data-theme="dark"] .text-secondary{ color: var(--app-text-muted) !important; }
+
+/* bg utilities */
+[data-theme="dark"] .bg-white  { background-color: var(--app-surface) !important; }
+[data-theme="dark"] .bg-light  { background-color: var(--app-muted-surface) !important; color: var(--app-text) !important; }
+[data-theme="dark"] .bg-body   { background-color: var(--app-muted-surface) !important; }
+
+/* Breadcrumb */
+[data-theme="dark"] .breadcrumb-item + .breadcrumb-item::before { color: var(--app-text-muted); }
+[data-theme="dark"] .breadcrumb-item a { color: var(--app-primary-light); }
+[data-theme="dark"] .breadcrumb-item.active { color: var(--app-text-muted); }
+
+/* hr */
+[data-theme="dark"] hr { border-color: var(--app-border); }
+
+/* ---------------------------------------------------------------------------
+   28. RESPONSIVE
+   --------------------------------------------------------------------------- */
 @media (max-width: 575.98px) {
-    .login-card {
-        padding: 1.5rem;
-    }
+    .login-card { padding: 1.5rem; }
 }

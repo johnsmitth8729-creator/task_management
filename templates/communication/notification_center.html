@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Notification Center" %} | University Task Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="h3 fw-bold mb-1"><i class="bi bi-bell-fill text-primary me-2"></i>{% trans "Notification Center" %}</h2>
+            <p class="text-muted mb-0">{% trans "Central inbox for university assignments, approvals, deadlines, and automated alerts." %}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'communication:preferences' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-sliders me-1"></i>{% trans "Preferences" %}
+            </a>
+            <form action="{% url 'communication:notification_mark_all_read' %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-primary" {% if unread_count == 0 %}disabled{% endif %}>
+                    <i class="bi bi-check2-all me-1"></i>{% trans "Mark All as Read" %}
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="btn-group" role="group">
+                    <a href="?status=all" class="btn btn-sm {% if current_status == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                        {% trans "All" %} <span class="badge bg-light text-dark ms-1">{{ total_count }}</span>
+                    </a>
+                    <a href="?status=unread" class="btn btn-sm {% if current_status == 'unread' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                        {% trans "Unread" %} <span class="badge bg-danger ms-1">{{ unread_count }}</span>
+                    </a>
+                    <a href="?status=read" class="btn btn-sm {% if current_status == 'read' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                        {% trans "Read" %}
+                    </a>
+                </div>
+                <div class="text-muted small">
+                    <i class="bi bi-info-circle me-1"></i>{% trans "Notifications are retained for continuous audit trail." %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Feed -->
+    <div class="card border-0 shadow-sm">
+        <div class="list-group list-group-flush">
+            {% for notif in notifications %}
+                <div class="list-group-item list-group-item-action p-3 {% if not notif.is_read %}bg-light border-start border-4 border-primary{% endif %}">
+                    <div class="d-flex justify-content-between align-items-start gap-3">
+                        <div class="d-flex gap-3">
+                            <div class="rounded-circle p-2 d-flex align-items-center justify-content-center {% if not notif.is_read %}bg-primary text-white{% else %}bg-secondary-subtle text-secondary{% endif %}" style="width: 42px; height: 42px;">
+                                <i class="bi bi-bell-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h6 class="mb-0 fw-bold">{{ notif.title }}</h6>
+                                    {% if not notif.is_read %}
+                                        <span class="badge bg-primary-subtle text-primary">{% trans "New" %}</span>
+                                    {% endif %}
+                                </div>
+                                <p class="mb-1 text-secondary" style="font-size: 0.95rem;">{{ notif.message }}</p>
+                                <div class="d-flex align-items-center gap-3 text-muted small mt-2">
+                                    <span><i class="bi bi-clock me-1"></i>{{ notif.created_at|timesince }} {% trans "ago" %}</span>
+                                    {% if notif.task %}
+                                        <span><i class="bi bi-folder2-open me-1"></i>{% trans "Task" %}: {{ notif.task.task_number }}</span>
+                                    {% endif %}
+                                    {% if notif.link %}
+                                        <a href="{{ notif.link }}" class="text-decoration-none fw-semibold">
+                                            {% trans "View Details" %} <i class="bi bi-arrow-right"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            {% if not notif.is_read %}
+                                <form action="{% url 'communication:notification_mark_read' pk=notif.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-light border" title="{% trans 'Mark as read' %}">
+                                        <i class="bi bi-check2"></i>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-center py-5">
+                    <i class="bi bi-bell-slash text-muted display-4"></i>
+                    <h5 class="mt-3 text-muted">{% trans "No notifications found." %}</h5>
+                    <p class="text-muted small">{% trans "You are all caught up! New alerts will appear here." %}</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+            <div class="card-footer bg-white border-top p-3 d-flex justify-content-center">
+                <nav>
+                    <ul class="pagination mb-0">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ current_status }}">{% trans "Previous" %}</a></li>
+                        {% endif %}
+                        <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                        {% if page_obj.has_next %}
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ current_status }}">{% trans "Next" %}</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

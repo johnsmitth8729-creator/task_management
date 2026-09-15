@@ -10,7 +10,7 @@
             <h1 class="h3 fw-bold text-dark mb-1">{% trans "Employee & User Directory" %}</h1>
             <p class="text-muted mb-0">{% trans "Manage university personnel, role assignments, and organizational placement" %}</p>
         </div>
-        {% if user.is_rector %}
+        {% if user.is_superuser or user.is_hr %}
             <div>
                 <a href="{% url 'user_create' %}" class="btn btn-primary">
                     <i class="bi bi-person-plus me-1"></i>{% trans "Create User" %}
@@ -78,7 +78,9 @@
                         <th>{% trans "Role" %}</th>
                         <th>{% trans "Department" %}</th>
                         <th>{% trans "Position" %}</th>
-                        <th>{% trans "Contact" %}</th>
+                        <th>{% trans "Hire Date" %}</th>
+                        <th>{% trans "Presence / Leave" %}</th>
+                        <th>{% trans "CV (PDF)" %}</th>
                         <th>{% trans "Status" %}</th>
                         <th class="text-end">{% trans "Actions" %}</th>
                     </tr>
@@ -111,8 +113,39 @@
                             <td>{{ item.department.name|default:_("None") }}</td>
                             <td>{{ item.position.name|default:_("None") }}</td>
                             <td>
-                                <div class="small text-dark">{{ item.email }}</div>
-                                <div class="small text-muted">{{ item.phone|default:"-" }}</div>
+                                <span class="small fw-semibold">{{ item.employment_start_date|date:"Y-m-d"|default:"-" }}</span>
+                            </td>
+                            <td>
+                                {% if item.work_presence == 'PRESENT' %}
+                                    <span class="badge bg-success-subtle text-success me-1" title="{% trans 'Present' %}"><i class="bi bi-check-circle"></i></span>
+                                {% elif item.work_presence == 'REMOTE' %}
+                                    <span class="badge bg-info-subtle text-info me-1" title="{% trans 'Remote' %}"><i class="bi bi-laptop"></i></span>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary me-1" title="{% trans 'Absent' %}"><i class="bi bi-dash-circle"></i></span>
+                                {% endif %}
+
+                                {% if item.leave_status == 'NONE' %}
+                                    <span class="small text-muted">{% trans "Active" %}</span>
+                                {% elif item.leave_status == 'PERMISSION' %}
+                                    <span class="badge bg-warning-subtle text-warning-emphasis">{% trans "Permission" %}</span>
+                                {% elif item.leave_status == 'VACATION' %}
+                                    <span class="badge bg-primary-subtle text-primary">{% trans "Vacation" %}</span>
+                                {% elif item.leave_status == 'SICK_LEAVE' %}
+                                    <span class="badge bg-danger-subtle text-danger">{% trans "Sick Leave" %}</span>
+                                {% elif item.leave_status == 'BUSINESS_TRIP' %}
+                                    <span class="badge bg-info-subtle text-info-emphasis">{% trans "Trip" %}</span>
+                                {% else %}
+                                    <span class="badge bg-warning-subtle text-warning-emphasis">{{ item.get_leave_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.cv_file %}
+                                    <a href="{{ item.cv_file.url }}" target="_blank" class="btn btn-sm btn-outline-danger py-0 px-2" title="{% trans 'View CV (PDF)' %}">
+                                        <i class="bi bi-file-earmark-pdf"></i> PDF
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted small">-</span>
+                                {% endif %}
                             </td>
                             <td>
                                 {% if item.is_active %}
@@ -122,19 +155,48 @@
                                 {% endif %}
                             </td>
                             <td class="text-end">
-                                <a href="{% url 'user_detail' pk=item.pk %}" class="btn btn-outline-secondary btn-sm" title="{% trans 'View Profile' %}">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                {% if user.is_rector or user.is_vice_rector or user.is_department_head %}
-                                    <a href="{% url 'user_edit' pk=item.pk %}" class="btn btn-outline-primary btn-sm" title="{% trans 'Edit' %}">
-                                        <i class="bi bi-pencil"></i>
+                                <div class="d-inline-flex gap-1">
+                                    <a href="{% url 'user_detail' pk=item.pk %}" class="btn btn-outline-secondary btn-sm" title="{% trans 'View Profile' %}">
+                                        <i class="bi bi-eye"></i>
                                     </a>
-                                {% endif %}
+                                    {% if user.is_superuser or user.is_hr or user.id == item.id %}
+                                        <a href="{% url 'user_edit' pk=item.pk %}" class="btn btn-outline-primary btn-sm" title="{% trans 'Edit' %}">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    {% endif %}
+                                    {% if user.is_superuser or user.is_hr %}
+                                        {% if user.id != item.id and not item.is_superuser %}
+                                            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ item.pk }}" title="{% trans 'Delete' %}">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                            <div class="modal fade" id="deleteModal-{{ item.pk }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content text-start">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle me-2"></i>{% trans "Confirm User Deletion" %}</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p>{% blocktrans with name=item.display_name %}Are you sure you want to permanently delete user <strong>{{ name }}</strong>? This action cannot be undone.{% endblocktrans %}</p>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                                                            <form action="{% url 'user_delete' pk=item.pk %}" method="post" class="d-inline">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash me-1"></i>{% trans "Delete" %}</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
                             </td>
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">
+                            <td colspan="9" class="text-center py-4 text-muted">
                                 <i class="bi bi-people fs-3 d-block mb-2 text-secondary"></i>
                                 {% trans "No users found matching your criteria." %}
                             </td>
@@ -151,14 +213,24 @@
                         Showing {{ start }} to {{ end }} of {{ total }} users
                     {% endblocktrans %}
                 </small>
-                <nav aria-label="Page navigation">
+                <nav aria-label="{% trans 'Page navigation' %}">
                     <ul class="pagination pagination-sm mb-0">
                         {% if page_obj.has_previous %}
-                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&department={{ selected_department }}&position={{ selected_position }}&role={{ selected_role }}&status={{ selected_status }}">&laquo;</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filter_params %}&{{ filter_params }}{% endif %}">&laquo;</a></li>
                         {% endif %}
-                        <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+                        {% for page_num in paginator.page_range %}
+                            {% if page_obj.number == page_num %}
+                                <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                            {% elif page_num > page_obj.number|add:'-3' and page_num < page_obj.number|add:'3' %}
+                                <li class="page-item"><a class="page-link" href="?page={{ page_num }}{% if filter_params %}&{{ filter_params }}{% endif %}">{{ page_num }}</a></li>
+                            {% elif page_num == 1 or page_num == paginator.num_pages %}
+                                <li class="page-item"><a class="page-link" href="?page={{ page_num }}{% if filter_params %}&{{ filter_params }}{% endif %}">{{ page_num }}</a></li>
+                            {% elif page_num == page_obj.number|add:'-3' or page_num == page_obj.number|add:'3' %}
+                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                            {% endif %}
+                        {% endfor %}
                         {% if page_obj.has_next %}
-                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&department={{ selected_department }}&position={{ selected_position }}&role={{ selected_role }}&status={{ selected_status }}">&raquo;</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filter_params %}&{{ filter_params }}{% endif %}">&raquo;</a></li>
                         {% endif %}
                     </ul>
                 </nav>

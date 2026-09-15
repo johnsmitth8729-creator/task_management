@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ doc.doc_number }} | {{ doc.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4" style="max-width: 1000px;">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-secondary font-monospace">{{ doc.doc_number }}</span>
+                <span class="badge bg-primary-subtle text-primary">{{ doc.get_document_type_display }}</span>
+                <span class="badge bg-success">v{{ doc.version }}</span>
+            </div>
+            <h2 class="h3 fw-bold mb-0">{{ doc.title }}</h2>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'operations:document_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>{% trans "Documents Registry" %}
+            </a>
+            {% if doc.file %}
+                <a href="{{ doc.file.url }}" target="_blank" class="btn btn-success">
+                    <i class="bi bi-download me-1"></i>{% trans "Download Official PDF" %}
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Metadata Card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-sm-4">
+                    <small class="text-muted d-block">{% trans "Effective Enactment Date" %}</small>
+                    <span class="fw-semibold">{{ doc.effective_date|date:"M d, Y" }}</span>
+                </div>
+                <div class="col-sm-4">
+                    <small class="text-muted d-block">{% trans "Issuing Department" %}</small>
+                    <span>{{ doc.department.name|default:"Rectorate / University Council" }}</span>
+                </div>
+                <div class="col-sm-4">
+                    <small class="text-muted d-block">{% trans "Registered By" %}</small>
+                    <span>{{ doc.created_by.display_name|default:"Administration" }}</span>
+                </div>
+            </div>
+
+            {% if doc.description %}
+                <hr class="my-3">
+                <h6 class="fw-bold">{% trans "Executive Summary / Scope" %}</h6>
+                <p class="text-secondary mb-0">{{ doc.description }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Versions History -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="card-title fw-bold mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>{% trans "Version History & Amendments" %}</h5>
+            {% if can_manage_docs %}
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#uploadVersionCollapse">
+                    <i class="bi bi-upload me-1"></i>{% trans "Upload New Version" %}
+                </button>
+            {% endif %}
+        </div>
+
+        {% if can_manage_docs %}
+            <div class="collapse p-4 bg-light border-bottom" id="uploadVersionCollapse">
+                <form action="{% url 'operations:document_version_upload' pk=doc.id %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <h6 class="fw-bold mb-3">{% trans "Upload Next Version (v" %}{{ doc.version|add:1 }})</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">{% trans "File (PDF/DOC)" %} <span class="text-danger">*</span></label>
+                            {{ version_form.file }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">{% trans "Change Summary" %}</label>
+                            {{ version_form.changelog }}
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary btn-sm px-4">{% trans "Submit Version" %}</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        {% endif %}
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>{% trans "Version" %}</th>
+                        <th>{% trans "Uploaded At" %}</th>
+                        <th>{% trans "Author" %}</th>
+                        <th>{% trans "Change Notes" %}</th>
+                        <th class="text-end">{% trans "File" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ver in versions %}
+                        <tr>
+                            <td class="font-monospace fw-bold text-primary">v{{ ver.version_number }}</td>
+                            <td class="small text-muted">{{ ver.created_at|date:"M d, Y H:i" }}</td>
+                            <td>{{ ver.uploaded_by.display_name|default:"Admin" }}</td>
+                            <td class="small text-secondary">{{ ver.changelog|default:"Initial official upload." }}</td>
+                            <td class="text-end">
+                                <a href="{{ ver.file.url }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-download me-1"></i>{% trans "Download" %}
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-3 text-muted">{% trans "Original release v1 active." %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

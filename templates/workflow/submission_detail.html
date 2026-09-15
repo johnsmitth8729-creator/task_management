@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Submission" %} — {{ submission.task.task_number }} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/workflow.css' %}?v=4" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-3 px-lg-4">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+        <a href="{% url 'dept_first_approval' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="h4 fw-bold mb-0">{% trans "Submission Review" %}</h1>
+            <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
+                <span class="task-number-pill">{{ task.task_number }}</span>
+                <span class="submission-version-badge">v{{ submission.version }}</span>
+                <span class="badge bg-success">{% trans "Pending First Approval" %}</span>
+            </div>
+        </div>
+        <a href="{% url 'dept_task_detail' pk=task.pk %}" class="ms-auto btn btn-sm btn-outline-secondary">
+            <i class="bi bi-list-check me-1"></i>{% trans "View Task" %}
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- LEFT: submission content -->
+        <div class="col-lg-8">
+
+            <!-- Task info -->
+            <div class="work-area-panel mb-4">
+                <h6 class="fw-bold mb-2"><i class="bi bi-file-text-fill text-primary me-2"></i>{{ task.title }}</h6>
+                <p class="text-muted mb-3">{{ task.description|default:_("No description.") }}</p>
+                <div class="row g-2 small text-muted">
+                    {% if task.deadline %}<div class="col-6 col-md-3"><strong>{% trans "Deadline" %}</strong><br>{{ task.deadline|date:"d M Y" }}{% if task.is_overdue %} <span class="text-danger fw-bold">{% trans "(Overdue)" %}</span>{% endif %}</div>{% endif %}
+                    {% if task.responsible_department %}<div class="col-6 col-md-3"><strong>{% trans "Department" %}</strong><br>{{ task.responsible_department.name }}</div>{% endif %}
+                    {% if task.priority %}<div class="col-6 col-md-3"><strong>{% trans "Priority" %}</strong><br>{{ task.get_priority_display }}</div>{% endif %}
+                    {% if task.task_type %}<div class="col-6 col-md-3"><strong>{% trans "Type" %}</strong><br>{{ task.task_type.name }}</div>{% endif %}
+                </div>
+            </div>
+
+            <!-- Employee info -->
+            <div class="work-area-panel mb-4">
+                <h6 class="fw-bold mb-3"><i class="bi bi-person-fill me-2"></i>{% trans "Submitted By" %}</h6>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="avatar-sm avatar-primary" style="width:48px;height:48px;font-size:1.25rem;border-radius:.75rem;">
+                        {{ submission.assignment.user.display_name|first|upper }}
+                    </div>
+                    <div>
+                        <div class="fw-bold">{{ submission.assignment.user.display_name }}</div>
+                        <div class="text-muted small">{{ submission.assignment.user.position.name|default:"" }}</div>
+                        <div class="text-muted small">{{ submission.assignment.user.department.name|default:"" }}</div>
+                    </div>
+                    <div class="ms-auto text-end">
+                        <div class="small text-muted">{% trans "Submitted" %}</div>
+                        <div class="fw-semibold small">{{ submission.submitted_at|date:"d M Y H:i" }}</div>
+                        <div class="small text-muted mt-1">{% trans "Accepted" %}</div>
+                        <div class="fw-semibold small">
+                            {% if submission.assignment.accepted_at %}{{ submission.assignment.accepted_at|date:"d M Y H:i" }}{% else %}—{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submission content -->
+            <div class="work-area-panel mb-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-file-earmark-text-fill text-success me-2"></i>{% trans "Submission Text" %}</h6>
+                    <span class="submission-version-badge ms-auto">v{{ submission.version }}</span>
+                </div>
+                <div class="submission-card">
+                    {{ submission.submission_text|linebreaksbr }}
+                </div>
+            </div>
+
+            <!-- Work Notes & Progress Log -->
+            {% include "includes/workflow/work_notes_panel.html" %}
+
+            <!-- Attached Work Evidence, Files & Reports -->
+            {% include "includes/files/work_evidence_panel.html" %}
+
+            <!-- Phase 5 First Approval Actions -->
+            {% if can_first_approve or can_first_reject %}
+            <div class="work-area-panel mb-4 border border-primary border-opacity-25 shadow-sm">
+                <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-shield-check me-2"></i>{% trans "Department Head Review Decision" %}</h6>
+                <p class="text-muted small mb-4">{% trans "Review the submitted work thoroughly. You can approve and forward this task for management second approval, or reject it back with specific feedback." %}</p>
+
+                <div class="d-flex gap-3 flex-wrap">
+                    {% if can_first_approve %}
+                    <button type="button" class="btn btn-success px-4" data-bs-toggle="modal" data-bs-target="#approveModal">
+                        <i class="bi bi-check-circle-fill me-2"></i>{% trans "Approve & Send to Second Approval" %}
+                    </button>
+                    {% endif %}
+
+                    {% if can_first_reject %}
+                    <button type="button" class="btn btn-outline-danger px-4" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                        <i class="bi bi-x-circle-fill me-2"></i>{% trans "Reject Submission" %}
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Approve Modal -->
+            {% if can_first_approve %}
+            <div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold text-success" id="approveModalLabel">
+                                <i class="bi bi-check2-circle me-2"></i>{% trans "Confirm First Approval" %}
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="post" action="{% url 'dept_approve_submission' pk=submission.pk %}" id="firstApproveForm">
+                            {% csrf_token %}
+                            <div class="modal-body pt-3">
+                                <p class="mb-3">{% trans "Are you sure you want to approve this submission and forward it for management second approval?" %}</p>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">{% trans "Notes / Comments for Management (Optional)" %}</label>
+                                    <textarea name="notes" class="form-control" rows="3" placeholder="{% trans 'Add optional feedback or confirmation notes...' %}"></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 pt-0">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "No, Cancel" %}</button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-check-circle me-1"></i>{% trans "Yes, Approve" %}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Reject Modal -->
+            {% if can_first_reject %}
+            <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold text-danger" id="rejectModalLabel">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>{% trans "Reject Task Submission" %}
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="post" action="{% url 'dept_reject_submission' pk=submission.pk %}" id="firstRejectForm">
+                            {% csrf_token %}
+                            <div class="modal-body pt-3">
+                                <p class="text-muted small mb-3">{% trans "Please provide a clear and detailed explanation for why this submission is being rejected. The employee will be notified." %}</p>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">{% trans "Rejection Reason" %} <span class="text-danger">*</span></label>
+                                    <textarea name="reason" class="form-control" rows="4" placeholder="{% trans 'Explain what is missing, incomplete, or needs correction...' %}" required></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 pt-0">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-x-circle me-1"></i>{% trans "Confirm Rejection" %}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+
+            <!-- Previous submissions (versioning) -->
+            {% if all_submissions|length > 1 %}
+            <div class="work-area-panel mb-4">
+                <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>{% trans "All Submissions" %}</h6>
+                {% for s in all_submissions %}
+                <div class="d-flex align-items-center gap-3 py-2 {% if not forloop.last %}border-bottom{% endif %}">
+                    <span class="submission-version-badge">v{{ s.version }}</span>
+                    <div class="flex-grow-1">
+                        <div class="small">{{ s.submission_text|truncatechars:80 }}</div>
+                        <div class="text-muted" style="font-size:.75rem;">{{ s.submitted_at|date:"d M Y H:i" }}</div>
+                    </div>
+                    {% if s.id == submission.id %}
+                        <span class="badge bg-success">{% trans "Current" %}</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- RIGHT: sidebar -->
+        <div class="col-lg-4">
+
+            <!-- Task progress -->
+            <div class="work-area-panel mb-4">
+                <h6 class="fw-bold mb-3"><i class="bi bi-bar-chart-fill me-2"></i>{% trans "Assignment Progress" %}</h6>
+                {% with value=assignment.progress %}{% include "includes/workflow/progress_bar.html" %}{% endwith %}
+            </div>
+
+            <!-- Timeline -->
+            <div class="work-area-panel">
+                <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>{% trans "Task Timeline" %}</h6>
+                {% if history %}
+                <ul class="wf-timeline">
+                    {% for entry in history %}
+                    <li>
+                        <div class="tl-dot"></div>
+                        <div class="tl-event">{{ entry.get_event_type_display }}</div>
+                        <div class="tl-meta">{{ entry.actor.display_name|default:_("System") }} · {{ entry.created_at|date:"d M H:i" }}</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted small">{% trans "No activity." %}</p>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

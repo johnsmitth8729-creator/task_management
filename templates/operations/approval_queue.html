@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Requests Approval Center" %} | University Task Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="h3 fw-bold mb-1"><i class="bi bi-shield-check text-primary me-2"></i>{% trans "Requests Approval Center" %}</h2>
+            <p class="text-muted mb-0">{% trans "Pending university applications and staff requests requiring your official leadership decision." %}</p>
+        </div>
+        <a href="{% url 'operations:service_catalog' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-grid-3x3-gap me-1"></i>{% trans "Service Catalog" %}
+        </a>
+    </div>
+
+    <!-- Approval Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>{% trans "Request ID" %}</th>
+                        <th>{% trans "Subject" %}</th>
+                        <th>{% trans "Requester & Dept" %}</th>
+                        <th>{% trans "Service Category" %}</th>
+                        <th>{% trans "Decision Role" %}</th>
+                        <th>{% trans "Waiting Since" %}</th>
+                        <th class="text-end">{% trans "Action" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for step in pending_steps %}
+                        <tr {% if step.request.is_urgent %}class="table-warning"{% endif %}>
+                            <td class="font-monospace fw-bold text-primary">{{ step.request.request_number }}</td>
+                            <td>
+                                <a href="{% url 'operations:request_detail' pk=step.request.id %}" class="fw-semibold text-decoration-none text-dark">
+                                    {{ step.request.subject }}
+                                </a>
+                                {% if step.request.is_urgent %}
+                                    <span class="badge bg-danger ms-1"><i class="bi bi-lightning-fill"></i> {% trans "Urgent" %}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div>{{ step.request.requester.display_name }}</div>
+                                <small class="text-muted">{{ step.request.department.name|default:"General Staff" }}</small>
+                            </td>
+                            <td><span class="badge bg-light text-secondary">{{ step.request.request_type.name }}</span></td>
+                            <td><span class="badge bg-primary-subtle text-primary">{{ step.get_approver_role_display }}</span></td>
+                            <td class="small text-muted">{{ step.created_at|timesince }} {% trans "ago" %}</td>
+                            <td class="text-end">
+                                <a href="{% url 'operations:request_detail' pk=step.request.id %}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-check2-circle me-1"></i> {% trans "Review & Decide" %}
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-patch-check display-5 text-success mb-2"></i>
+                                <h5 class="mt-2 text-dark">{% trans "All caught up!" %}</h5>
+                                <p class="mb-0">{% trans "No pending university requests awaiting your approval right now." %}</p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

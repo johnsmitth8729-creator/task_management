@@ -111,30 +111,54 @@ class UserDirectoryAndRBACSecurityTests(TestCase):
         self.dept_fin = Department.objects.create(name='Finance Department', code='FIN')
 
         self.rector = User.objects.create_user(
-            username='rector', email='rector@example.com', password='Password123!', is_superuser=True,
+            username='rector', email='rector@example.com', password='Password123!', is_staff=False, is_superuser=False,
         )
         self.rector.roles.add(self.rector_role)
 
+        self.superadmin = User.objects.create_user(
+            username='superadmin', email='superadmin@example.com', password='Password123!', is_staff=True, is_superuser=True,
+        )
+
         self.vr_acad = User.objects.create_user(
-            username='vr.acad', email='vr.acad@example.com', password='Password123!',
+            username='vr.acad', email='vr.acad@example.com', password='Password123!', is_staff=False, is_superuser=False,
         )
         self.vr_acad.roles.add(self.vr_role)
-        assign_vice_rector_responsibility(self.vr_acad, self.dept_it, actor=self.rector)
+        assign_vice_rector_responsibility(self.vr_acad, self.dept_it, actor=self.superadmin)
 
         self.head_it = User.objects.create_user(
-            username='head.it', email='head.it@example.com', password='Password123!', department=self.dept_it,
+            username='head.it', email='head.it@example.com', password='Password123!', department=self.dept_it, is_staff=False, is_superuser=False,
         )
         self.head_it.roles.add(self.head_role)
 
         self.emp_it = User.objects.create_user(
-            username='emp.it', email='emp.it@example.com', password='Password123!', department=self.dept_it,
+            username='emp.it', email='emp.it@example.com', password='Password123!', department=self.dept_it, is_staff=False, is_superuser=False,
         )
         self.emp_it.roles.add(self.emp_role)
 
         self.emp_fin = User.objects.create_user(
-            username='emp.fin', email='emp.fin@example.com', password='Password123!', department=self.dept_fin,
+            username='emp.fin', email='emp.fin@example.com', password='Password123!', department=self.dept_fin, is_staff=False, is_superuser=False,
         )
         self.emp_fin.roles.add(self.emp_role)
+
+    def test_rector_and_superadmin_separation(self):
+        self.assertFalse(self.rector.is_superuser)
+        self.assertFalse(self.rector.is_staff)
+        self.assertTrue(self.rector.is_rector)
+        self.assertFalse(self.rector.is_technical_superadmin)
+
+        self.assertTrue(self.superadmin.is_superuser)
+        self.assertTrue(self.superadmin.is_staff)
+        self.assertTrue(self.superadmin.is_technical_superadmin)
+
+        # Operational rector cannot access Django Admin
+        self.client.login(username='rector', password='Password123!')
+        res_admin_rector = self.client.get('/admin/')
+        self.assertNotEqual(res_admin_rector.status_code, 200)
+
+        # Technical superadmin can access Django Admin
+        self.client.login(username='superadmin', password='Password123!')
+        res_admin_super = self.client.get('/admin/')
+        self.assertEqual(res_admin_super.status_code, 200)
 
     def test_user_list_scoping_per_role(self):
         # 1. Rector sees all
@@ -218,3 +242,4 @@ class UserDirectoryAndRBACSecurityTests(TestCase):
         self.client.post(reverse('user_toggle_active', kwargs={'pk': self.rector.pk}))
         self.rector.refresh_from_db()
         self.assertTrue(self.rector.is_active)
+

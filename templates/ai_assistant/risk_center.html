@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Management Risk Center" %} | University Task Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="h3 fw-bold mb-1"><i class="bi bi-shield-exclamation text-danger me-2"></i>{% trans "Management Risk & Bottleneck Center" %}</h2>
+            <p class="text-muted mb-0">{% trans "Automated organizational anomaly detection identifying overdue deadline clusters, approval delays, and staff workload overload." %}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'ai_assistant:chat' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-robot me-1"></i>{% trans "Ask AI Assistant" %}
+            </a>
+            <form action="{% url 'ai_assistant:risk_scan' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-arrow-repeat me-1"></i>{% trans "Run Deep Risk Scan" %}
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Severity Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm border-start border-4 border-danger">
+                <div class="card-body d-flex align-items-center justify-content-between p-3">
+                    <div>
+                        <div class="text-muted small">{% trans "Critical Severity" %}</div>
+                        <h3 class="mb-0 fw-bold text-danger">{{ critical_count }}</h3>
+                    </div>
+                    <i class="bi bi-radioactive fs-2 text-danger"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm border-start border-4 border-warning">
+                <div class="card-body d-flex align-items-center justify-content-between p-3">
+                    <div>
+                        <div class="text-muted small">{% trans "High Severity" %}</div>
+                        <h3 class="mb-0 fw-bold text-warning-emphasis">{{ high_count }}</h3>
+                    </div>
+                    <i class="bi bi-exclamation-octagon fs-2 text-warning"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm border-start border-4 border-info">
+                <div class="card-body d-flex align-items-center justify-content-between p-3">
+                    <div>
+                        <div class="text-muted small">{% trans "Total Active Risks" %}</div>
+                        <h3 class="mb-0 fw-bold text-info">{{ total_unresolved }}</h3>
+                    </div>
+                    <i class="bi bi-activity fs-2 text-info"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <div class="btn-group" role="group">
+                <a href="?severity=" class="btn btn-sm {% if not current_severity %}btn-primary{% else %}btn-outline-secondary{% endif %}">{% trans "All Severities" %}</a>
+                <a href="?severity=CRITICAL" class="btn btn-sm {% if current_severity == 'CRITICAL' %}btn-danger{% else %}btn-outline-secondary{% endif %}">{% trans "Critical" %}</a>
+                <a href="?severity=HIGH" class="btn btn-sm {% if current_severity == 'HIGH' %}btn-warning text-dark{% else %}btn-outline-secondary{% endif %}">{% trans "High" %}</a>
+                <a href="?severity=MEDIUM" class="btn btn-sm {% if current_severity == 'MEDIUM' %}btn-info{% else %}btn-outline-secondary{% endif %}">{% trans "Medium" %}</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Indicators List -->
+    <div class="row g-3">
+        {% for risk in risks %}
+            <div class="col-12">
+                <div class="card border-0 shadow-sm p-3 {% if risk.severity == 'CRITICAL' %}border-start border-4 border-danger{% elif risk.severity == 'HIGH' %}border-start border-4 border-warning{% else %}border-start border-4 border-info{% endif %}">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge {% if risk.severity == 'CRITICAL' %}bg-danger{% elif risk.severity == 'HIGH' %}bg-warning text-dark{% else %}bg-info{% endif %}">
+                                    {{ risk.get_severity_display }}
+                                </span>
+                                <span class="badge bg-secondary-subtle text-dark">{{ risk.get_risk_type_display }}</span>
+                                {% if risk.department %}
+                                    <span class="badge bg-light text-secondary"><i class="bi bi-building me-1"></i>{{ risk.department.name }}</span>
+                                {% endif %}
+                                <small class="text-muted"><i class="bi bi-clock me-1"></i>{% trans "Detected" %} {{ risk.detected_at|timesince }} {% trans "ago" %}</small>
+                            </div>
+                            <h5 class="fw-bold mb-2">{{ risk.title }}</h5>
+                            <p class="text-secondary mb-2">{{ risk.description }}</p>
+                        </div>
+                        <div>
+                            {% if can_manage_risks %}
+                                <form action="{% url 'ai_assistant:risk_resolve' pk=risk.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-check2-circle me-1"></i>{% trans "Mark Resolved" %}
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5 text-muted">
+                <i class="bi bi-shield-check display-4 text-success mb-2"></i>
+                <h5 class="mt-2 text-dark">{% trans "No unresolved management risks!" %}</h5>
+                <p class="mb-0">{% trans "University workflows and task execution are running within normal parameters." %}</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

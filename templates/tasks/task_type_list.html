@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Task Types" %} | {% trans "TASK MANAGEMENT" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">{% trans "Task Types" %}</h1>
+            <p class="text-muted mb-0">{% trans "Configurable university task classification and categories" %}</p>
+        </div>
+        <a href="{% url 'task_type_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>{% trans "Add Task Type" %}
+        </a>
+    </div>
+
+    <div class="content-panel">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>{% trans "Type Name" %}</th>
+                        <th>{% trans "Code" %}</th>
+                        <th>{% trans "Description" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th class="text-end">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tt in task_types %}
+                        <tr>
+                            <td class="fw-bold text-dark">{{ tt.name }}</td>
+                            <td><code>{{ tt.code }}</code></td>
+                            <td class="text-muted small">{{ tt.description|default:"-" }}</td>
+                            <td>
+                                {% if tt.is_active %}
+                                    <span class="badge bg-success-subtle text-success">{% trans "Active" %}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary">{% trans "Inactive" %}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'task_type_edit' pk=tt.pk %}" class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form action="{% url 'task_type_toggle' pk=tt.pk %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                        {% if tt.is_active %}<i class="bi bi-slash-circle"></i>{% else %}<i class="bi bi-check-circle"></i>{% endif %}
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                <i class="bi bi-tags fs-2 d-block mb-2 text-secondary"></i>
+                                {% trans "No task types configured." %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

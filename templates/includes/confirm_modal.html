@@ -1,0 +1,39 @@
+{% load i18n %}
+{% comment %}
+Reusable Confirmation Modal — included in base.html for all authenticated pages.
+
+Usage: add data-confirm="message" and optionally data-confirm-yes="label" to any
+submit button that is inside a <form>. app.js auto-wires these on DOMContentLoaded.
+
+Example:
+  <button type="submit"
+          data-confirm="Are you sure you want to delete this item?"
+          data-confirm-yes="Yes, delete">
+    Delete
+  </button>
+{% endcomment %}
+<div class="modal fade" id="confirmModal" tabindex="-1"
+     aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold" id="confirmModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>{% trans "Confirm Action" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="{% trans 'Close' %}"></button>
+            </div>
+            <div class="modal-body py-4 text-center">
+                <p class="mb-0 fs-6" id="confirmModalBody">{% trans "Are you sure you want to perform this action?" %}</p>
+            </div>
+            <div class="modal-footer border-top gap-2">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>{% trans "No" %}
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmModalYesBtn">
+                    <i class="bi bi-check-lg me-1"></i>{% trans "Yes" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

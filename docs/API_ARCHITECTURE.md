@@ -60,6 +60,10 @@ Browser URLs:
 - `/kpi/`
 - `/payroll/`
 - `/settings/`
+- `/verify/<verification_id>/` (Public Electronic Signature & QR Verification)
+- `/signatures/<id>/qr/` (Signature QR Code PNG)
+- `/signatures/<id>/revoke/` (Revoke Electronic Signature)
+- `/tasks/<id>/sign/` (Sign Task Form / Action)
 
 API URLs:
 
@@ -68,6 +72,9 @@ API URLs:
 - `/api/v1/tasks/<id>/assignments/`
 - `/api/v1/tasks/<id>/submissions/`
 - `/api/v1/tasks/<id>/approvals/`
+- `/api/v1/tasks/<id>/sign/` (Electronic Signing API)
+- `/api/v1/signatures/<id>/verify/` (Internal Cryptographic Verification API)
+- `/api/v1/verify/<verification_id>/` (Public Cryptographic Verification API)
 - `/api/v1/notifications/`
 - `/api/v1/reports/`
 - `/api/v1/analytics/`
